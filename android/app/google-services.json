@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "211589998133",
+    "project_id": "real-beauty-2b6b0",
+    "storage_bucket": "real-beauty-2b6b0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:211589998133:android:a3682bd854e1024044f37c",
+        "android_client_info": {
+          "package_name": "com.example.real_beauty_ai"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "211589998133-21b4a4bci0jm0qv0b37vill1lh4grpd8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.real_beauty_ai",
+            "certificate_hash": "672b90fba5afd94b1df0194876c6a45bd9c0bdf1"
+          }
+        },
+        {
+          "client_id": "211589998133-oktsmveknmmq3iqb41sdbqt1se4g66m1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3is5e05pAkGf7CHyBkN8FhYSy966N1r4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "211589998133-oktsmveknmmq3iqb41sdbqt1se4g66m1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "211589998133-gfr31b1iqe2tbhr1f7h5rl9q16taro2t.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.realBeautyAi"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

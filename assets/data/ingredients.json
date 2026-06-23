@@ -1,0 +1,989 @@
+{
+  "version": 1,
+  "ingredients": [
+    {
+      "inci": "Aqua",
+      "aliases": ["water", "aqua", "eau", "wasser"],
+      "function": "Asos, erituvchi",
+      "flags": ["humectant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Glycerin",
+      "aliases": ["glycerin", "glycerine", "glycerol", "vegetable glycerin"],
+      "function": "Namlovchi",
+      "flags": ["humectant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Niacinamide",
+      "aliases": ["niacinamide", "nicotinamide", "vitamin b3"],
+      "function": "Tonni tekislaydi, poralarni kamaytiradi",
+      "flags": ["soothing"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Sodium Hyaluronate",
+      "aliases": ["sodium hyaluronate", "hyaluronate sodium"],
+      "function": "Chuqur namlaydi",
+      "flags": ["humectant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Hyaluronic Acid",
+      "aliases": ["hyaluronic acid", "hyaluronan"],
+      "function": "Chuqur namlaydi",
+      "flags": ["humectant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Snail Secretion Filtrate",
+      "aliases": ["snail secretion filtrate", "snail mucin", "snail extract"],
+      "function": "Tiklaydi, namlaydi",
+      "flags": ["soothing"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Centella Asiatica Extract",
+      "aliases": ["centella asiatica extract", "centella asiatica", "cica extract", "gotu kola extract", "tiger grass extract"],
+      "function": "Tinchlantiradi (CICA)",
+      "flags": ["soothing"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Madecassoside",
+      "aliases": ["madecassoside"],
+      "function": "Tinchlantiradi, tiklaydi",
+      "flags": ["soothing", "barrier"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Panthenol",
+      "aliases": ["panthenol", "d-panthenol", "dl-panthenol", "vitamin b5", "provitamin b5"],
+      "function": "Tiklaydi (B5)",
+      "flags": ["soothing", "barrier"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Allantoin",
+      "aliases": ["allantoin"],
+      "function": "Tinchlantiradi",
+      "flags": ["soothing"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Ceramide NP",
+      "aliases": ["ceramide np", "ceramide 3", "ceramide iii", "ceramide"],
+      "function": "Teri to'sig'ini mustahkamlaydi",
+      "flags": ["barrier"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Beta-Glucan",
+      "aliases": ["beta-glucan", "beta glucan", "oat beta glucan"],
+      "function": "Tinchlantiradi, namlaydi",
+      "flags": ["soothing", "barrier"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Ascorbic Acid",
+      "aliases": ["ascorbic acid", "vitamin c", "l-ascorbic acid"],
+      "function": "C vitamini, yorqinlik beradi",
+      "flags": ["antioxidant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Tocopherol",
+      "aliases": ["tocopherol", "vitamin e", "alpha-tocopherol", "d-alpha-tocopherol"],
+      "function": "E vitamini, antioksidant",
+      "flags": ["antioxidant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Adenosine",
+      "aliases": ["adenosine"],
+      "function": "Ajinlarga qarshi ishlaydi",
+      "flags": ["soothing"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Salicylic Acid",
+      "aliases": ["salicylic acid", "bha", "beta hydroxy acid", "2-hydroxybenzoic acid"],
+      "function": "Poralarni tozalaydi (BHA)",
+      "flags": ["exfoliantBHA"],
+      "baseRisk": "caution",
+      "note": "Sezgir terida ehtiyotlik bilan ishlating."
+    },
+    {
+      "inci": "Glycolic Acid",
+      "aliases": ["glycolic acid", "glycollic acid", "aha"],
+      "function": "Eksfoliatsiya (AHA)",
+      "flags": ["exfoliantAHA"],
+      "baseRisk": "caution",
+      "note": "Quruq yoki sezgir terida ehtiyot bo'ling."
+    },
+    {
+      "inci": "Lactic Acid",
+      "aliases": ["lactic acid"],
+      "function": "Yumshoq eksfoliatsiya (AHA)",
+      "flags": ["exfoliantAHA"],
+      "baseRisk": "caution",
+      "note": "Sezgir terida ehtiyotlik bilan qo'llang."
+    },
+    {
+      "inci": "Retinol",
+      "aliases": ["retinol", "vitamin a", "retinoid"],
+      "function": "Yangilaydi, ajinlarga qarshi",
+      "flags": ["retinoid"],
+      "baseRisk": "caution",
+      "note": "Kechasi ishlating, quyoshdan himoyalaning."
+    },
+    {
+      "inci": "Retinyl Palmitate",
+      "aliases": ["retinyl palmitate", "vitamin a palmitate"],
+      "function": "Yumshoq retinoid",
+      "flags": ["retinoid"],
+      "baseRisk": "caution",
+      "note": "Yumshoq retinol, lekin ehtiyot bo'ling."
+    },
+    {
+      "inci": "Fragrance",
+      "aliases": ["fragrance", "parfum", "perfume", "aroma"],
+      "function": "Xushbo'ylik",
+      "flags": ["fragrance"],
+      "baseRisk": "caution",
+      "note": "Sezgir terida reaksiya chaqirishi mumkin."
+    },
+    {
+      "inci": "Limonene",
+      "aliases": ["limonene", "d-limonene"],
+      "function": "Xushbo'y komponent",
+      "flags": ["fragrance", "essentialOil"],
+      "baseRisk": "caution",
+      "note": "Atopik yoki sezgir terida irritatsiya qilishi mumkin."
+    },
+    {
+      "inci": "Linalool",
+      "aliases": ["linalool"],
+      "function": "Xushbo'y komponent",
+      "flags": ["fragrance", "essentialOil"],
+      "baseRisk": "caution",
+      "note": "Sezgir terida allergik reaksiya mumkin."
+    },
+    {
+      "inci": "Citronellol",
+      "aliases": ["citronellol"],
+      "function": "Xushbo'y komponent",
+      "flags": ["fragrance", "essentialOil"],
+      "baseRisk": "caution",
+      "note": "Sezgir terida allergik reaksiya mumkin."
+    },
+    {
+      "inci": "Geraniol",
+      "aliases": ["geraniol"],
+      "function": "Xushbo'y komponent",
+      "flags": ["fragrance", "essentialOil"],
+      "baseRisk": "caution",
+      "note": "Sezgir terida allergik reaksiya mumkin."
+    },
+    {
+      "inci": "Eucalyptus Globulus Leaf Oil",
+      "aliases": ["eucalyptus globulus leaf oil", "eucalyptus oil", "eucalyptus"],
+      "function": "Efir moyi",
+      "flags": ["essentialOil"],
+      "baseRisk": "caution",
+      "note": "Sezgir terida irritatsiya qilishi mumkin."
+    },
+    {
+      "inci": "Mentha Piperita Leaf Oil",
+      "aliases": ["mentha piperita leaf oil", "peppermint oil", "mint oil"],
+      "function": "Efir moyi",
+      "flags": ["essentialOil"],
+      "baseRisk": "caution",
+      "note": "Sezgir terida irritatsiya qilishi mumkin."
+    },
+    {
+      "inci": "Alcohol Denat.",
+      "aliases": ["alcohol denat", "sd alcohol", "denatured alcohol", "ethanol", "alcohol"],
+      "function": "Erituvchi, tez quritadi",
+      "flags": ["drying"],
+      "baseRisk": "caution",
+      "note": "Teri namligini kamaytirishi mumkin."
+    },
+    {
+      "inci": "Cocos Nucifera Oil",
+      "aliases": ["cocos nucifera oil", "coconut oil", "virgin coconut oil", "fractionated coconut oil"],
+      "function": "Boy moy",
+      "flags": ["comedogenic"],
+      "baseRisk": "caution",
+      "note": "Yog'li terida poralarni berkitishi mumkin."
+    },
+    {
+      "inci": "Isopropyl Myristate",
+      "aliases": ["isopropyl myristate"],
+      "function": "Emolent, yuklatuvchi",
+      "flags": ["comedogenic"],
+      "baseRisk": "caution",
+      "note": "Poralarni berkitishi mumkin."
+    },
+    {
+      "inci": "Titanium Dioxide",
+      "aliases": ["titanium dioxide", "ci 77891"],
+      "function": "Mineral SPF filtri",
+      "flags": ["spf"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Zinc Oxide",
+      "aliases": ["zinc oxide", "ci 77947"],
+      "function": "Mineral SPF, tinchlantiradi",
+      "flags": ["spf", "soothing"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Butylene Glycol",
+      "aliases": ["butylene glycol", "1,3-butylene glycol", "1,3-butanediol"],
+      "function": "Namlaydi, tarkibni siqib chiqaradi",
+      "flags": ["humectant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Propylene Glycol",
+      "aliases": ["propylene glycol", "1,2-propanediol"],
+      "function": "Namlaydi, erituvchi",
+      "flags": ["humectant"],
+      "baseRisk": "caution",
+      "note": "Sezgir terida irritatsiya qilishi mumkin."
+    },
+    {
+      "inci": "Dipropylene Glycol",
+      "aliases": ["dipropylene glycol", "dpg"],
+      "function": "Namlaydi, erituvchi",
+      "flags": ["humectant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "1,2-Hexanediol",
+      "aliases": ["1,2-hexanediol", "hexanediol"],
+      "function": "Namlaydi, mikrobga qarshi",
+      "flags": ["humectant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Pentylene Glycol",
+      "aliases": ["pentylene glycol", "1,2-pentanediol"],
+      "function": "Namlaydi",
+      "flags": ["humectant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Sodium PCA",
+      "aliases": ["sodium pca", "sodium pyrrolidone carboxylate"],
+      "function": "Teri namlashini saqlaydi",
+      "flags": ["humectant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Betaine",
+      "aliases": ["betaine", "trimethylglycine"],
+      "function": "Namlaydi, tinchlantiradi",
+      "flags": ["humectant", "soothing"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Trehalose",
+      "aliases": ["trehalose"],
+      "function": "Chuqur namlaydi",
+      "flags": ["humectant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Xylitol",
+      "aliases": ["xylitol"],
+      "function": "Namlaydi",
+      "flags": ["humectant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Sorbitol",
+      "aliases": ["sorbitol"],
+      "function": "Namlaydi",
+      "flags": ["humectant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Urea",
+      "aliases": ["urea", "carbamide"],
+      "function": "Namlaydi, eski hujayralarni tozalaydi",
+      "flags": ["humectant"],
+      "baseRisk": "caution",
+      "note": "Yuqori konsentratsiyada sezgir terida achishishi mumkin."
+    },
+    {
+      "inci": "Dimethicone",
+      "aliases": ["dimethicone", "polydimethylsiloxane", "pdms"],
+      "function": "Silikon, silliqlashtiradi",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Cyclopentasiloxane",
+      "aliases": ["cyclopentasiloxane", "d5", "decamethylcyclopentasiloxane"],
+      "function": "Yengil silikon erituvchi",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Squalane",
+      "aliases": ["squalane"],
+      "function": "Yengil emolent, nam saqlaydi",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Petrolatum",
+      "aliases": ["petrolatum", "petroleum jelly", "vaseline", "white petrolatum"],
+      "function": "Kuchli to'siq, teri himoyasi",
+      "flags": ["barrier"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Paraffinum Liquidum",
+      "aliases": ["paraffinum liquidum", "mineral oil", "liquid paraffin"],
+      "function": "Okklyuziv emolent",
+      "flags": ["comedogenic"],
+      "baseRisk": "caution",
+      "note": "Ba'zi terida poralarni berkitishi mumkin."
+    },
+    {
+      "inci": "Butyrospermum Parkii Butter",
+      "aliases": ["butyrospermum parkii butter", "shea butter", "shea"],
+      "function": "Boy emolent, namlaydi",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Simmondsia Chinensis Seed Oil",
+      "aliases": ["simmondsia chinensis seed oil", "jojoba oil", "jojoba seed oil"],
+      "function": "Yengil moy, non-komedogen",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Rosa Canina Fruit Oil",
+      "aliases": ["rosa canina fruit oil", "rosehip oil", "rosehip seed oil"],
+      "function": "Regeneratsiya, linoleik kislota",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Argania Spinosa Kernel Oil",
+      "aliases": ["argania spinosa kernel oil", "argan oil"],
+      "function": "E vitamini, yengil emolent",
+      "flags": ["antioxidant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Ceramide AP",
+      "aliases": ["ceramide ap", "ceramide 6 ii"],
+      "function": "Teri to'sig'ini mustahkamlaydi",
+      "flags": ["barrier"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Ceramide EOP",
+      "aliases": ["ceramide eop", "ceramide 1"],
+      "function": "Teri to'sig'ini mustahkamlaydi",
+      "flags": ["barrier"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Phytosphingosine",
+      "aliases": ["phytosphingosine"],
+      "function": "Tinchlantiradi, to'siqni mustahkamlaydi",
+      "flags": ["soothing", "barrier"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Cholesterol",
+      "aliases": ["cholesterol"],
+      "function": "Teri to'sig'ini to'ldiradi",
+      "flags": ["barrier"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Tocopheryl Acetate",
+      "aliases": ["tocopheryl acetate", "vitamin e acetate"],
+      "function": "E vitamini, antioksidant",
+      "flags": ["antioxidant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Retinyl Retinoate",
+      "aliases": ["retinyl retinoate"],
+      "function": "Kuchli retinoid, yangilaydi",
+      "flags": ["retinoid"],
+      "baseRisk": "caution",
+      "note": "Kechasi ishlating, SPF bilan birga qo'llang."
+    },
+    {
+      "inci": "Sodium Ascorbyl Phosphate",
+      "aliases": ["sodium ascorbyl phosphate", "sap"],
+      "function": "Barqaror C vitamini",
+      "flags": ["antioxidant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Ascorbyl Glucoside",
+      "aliases": ["ascorbyl glucoside"],
+      "function": "Barqaror C vitamini",
+      "flags": ["antioxidant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "3-O-Ethyl Ascorbic Acid",
+      "aliases": ["3-o-ethyl ascorbic acid", "ethyl ascorbic acid", "ethylated ascorbic acid"],
+      "function": "Barqaror C vitamini, yorqinlik",
+      "flags": ["antioxidant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Kojic Acid",
+      "aliases": ["kojic acid"],
+      "function": "Pigmentatsiyaga qarshi",
+      "flags": [],
+      "baseRisk": "caution",
+      "note": "Sezgir terida irritatsiya qilishi mumkin."
+    },
+    {
+      "inci": "Alpha-Arbutin",
+      "aliases": ["alpha-arbutin", "alpha arbutin"],
+      "function": "Yorqinlik, dog'larga qarshi",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Arbutin",
+      "aliases": ["arbutin", "beta-arbutin"],
+      "function": "Yorqinlik, dog'larga qarshi",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Tranexamic Acid",
+      "aliases": ["tranexamic acid"],
+      "function": "Pigmentatsiyaga qarshi",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Azelaic Acid",
+      "aliases": ["azelaic acid"],
+      "function": "Pigmentatsiya va aknega qarshi",
+      "flags": ["exfoliantAHA"],
+      "baseRisk": "caution",
+      "note": "Sezgir terida ehtiyotlik bilan boshlang."
+    },
+    {
+      "inci": "Mandelic Acid",
+      "aliases": ["mandelic acid"],
+      "function": "Yumshoq AHA eksfoliatsiyasi",
+      "flags": ["exfoliantAHA"],
+      "baseRisk": "caution",
+      "note": "Sezgir teri uchun yumshoq, lekin ehtiyot."
+    },
+    {
+      "inci": "Bakuchiol",
+      "aliases": ["bakuchiol"],
+      "function": "O'simlik retinoli, yangilaydi",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Resveratrol",
+      "aliases": ["resveratrol"],
+      "function": "Kuchli antioksidant",
+      "flags": ["antioxidant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Palmitoyl Pentapeptide-4",
+      "aliases": ["palmitoyl pentapeptide-4", "matrixyl", "palmitoyl pentapeptide"],
+      "function": "Peptid, kollagen hosil qiladi",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Acetyl Hexapeptide-3",
+      "aliases": ["acetyl hexapeptide-3", "acetyl hexapeptide-8", "argireline"],
+      "function": "Peptid, ajinlarni yumshatadi",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Copper Tripeptide-1",
+      "aliases": ["copper tripeptide-1", "ghk-cu"],
+      "function": "Mis peptidi, tiklaydi",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Galactomyces Ferment Filtrate",
+      "aliases": ["galactomyces ferment filtrate", "galactomyces", "pitera"],
+      "function": "Yirik tirqish va ton tenglashtiradi",
+      "flags": ["soothing"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Bifida Ferment Lysate",
+      "aliases": ["bifida ferment lysate", "bifidus"],
+      "function": "Mikrobiom va to'siqni qo'llab-quvvatlaydi",
+      "flags": ["soothing", "barrier"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Saccharomyces Ferment Filtrate",
+      "aliases": ["saccharomyces ferment filtrate", "yeast ferment"],
+      "function": "Yorqinlik, tinchlantiradi",
+      "flags": ["soothing"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Lactobacillus Ferment",
+      "aliases": ["lactobacillus ferment", "lactobacillus"],
+      "function": "Probiotik, mikrobiomni qo'llaydi",
+      "flags": ["soothing"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Propolis Extract",
+      "aliases": ["propolis extract", "propolis"],
+      "function": "Antibakterial, tinchlantiradi",
+      "flags": ["soothing"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Camellia Sinensis Leaf Extract",
+      "aliases": ["camellia sinensis leaf extract", "green tea extract", "camellia sinensis"],
+      "function": "Yashil choy, antioksidant",
+      "flags": ["antioxidant", "soothing"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Matricaria Recutita Flower Extract",
+      "aliases": ["matricaria recutita flower extract", "chamomile extract", "chamomile"],
+      "function": "Qo'ng'iroqchagul, tinchlantiradi",
+      "flags": ["soothing"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Dipotassium Glycyrrhizate",
+      "aliases": ["dipotassium glycyrrhizate", "licorice root extract"],
+      "function": "Qizilmiya, tinchlantiradi",
+      "flags": ["soothing"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Artemisia Vulgaris Extract",
+      "aliases": ["artemisia vulgaris extract", "mugwort extract", "mugwort"],
+      "function": "Yovvoyi qo'ziqorin, tinchlantiradi",
+      "flags": ["soothing"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Aloe Barbadensis Leaf Juice",
+      "aliases": ["aloe barbadensis leaf juice", "aloe vera", "aloe vera gel", "aloe"],
+      "function": "Tinchlantiradi, namlaydi",
+      "flags": ["humectant", "soothing"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Asiaticoside",
+      "aliases": ["asiaticoside"],
+      "function": "CICA tarkibi, tiklaydi",
+      "flags": ["soothing"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Madecassic Acid",
+      "aliases": ["madecassic acid"],
+      "function": "CICA tarkibi, to'siqni mustahkamlaydi",
+      "flags": ["soothing", "barrier"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Laminaria Digitata Extract",
+      "aliases": ["laminaria digitata extract", "sea kelp extract", "kelp extract"],
+      "function": "Dengiz o'ti, namlaydi",
+      "flags": ["humectant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Apitoxin",
+      "aliases": ["apitoxin", "bee venom"],
+      "function": "Ari zahari, akne va ajinlarga qarshi",
+      "flags": [],
+      "baseRisk": "caution",
+      "note": "Allergik reaksiya xavfi bor."
+    },
+    {
+      "inci": "Royal Jelly Extract",
+      "aliases": ["royal jelly extract", "royal jelly"],
+      "function": "Qirollik jelesi, oziqlantiradi",
+      "flags": [],
+      "baseRisk": "caution",
+      "note": "Ari mahsulotlariga allergiyasi bo'lganlarda ehtiyot."
+    },
+    {
+      "inci": "Mel",
+      "aliases": ["mel", "honey extract", "honey"],
+      "function": "Namlaydi, antibakterial",
+      "flags": ["humectant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Bisabolol",
+      "aliases": ["bisabolol", "alpha-bisabolol"],
+      "function": "Tinchlantiradi",
+      "flags": ["soothing"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Cetearyl Alcohol",
+      "aliases": ["cetearyl alcohol", "cetostearyl alcohol"],
+      "function": "Emulsifikator, yog'li spirt",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Cetyl Alcohol",
+      "aliases": ["cetyl alcohol", "1-hexadecanol"],
+      "function": "Emulsifikator, yog'li spirt",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Stearic Acid",
+      "aliases": ["stearic acid"],
+      "function": "Emulsifikator, emolent",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Glyceryl Stearate",
+      "aliases": ["glyceryl stearate"],
+      "function": "Emulsifikator",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Polysorbate 80",
+      "aliases": ["polysorbate 80", "tween 80"],
+      "function": "Emulsifikator",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Polysorbate 20",
+      "aliases": ["polysorbate 20", "tween 20"],
+      "function": "Emulsifikator",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Lecithin",
+      "aliases": ["lecithin", "soy lecithin", "sunflower lecithin"],
+      "function": "Emulsifikator, to'siqni qo'llaydi",
+      "flags": ["barrier"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Xanthan Gum",
+      "aliases": ["xanthan gum"],
+      "function": "Qovushqoqlik beradi",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Carbomer",
+      "aliases": ["carbomer", "carbopol"],
+      "function": "Qovushqoqlik beradi",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Hydroxyethylcellulose",
+      "aliases": ["hydroxyethylcellulose", "hec"],
+      "function": "Qovushqoqlik beradi",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Phenoxyethanol",
+      "aliases": ["phenoxyethanol"],
+      "function": "Konservant",
+      "flags": [],
+      "baseRisk": "caution",
+      "note": "Yuqori konsentratsiyada sezgir terida irritatsiya mumkin."
+    },
+    {
+      "inci": "Methylparaben",
+      "aliases": ["methylparaben", "methyl paraben", "methyl 4-hydroxybenzoate"],
+      "function": "Konservant (paraben)",
+      "flags": [],
+      "baseRisk": "caution",
+      "note": "Paraben — ba'zilarda sezgirlik mumkin."
+    },
+    {
+      "inci": "Ethylparaben",
+      "aliases": ["ethylparaben", "ethyl paraben"],
+      "function": "Konservant (paraben)",
+      "flags": [],
+      "baseRisk": "caution",
+      "note": "Paraben — ba'zilarda sezgirlik mumkin."
+    },
+    {
+      "inci": "Propylparaben",
+      "aliases": ["propylparaben", "propyl paraben"],
+      "function": "Konservant (paraben)",
+      "flags": [],
+      "baseRisk": "caution",
+      "note": "Paraben — ba'zilarda sezgirlik mumkin."
+    },
+    {
+      "inci": "Sodium Benzoate",
+      "aliases": ["sodium benzoate"],
+      "function": "Yumshoq konservant",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Potassium Sorbate",
+      "aliases": ["potassium sorbate"],
+      "function": "Yumshoq konservant",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Chlorphenesin",
+      "aliases": ["chlorphenesin"],
+      "function": "Konservant",
+      "flags": [],
+      "baseRisk": "caution",
+      "note": "Ba'zi terida irritatsiya qilishi mumkin."
+    },
+    {
+      "inci": "Ethylhexylglycerin",
+      "aliases": ["ethylhexylglycerin"],
+      "function": "Konservant kuchaytiruvchi",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Caprylyl Glycol",
+      "aliases": ["caprylyl glycol"],
+      "function": "Konservant kuchaytiruvchi, namlaydi",
+      "flags": ["humectant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Benzyl Alcohol",
+      "aliases": ["benzyl alcohol"],
+      "function": "Konservant, xushbo'y komponent",
+      "flags": ["fragrance"],
+      "baseRisk": "caution",
+      "note": "Sezgir terida irritatsiya mumkin."
+    },
+    {
+      "inci": "Ethylhexyl Methoxycinnamate",
+      "aliases": ["ethylhexyl methoxycinnamate", "octinoxate", "octyl methoxycinnamate"],
+      "function": "Kimyoviy UVB filtri",
+      "flags": ["spf"],
+      "baseRisk": "caution",
+      "note": "Sezgir terida irritatsiya qilishi mumkin."
+    },
+    {
+      "inci": "Benzophenone-3",
+      "aliases": ["benzophenone-3", "oxybenzone"],
+      "function": "Kimyoviy UVA/UVB filtri",
+      "flags": ["spf"],
+      "baseRisk": "caution",
+      "note": "Allergik reaksiya xavfi bor, gormonal ta'siri tekshirilmoqda."
+    },
+    {
+      "inci": "Butyl Methoxydibenzoylmethane",
+      "aliases": ["butyl methoxydibenzoylmethane", "avobenzone", "parsol 1789"],
+      "function": "Kimyoviy UVA filtri",
+      "flags": ["spf"],
+      "baseRisk": "caution",
+      "note": "Sezgir terida irritatsiya mumkin."
+    },
+    {
+      "inci": "Octocrylene",
+      "aliases": ["octocrylene"],
+      "function": "Kimyoviy UVB filtri, barqarorlashtiradi",
+      "flags": ["spf"],
+      "baseRisk": "caution",
+      "note": "Ba'zilarda allergik reaksiya mumkin."
+    },
+    {
+      "inci": "Ethylhexyl Salicylate",
+      "aliases": ["ethylhexyl salicylate", "octisalate", "octyl salicylate"],
+      "function": "Kimyoviy UVB filtri",
+      "flags": ["spf"],
+      "baseRisk": "caution",
+      "note": "Sezgir terida ehtiyot bo'ling."
+    },
+    {
+      "inci": "Lavandula Angustifolia Flower Oil",
+      "aliases": ["lavandula angustifolia flower oil", "lavender oil", "lavender essential oil"],
+      "function": "Lavanda efir moyi",
+      "flags": ["fragrance", "essentialOil"],
+      "baseRisk": "caution",
+      "note": "Sezgir terida allergik reaksiya mumkin."
+    },
+    {
+      "inci": "Melaleuca Alternifolia Leaf Oil",
+      "aliases": ["melaleuca alternifolia leaf oil", "tea tree oil", "tea tree"],
+      "function": "Choy daraxti efir moyi",
+      "flags": ["essentialOil"],
+      "baseRisk": "caution",
+      "note": "Sezgir terida irritatsiya qilishi mumkin."
+    },
+    {
+      "inci": "Rosmarinus Officinalis Leaf Extract",
+      "aliases": ["rosmarinus officinalis leaf extract", "rosemary extract", "rosemary leaf extract"],
+      "function": "Antioksidant, konservant kuchaytiruvchi",
+      "flags": ["antioxidant"],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Citric Acid",
+      "aliases": ["citric acid"],
+      "function": "pH tartibga soluvchi",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Sodium Hydroxide",
+      "aliases": ["sodium hydroxide", "caustic soda", "lye"],
+      "function": "pH tartibga soluvchi",
+      "flags": [],
+      "baseRisk": "safe",
+      "note": ""
+    },
+    {
+      "inci": "Eugenol",
+      "aliases": ["eugenol"],
+      "function": "Xushbo'y komponent",
+      "flags": ["fragrance", "essentialOil"],
+      "baseRisk": "caution",
+      "note": "Sezgir terida allergik reaksiya mumkin."
+    },
+    {
+      "inci": "Citral",
+      "aliases": ["citral"],
+      "function": "Xushbo'y komponent",
+      "flags": ["fragrance", "essentialOil"],
+      "baseRisk": "caution",
+      "note": "Sezgir terida irritatsiya qilishi mumkin."
+    },
+    {
+      "inci": "Benzyl Benzoate",
+      "aliases": ["benzyl benzoate"],
+      "function": "Xushbo'y komponent",
+      "flags": ["fragrance"],
+      "baseRisk": "caution",
+      "note": "Sezgir terida allergik reaksiya mumkin."
+    },
+    {
+      "inci": "Coumarin",
+      "aliases": ["coumarin"],
+      "function": "Xushbo'y komponent",
+      "flags": ["fragrance"],
+      "baseRisk": "caution",
+      "note": "Sezgir terida allergik reaksiya mumkin."
+    }
+  ]
+}
