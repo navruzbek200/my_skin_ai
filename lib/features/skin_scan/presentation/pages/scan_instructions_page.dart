@@ -8,6 +8,7 @@ import 'package:real_beauty_ai/services/local_store.dart';
 import 'package:real_beauty_ai/widgets/looping_video_thumb.dart';
 import 'package:real_beauty_ai/widgets/primary_button.dart';
 import 'package:go_router/go_router.dart';
+import 'package:real_beauty_ai/core/router/route_args.dart';
 
 // ── Step data model ───────────────────────────────────────────────────────────
 
@@ -114,7 +115,7 @@ class _ScanInstructionsScreenState extends State<ScanInstructionsScreen>
           onDecline: () {
             Navigator.of(ctx).pop();
             // Skip camera — AnalysisScreen falls through to quiz-only SkinLogic path.
-            router.pushReplacement('/analysis', extra: answers);
+            router.pushReplacement('/analysis', extra: AnalysisArgs(quizAnswers: answers));
           },
         );
       },

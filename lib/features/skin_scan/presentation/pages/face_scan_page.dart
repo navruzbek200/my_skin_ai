@@ -346,7 +346,8 @@ class _FaceScanScreenState extends State<FaceScanScreen>
       } else {
         _cancelStabilityTimers();
       }
-    } catch (_) {
+    } catch (e, st) {
+      AppLogger.error('Frame processing error', e, st);
     } finally {
       _isDetecting = false;
     }
@@ -694,8 +695,9 @@ class _FaceScanScreenState extends State<FaceScanScreen>
   // ── InputImage (stream, NV21/BGRA for live guidance) ──────────
 
   InputImage? _buildInputImage(CameraImage image) {
-    if (_cam == null || image.planes.isEmpty) return null;
-    final camera = _cam!.description;
+    final cam = _cam;
+    if (cam == null || image.planes.isEmpty) return null;
+    final camera = cam.description;
     final sensorOrientation = camera.sensorOrientation;
     final int rawRotation = camera.lensDirection == CameraLensDirection.front
         ? (360 - sensorOrientation) % 360
@@ -744,8 +746,11 @@ class _FaceScanScreenState extends State<FaceScanScreen>
     final uvWidth = image.width ~/ 2;
     for (int row = 0; row < uvHeight; row++) {
       for (int col = 0; col < uvWidth; col++) {
-        nv21[nv21Idx++] = vPlane.bytes[row * vRowStride + col * vPixelStride];
-        nv21[nv21Idx++] = uPlane.bytes[row * uRowStride + col * uPixelStride];
+        final vIdx = row * vRowStride + col * vPixelStride;
+        final uIdx = row * uRowStride + col * uPixelStride;
+        if (vIdx >= vPlane.bytes.length || uIdx >= uPlane.bytes.length) continue;
+        nv21[nv21Idx++] = vPlane.bytes[vIdx];
+        nv21[nv21Idx++] = uPlane.bytes[uIdx];
       }
     }
 

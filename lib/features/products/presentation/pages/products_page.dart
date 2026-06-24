@@ -54,6 +54,7 @@ class _ProductsBodyState extends State<_ProductsBody> {
       builder: (context, state) {
         final List<Product> items =
             state is ProductsLoaded ? state.items : [];
+        final List<Product> filtered = _filtered(items);
 
         return Scaffold(
           backgroundColor: AppColors.background,
@@ -213,7 +214,7 @@ class _ProductsBodyState extends State<_ProductsBody> {
                     ),
                   ),
                 )
-              else if (_filtered(items).isEmpty)
+              else if (filtered.isEmpty)
                 SliverFillRemaining(
                   child: Center(
                     child: Column(
@@ -246,12 +247,9 @@ class _ProductsBodyState extends State<_ProductsBody> {
                       childAspectRatio: 0.65,
                     ),
                     delegate: SliverChildBuilderDelegate(
-                      (_, i) {
-                        final filtered = _filtered(items);
-                        return _ProductCard(
-                            product: filtered[i], index: i);
-                      },
-                      childCount: _filtered(items).length,
+                      (_, i) => _ProductCard(
+                          product: filtered[i], index: i),
+                      childCount: filtered.length,
                     ),
                   ),
                 ),

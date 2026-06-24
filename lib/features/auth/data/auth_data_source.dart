@@ -45,6 +45,7 @@ class FirebaseAuthDataSource implements AuthDataSource {
       // google_sign_in v7: singleton + authenticate() (throws on cancel/error).
       final account = await GoogleSignIn.instance.authenticate();
       final idToken = account.authentication.idToken;
+      if (idToken == null) return false;
       final credential = GoogleAuthProvider.credential(idToken: idToken);
       await FirebaseAuth.instance.signInWithCredential(credential);
       return true;

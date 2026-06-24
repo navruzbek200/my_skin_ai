@@ -1,8 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-permission
-        android:name="android.permission.CAMERA"
-        android:label="Teri tahlili uchun kamera"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
     <!-- Skan ixtiyoriy — kamerasiz qurilmalarda ham o'rnatiladi -->
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
     <uses-feature android:name="android.hardware.camera.front" android:required="false"/>
@@ -36,6 +34,10 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- ML Kit face detection model — bundle with app for offline/cold-start reliability -->
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="face"/>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
