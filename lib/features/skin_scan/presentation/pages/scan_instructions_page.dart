@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:real_beauty_ai/core/colors.dart';
+import 'package:real_beauty_ai/services/local_store.dart';
 import 'package:real_beauty_ai/widgets/looping_video_thumb.dart';
 import 'package:real_beauty_ai/widgets/primary_button.dart';
 import 'package:go_router/go_router.dart';
@@ -42,9 +43,9 @@ const _steps = [
   ),
   _StepItem(
     number: 3,
-    videoAsset: 'assets/videos/scan/step3_ring.mp4',
-    title: "To'liq aylaning",
-    subtitle: "Sekin aylanib, barcha bo'laklarni yoping",
+    videoAsset: 'assets/videos/scan/step2_straight.mp4',
+    title: "To'g'ri va frontal qarang",
+    subtitle: "Avtomatik suratga olinadi",
   ),
 ];
 
@@ -85,7 +86,39 @@ class _ScanInstructionsScreenState extends State<ScanInstructionsScreen>
 
   void _proceed() {
     HapticFeedback.mediumImpact();
-    context.pushReplacement('/face-scan', extra: widget.quizAnswers);
+    if (LocalStore.instance.cloudAnalysisAccepted) {
+      context.pushReplacement('/face-scan', extra: widget.quizAnswers);
+    } else {
+      _showConsentDialog();
+    }
+  }
+
+  void _showConsentDialog() {
+    // Capture router and answers before any async gap.
+    final router = GoRouter.of(context);
+    final answers = widget.quizAnswers;
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        // Capture navigator before async gap so BuildContext isn't used after await.
+        final nav = Navigator.of(ctx);
+        return _CloudConsentDialog(
+          onAccept: () async {
+            await LocalStore.instance.acceptCloudAnalysis();
+            if (!mounted) return;
+            nav.pop();
+            router.pushReplacement('/face-scan', extra: answers);
+          },
+          onDecline: () {
+            Navigator.of(ctx).pop();
+            // Skip camera — AnalysisScreen falls through to quiz-only SkinLogic path.
+            router.pushReplacement('/analysis', extra: answers);
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -105,7 +138,7 @@ class _ScanInstructionsScreenState extends State<ScanInstructionsScreen>
             child: _Sheet(
               safeBottom: bottom,
               pauseSignal: _pauseSignal,
-              onClose: () => Navigator.pop(context),
+              onClose: () => context.pop(),
               onContinue: _proceed,
             ),
           ),
@@ -343,4 +376,176 @@ class _StepText extends StatelessWidget {
       ],
     );
   }
+}
+
+// ── Cloud analysis consent dialog ─────────────────────────────
+
+class _CloudConsentDialog extends StatelessWidget {
+  final Future<void> Function() onAccept;
+  final VoidCallback onDecline;
+
+  const _CloudConsentDialog({
+    required this.onAccept,
+    required this.onDecline,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Icon + title
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF7060AA).withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.privacy_tip_outlined,
+                    color: Color(0xFF7060AA),
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Rasm yuborish haqida',
+                    style: GoogleFonts.nunito(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF2D2050),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            // Bullet list
+            ..._bullets.map(
+              (text) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(top: 5),
+                      child: CircleAvatar(
+                        radius: 3,
+                        backgroundColor: Color(0xFF7060AA),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        text,
+                        style: GoogleFonts.nunito(
+                          fontSize: 13,
+                          color: const Color(0xFF4A4070),
+                          height: 1.55,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Non-medical disclaimer box
+            Container(
+              margin: const EdgeInsets.only(top: 4, bottom: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.orange.withValues(alpha: 0.28),
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.warning_amber_rounded,
+                      size: 16, color: Colors.orange.shade600),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Bu tibbiy tashxis EMAS — faqat kosmetik yo\'riqnoma. '
+                      'Teri muammolari bo\'lsa mutaxassisga murojaat qiling.',
+                      style: GoogleFonts.nunito(
+                        fontSize: 12,
+                        color: Colors.orange.shade700,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Buttons
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: onAccept,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4A3A9A),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'Qabul qilaman',
+                  style: GoogleFonts.nunito(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: TextButton(
+                onPressed: onDecline,
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFF9490B0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                child: Text(
+                  'Rad etaman (faqat anketa)',
+                  style: GoogleFonts.nunito(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static const _bullets = [
+    'Yuz rasmingiz kosmetik tahlil uchun uchinchi tomon serveriga yuboriladi',
+    'Rasm tahlildan so\'ng darhol o\'chiriladi — saqlanmaydi',
+    'Natijalar faqat qurilmangizda qoladi',
+  ];
 }

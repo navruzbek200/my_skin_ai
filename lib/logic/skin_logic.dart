@@ -1,6 +1,7 @@
-import '../models/skin_result.dart';
+import '../models/skin_analysis_result.dart';
 
 export '../models/skin_result.dart';
+export '../models/skin_analysis_result.dart';
 
 class SkinLogic {
   static const _skinTypeByQ1 = {
@@ -146,7 +147,7 @@ Post-acne izlarni yo'qotish uchun: C vitamini, AHA, retinol va quyosh kremini bi
     },
   };
 
-  static SkinResult analyze(List<dynamic> answers) {
+  static SkinAnalysisResult analyze(List<dynamic> answers) {
     final q1 = _safeInt(answers, 0, defaultVal: 2);
     final skinType = _skinTypeByQ1[q1] ?? 'Normal';
     final skinCode = _skinTypeCode[skinType] ?? 'N';
@@ -195,11 +196,12 @@ Post-acne izlarni yo'qotish uchun: C vitamini, AHA, retinol va quyosh kremini bi
       });
     }
 
-    return SkinResult(
+    return SkinAnalysisResult(
       skinType: skinType,
       skinTypeCode: skinCode,
       baseRecommendation: baseRec,
       additionalBlocks: blocks,
+      source: AnalysisSource.quizEstimate,
     );
   }
 

@@ -63,6 +63,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '211589998133',
     projectId: 'real-beauty-2b6b0',
     storageBucket: 'real-beauty-2b6b0.firebasestorage.app',
-    iosBundleId: 'com.example.realBeautyAi',
+    iosBundleId: 'uz.realbeauty.app',
   );
 }

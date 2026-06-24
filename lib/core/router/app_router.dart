@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -18,6 +19,8 @@ import 'package:real_beauty_ai/features/skin_scan/presentation/pages/scan_instru
 import 'package:real_beauty_ai/models/article.dart';
 import 'package:real_beauty_ai/models/cosmetolog.dart';
 import 'package:real_beauty_ai/models/lesson.dart';
+import 'package:real_beauty_ai/core/router/route_args.dart';
+import 'package:real_beauty_ai/models/skin_analysis_result.dart';
 
 final _protectedPaths = {
   '/home', '/quiz', '/scan-instructions', '/face-scan',
@@ -27,6 +30,9 @@ final _authOnlyPaths = {'/auth', '/intro'};
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
+  refreshListenable: GoRouterRefreshStream(
+    FirebaseAuth.instance.authStateChanges(),
+  ),
   redirect: (context, state) {
     final loggedIn = FirebaseAuth.instance.currentUser != null;
     final path = state.matchedLocation;
@@ -65,54 +71,59 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/scan-instructions',
-      pageBuilder: (context, state) => _fade(
-        state,
-        ScanInstructionsScreen(
-          quizAnswers: state.extra as List<dynamic>,
-        ),
-      ),
+      pageBuilder: (context, state) {
+        final extra = state.extra;
+        if (extra is! List) return _fade(state, const SplashScreen());
+        return _fade(state, ScanInstructionsScreen(quizAnswers: extra));
+      },
     ),
     GoRoute(
       path: '/face-scan',
-      pageBuilder: (context, state) => _fade(
-        state,
-        FaceScanScreen(quizAnswers: state.extra as List<dynamic>),
-      ),
+      pageBuilder: (context, state) {
+        final extra = state.extra;
+        if (extra is! List) return _fade(state, const SplashScreen());
+        return _fade(state, FaceScanScreen(quizAnswers: extra));
+      },
     ),
     GoRoute(
       path: '/analysis',
-      pageBuilder: (context, state) => _fade(
-        state,
-        AnalysisScreen(answers: state.extra as List<dynamic>),
-      ),
+      pageBuilder: (context, state) {
+        final extra = state.extra;
+        if (extra is! AnalysisArgs) return _fade(state, const SplashScreen());
+        return _fade(state, AnalysisScreen(args: extra));
+      },
     ),
     GoRoute(
       path: '/results',
-      pageBuilder: (context, state) => _fade(
-        state,
-        ResultsScreen(answers: state.extra as List<dynamic>),
-      ),
+      pageBuilder: (context, state) {
+        final extra = state.extra;
+        if (extra is! SkinAnalysisResult) return _fade(state, const SplashScreen());
+        return _fade(state, ResultsScreen(result: extra));
+      },
     ),
     GoRoute(
       path: '/lesson-detail',
-      pageBuilder: (context, state) => _fade(
-        state,
-        LessonDetailScreen(lesson: state.extra as Lesson),
-      ),
+      pageBuilder: (context, state) {
+        final extra = state.extra;
+        if (extra is! Lesson) return _fade(state, const SplashScreen());
+        return _fade(state, LessonDetailScreen(lesson: extra));
+      },
     ),
     GoRoute(
       path: '/article-detail',
-      pageBuilder: (context, state) => _fade(
-        state,
-        ArticleDetailScreen(article: state.extra as Article),
-      ),
+      pageBuilder: (context, state) {
+        final extra = state.extra;
+        if (extra is! Article) return _fade(state, const SplashScreen());
+        return _fade(state, ArticleDetailScreen(article: extra));
+      },
     ),
     GoRoute(
       path: '/cosmetolog-detail',
-      pageBuilder: (context, state) => _fade(
-        state,
-        KosmetologDetailScreen(cosmetolog: state.extra as Cosmetolog),
-      ),
+      pageBuilder: (context, state) {
+        final extra = state.extra;
+        if (extra is! Cosmetolog) return _fade(state, const SplashScreen());
+        return _fade(state, KosmetologDetailScreen(cosmetolog: extra));
+      },
     ),
     GoRoute(
       path: '/account',
@@ -129,4 +140,19 @@ CustomTransitionPage<void> _fade(GoRouterState state, Widget child) {
     transitionsBuilder: (_, animation, _, child) =>
         FadeTransition(opacity: animation, child: child),
   );
+}
+
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    notifyListeners();
+    _sub = stream.asBroadcastStream().listen((_) => notifyListeners());
+  }
+
+  late final StreamSubscription<dynamic> _sub;
+
+  @override
+  void dispose() {
+    _sub.cancel();
+    super.dispose();
+  }
 }

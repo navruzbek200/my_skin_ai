@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:real_beauty_ai/core/colors.dart';
 import 'package:real_beauty_ai/features/auth/presentation/bloc/auth_cubit.dart';
-import 'package:real_beauty_ai/widgets/google_sign_in_button.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -204,10 +203,6 @@ class _LoginPageState extends State<_LoginPage> {
                 );
               },
             ),
-            const SizedBox(height: 20),
-            const _OrDivider(),
-            const SizedBox(height: 20),
-            const GoogleSignInButton(),
             const SizedBox(height: 28),
             _SwitchRow(
               text: "Hisobingiz yo'qmi?",
@@ -355,10 +350,6 @@ class _RegisterPageState extends State<_RegisterPage> {
                 );
               },
             ),
-            const SizedBox(height: 20),
-            const _OrDivider(),
-            const SizedBox(height: 20),
-            const GoogleSignInButton(),
             const SizedBox(height: 28),
             _SwitchRow(
               text: 'Hisobingiz bormi?',
@@ -489,30 +480,6 @@ class _AuthButton extends StatelessWidget {
   }
 }
 
-class _OrDivider extends StatelessWidget {
-  const _OrDivider();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Expanded(child: Divider(color: Color(0xFFEAE8F5), thickness: 1.5)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          child: Text(
-            'yoki',
-            style: GoogleFonts.nunito(
-              fontSize: 13,
-              color: const Color(0xFF9490B0),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        const Expanded(child: Divider(color: Color(0xFFEAE8F5), thickness: 1.5)),
-      ],
-    );
-  }
-}
 
 class _SwitchRow extends StatelessWidget {
   final String text;

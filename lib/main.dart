@@ -9,7 +9,6 @@ import 'package:real_beauty_ai/services/local_store.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  // google_sign_in v7 requires a one-time initialization before any sign-in calls.
   await GoogleSignIn.instance.initialize();
   await LocalStore.instance.init();
   configureDependencies();

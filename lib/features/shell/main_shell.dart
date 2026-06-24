@@ -27,8 +27,7 @@ class _MainShellState extends State<MainShell> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
-    // Show once per install, for every user, regardless of profile state.
-    // Mark seen immediately so dismissing the dialog never re-shows it.
+    // Show on every launch until the user completes a skin analysis.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.delayed(const Duration(seconds: 2), () {
         if (!mounted) return;

@@ -7,18 +7,18 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:211589998133:android:a3682bd854e1024044f37c",
+        "mobilesdk_app_id": "1:211589998133:android:e4258d76e58e88a844f37c",
         "android_client_info": {
-          "package_name": "com.example.real_beauty_ai"
+          "package_name": "uz.realbeauty.app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "211589998133-21b4a4bci0jm0qv0b37vill1lh4grpd8.apps.googleusercontent.com",
+          "client_id": "211589998133-3hsn60dv71u1usbl9pvi0mkb30lul8o4.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.real_beauty_ai",
-            "certificate_hash": "672b90fba5afd94b1df0194876c6a45bd9c0bdf1"
+            "package_name": "uz.realbeauty.app",
+            "certificate_hash": "4dd17ba2cf522757669968db9ea40661807f0ee2"
           }
         },
         {

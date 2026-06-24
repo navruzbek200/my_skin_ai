@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.real_beauty_ai"
+    namespace = "uz.realbeauty.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -22,11 +22,26 @@ android {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
+    // Load release signing credentials from key.properties (never commit that file).
+    // To create: keytool -genkey -v -keystore android/upload-keystore.jks
+    //            -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+    // Then create android/key.properties with storeFile/storePassword/keyAlias/keyPassword.
+    val keyPropertiesFile = rootProject.file("key.properties")
+    val keyProperties = java.util.Properties().apply {
+        if (keyPropertiesFile.exists()) load(keyPropertiesFile.inputStream())
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = keyProperties.getProperty("storeFile")?.let { file(it) }
+            storePassword = keyProperties.getProperty("storePassword")
+            keyAlias = keyProperties.getProperty("keyAlias")
+            keyPassword = keyProperties.getProperty("keyPassword")
+        }
+    }
+
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.real_beauty_ai"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        applicationId = "uz.realbeauty.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -35,9 +50,10 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (keyPropertiesFile.exists())
+                signingConfigs.getByName("release")
+            else
+                signingConfigs.getByName("debug")
         }
     }
 }

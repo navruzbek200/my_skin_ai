@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:real_beauty_ai/core/utils/logger.dart';
@@ -61,14 +62,17 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> deleteAccount() async {
     try {
       await _ds.deleteAccount();
+      await LocalStore.instance.setLoggedOut();
+      emit(AuthInitial());
     } on FirebaseAuthException catch (e) {
       if (e.code == 'requires-recent-login') {
         emit(AuthError("Akkauntni o'chirish uchun qayta kiring"));
-        return;
+      } else {
+        emit(AuthError(_mapError(e.code)));
       }
+    } catch (_) {
+      emit(AuthError("Xato yuz berdi. Qaytadan urinib ko'ring"));
     }
-    await LocalStore.instance.setLoggedOut();
-    emit(AuthInitial());
   }
 
   Future<void> reauthenticateAndDelete(String password) async {

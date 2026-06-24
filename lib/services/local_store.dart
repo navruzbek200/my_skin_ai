@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/skin_analysis_result.dart';
 import '../models/skin_result.dart';
 
 // Single source of truth for all local persistence.
@@ -137,18 +138,50 @@ class LocalStore {
     } catch (_) {}
   }
 
-  // ── Analysis prompt ───────────────────────────────────────────
-  // Persisted so the dialog shows once for every user, regardless of whether
-  // they complete the quiz or have an existing profile.
+  // ── Scan history ──────────────────────────────────────────────
+  //
+  // Stores only scores + metadata — no images ever touch this store.
+  // Newest entry at index 0. Capped at _historyMax to avoid unbounded growth.
 
-  static const _analysisPromptKey = 'analysis_prompt_seen_v1';
+  static const _historyKey = 'scan_history_v1';
+  static const _historyMax = 20;
 
-  bool get analysisPromptSeen =>
-      _prefs.getBool(_analysisPromptKey) ?? false;
-
-  Future<void> markAnalysisPromptSeen() async {
+  Future<void> saveAnalysisToHistory(SkinAnalysisResult result) async {
     try {
-      await _prefs.setBool(_analysisPromptKey, true);
+      final history = getAnalysisHistory();
+      history.insert(0, result);
+      if (history.length > _historyMax) history.length = _historyMax;
+      await _prefs.setString(
+        _historyKey,
+        jsonEncode(history.map((r) => r.toJson()).toList()),
+      );
+    } catch (_) {}
+  }
+
+  List<SkinAnalysisResult> getAnalysisHistory() {
+    try {
+      final raw = _prefs.getString(_historyKey);
+      if (raw == null) return [];
+      final list = jsonDecode(raw) as List<dynamic>;
+      return list
+          .map((e) => SkinAnalysisResult.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  // ── Cloud analysis consent ────────────────────────────────────
+  //
+  // Separate from general privacy_accepted — this gates the camera→cloud path.
+
+  static const _cloudConsentKey = 'cloud_analysis_consent_v1';
+
+  bool get cloudAnalysisAccepted => _prefs.getBool(_cloudConsentKey) ?? false;
+
+  Future<void> acceptCloudAnalysis() async {
+    try {
+      await _prefs.setBool(_cloudConsentKey, true);
     } catch (_) {}
   }
 }
