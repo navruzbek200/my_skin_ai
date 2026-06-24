@@ -38,6 +38,13 @@ final GoRouter appRouter = GoRouter(
     final path = state.matchedLocation;
     if (!loggedIn && _protectedPaths.contains(path)) return '/auth';
     if (loggedIn && _authOnlyPaths.contains(path)) return '/home';
+    if (const {'/scan-instructions', '/face-scan', '/analysis', '/results'}.contains(path) &&
+        state.extra is! List) {
+      return '/home';
+    }
+    if (path == '/lesson-detail' && state.extra is! Lesson) { return '/home'; }
+    if (path == '/article-detail' && state.extra is! Article) { return '/home'; }
+    if (path == '/cosmetolog-detail' && state.extra is! Cosmetolog) { return '/home'; }
     return null;
   },
   routes: [
