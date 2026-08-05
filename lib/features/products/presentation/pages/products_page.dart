@@ -281,11 +281,24 @@ class _ProductsBodyState extends State<_ProductsBody> {
 
 // ── Product image helper ──────────────────────────────────────
 
-Widget _productImage(Product product, {BoxFit fit = BoxFit.contain}) {
+/// [decodeWidth] caps the resolution the bitmap is decoded at. Product art is
+/// ~1000-1450px wide at source, while a grid cell is under 200dp — decoding at
+/// full size costs ~6MB of RAM per image, so a scroll through 60 products
+/// thrashes Flutter's image cache and drops frames. Decoding at the size we
+/// actually draw keeps each image around 640KB.
+Widget _productImage(
+  Product product, {
+  BoxFit fit = BoxFit.contain,
+  int decodeWidth = 400,
+}) {
   if (product.imageUrl != null && product.imageUrl!.isNotEmpty) {
     return CachedNetworkImage(
       imageUrl: product.imageUrl!,
       fit: fit,
+      memCacheWidth: decodeWidth,
+      // Disk copy is capped too, so a poorly exported source image cannot
+      // bloat the on-device cache.
+      maxWidthDiskCache: 1000,
       placeholder: (_, _) => const Center(
         child: CircularProgressIndicator(
             strokeWidth: 1.5, color: AppColors.primary),
@@ -299,7 +312,7 @@ Widget _productImage(Product product, {BoxFit fit = BoxFit.contain}) {
   return Image.asset(
     product.imagePath,
     fit: fit,
-    cacheWidth: 400,
+    cacheWidth: decodeWidth,
     errorBuilder: (_, _, _) =>
         const Icon(Icons.image_outlined, size: 40, color: Color(0xFFCCC8E0)),
   );
@@ -472,7 +485,8 @@ class _ProductDetailPage extends StatelessWidget {
               color: Colors.white,
               child: Padding(
                 padding: EdgeInsets.fromLTRB(16, topPad + 48, 16, 0),
-                child: _productImage(product),
+                // Detail view fills the screen width, so it earns the larger decode.
+                child: _productImage(product, decodeWidth: 900),
               ),
             ),
           ),
