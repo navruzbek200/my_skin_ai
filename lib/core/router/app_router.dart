@@ -38,20 +38,15 @@ final GoRouter appRouter = GoRouter(
   redirect: (context, state) {
     final session = sl<AuthBloc>().state;
     final loggedIn = session.isAuthenticated;
-    final verified = session.isEmailVerified;
     final path = state.matchedLocation;
     if (!loggedIn && _protectedPaths.contains(path)) return '/auth';
-    // An account exists but the address is unproven: hold it at the verify
-    // screen. Signing up with someone else's or a made-up address therefore
-    // never reaches the app.
-    if (loggedIn && !verified && path != '/verify-email') {
-      if (_protectedPaths.contains(path) || _authOnlyPaths.contains(path)) {
-        return '/verify-email';
-      }
-    }
-    if (loggedIn && verified && path == '/verify-email') return '/home';
+    // Verification is not a gate. Most of this audience does not use email
+    // day to day, and holding them at a screen that asks them to go find a
+    // link loses them at the door. The link is still mailed at sign-up and
+    // the verify screen is still reachable from the account page — it just
+    // never blocks anyone.
     if (!loggedIn && path == '/verify-email') return '/auth';
-    if (loggedIn && verified && _authOnlyPaths.contains(path)) return '/home';
+    if (loggedIn && _authOnlyPaths.contains(path)) return '/home';
     if (const {'/scan-instructions', '/face-scan'}.contains(path) &&
         state.extra is! List) {
       return '/home';

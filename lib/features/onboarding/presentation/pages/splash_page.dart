@@ -18,10 +18,13 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3000),
+      duration: const Duration(milliseconds: 1400),
     )..forward();
 
-    Future.delayed(const Duration(milliseconds: 3500), () {
+    // Long enough for the animation to land, short enough that a returning
+    // user is not made to watch a logo. The old 3.5s ran well past the point
+    // the screen had anything left to show.
+    Future.delayed(const Duration(milliseconds: 1600), () {
       if (!mounted) return;
       final dest = FirebaseAuth.instance.currentUser != null ? '/home' : '/intro';
       context.go(dest);

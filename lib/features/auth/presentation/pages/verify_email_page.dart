@@ -8,12 +8,13 @@ import 'package:real_beauty_ai/core/theme/colors.dart';
 import 'package:real_beauty_ai/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:real_beauty_ai/features/auth/presentation/bloc/auth_cubit.dart';
 
-/// Holding screen for a signed-in account whose address is not proven yet.
+/// Optional screen, opened from the account page — it is not a gate. Verifying
+/// only buys the ability to reset a forgotten password, which is not worth
+/// blocking sign-up over for an audience that mostly does not use email.
 ///
-/// Clicking the link happens outside the app, and `authStateChanges()` stays
-/// silent when it does — so this screen polls the Auth record. Once the flag
-/// flips, [AuthBloc] emits and the router redirect moves the user on; nothing
-/// here navigates by itself.
+/// Clicking the link happens outside the app and `authStateChanges()` stays
+/// silent when it does, so this screen polls the Auth record and closes itself
+/// once the flag flips.
 class VerifyEmailScreen extends StatefulWidget {
   const VerifyEmailScreen({super.key});
 
@@ -93,11 +94,25 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     final top = MediaQuery.of(context).padding.top;
     final bottom = MediaQuery.of(context).padding.bottom;
 
-    return BlocListener<AuthCubit, AuthState>(
-      listener: (context, state) {
-        if (state is AuthInfo) _showSnack(state.message);
-        if (state is AuthError) _showSnack(state.message);
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<AuthCubit, AuthState>(
+          listener: (context, state) {
+            if (state is AuthInfo) _showSnack(state.message);
+            if (state is AuthError) _showSnack(state.message);
+          },
+        ),
+        BlocListener<AuthBloc, AuthSessionState>(
+          // Nothing redirects on verification any more, so the screen closes
+          // itself once the poll sees the flag flip.
+          listenWhen: (prev, next) =>
+              !prev.isEmailVerified && next.isEmailVerified,
+          listener: (context, _) {
+            if (!Navigator.of(context).canPop()) return;
+            Navigator.of(context).pop(true);
+          },
+        ),
+      ],
       child: Scaffold(
         backgroundColor: Colors.white,
         body: SingleChildScrollView(
@@ -183,9 +198,9 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
               const SizedBox(height: 4),
               Center(
                 child: TextButton(
-                  onPressed: () => context.read<AuthCubit>().logout(),
+                  onPressed: () => Navigator.of(context).maybePop(),
                   child: Text(
-                    'Boshqa hisob bilan kirish',
+                    'Keyinroq',
                     style: GoogleFonts.nunito(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,

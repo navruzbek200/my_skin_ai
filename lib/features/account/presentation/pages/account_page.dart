@@ -9,7 +9,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:real_beauty_ai/core/constants/api_constants.dart';
 import 'package:real_beauty_ai/core/theme/colors.dart';
 import 'package:real_beauty_ai/core/utils/logger.dart';
+import 'package:real_beauty_ai/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:real_beauty_ai/features/auth/presentation/bloc/auth_cubit.dart';
+import 'package:real_beauty_ai/features/auth/presentation/pages/verify_email_page.dart';
 import 'package:real_beauty_ai/services/local_store.dart';
 
 class AccountScreen extends StatefulWidget {
@@ -308,6 +310,26 @@ class _AccountScreenState extends State<AccountScreen> {
                   label: 'Sozlamalar',
                   child: Column(
                     children: [
+                      // Offered, never forced: an unverified address only
+                      // costs the user the ability to reset a password.
+                      if (!context
+                          .watch<AuthBloc>()
+                          .state
+                          .isEmailVerified) ...[
+                        _ActionRow(
+                          icon: Icons.mark_email_unread_outlined,
+                          label: 'Emailni tasdiqlash',
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute<bool>(
+                              builder: (_) => const VerifyEmailScreen(),
+                            ),
+                          ),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 4),
+                          child: Divider(height: 1, color: Color(0xFFF0ECF8)),
+                        ),
+                      ],
                       _ActionRow(
                         icon: Icons.privacy_tip_outlined,
                         label: 'Maxfiylik siyosati',

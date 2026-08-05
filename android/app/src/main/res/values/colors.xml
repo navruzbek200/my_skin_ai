@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Matches the white Scaffold the Flutter splash draws on, so the two
+         screens hand over without a flash of a different colour. -->
+    <color name="splash_background">#FFFFFFFF</color>
+</resources>
