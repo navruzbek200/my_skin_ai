@@ -16,6 +16,9 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     await LocalStore.instance.init();
     ds = _MockDs();
+    // Every successful sign-up mails the verification link; stubbed here so
+    // individual tests only declare the call they are actually about.
+    when(() => ds.sendEmailVerification()).thenAnswer((_) async {});
   });
 
   // ── Email login ──────────────────────────────────────────────────────
@@ -54,6 +57,19 @@ void main() {
     },
     act: (c) => c.register('a@b.com', 'secret123'),
     expect: () => [isA<AuthLoading>(), isA<AuthAuthenticated>()],
+    verify: (_) => verify(() => ds.sendEmailVerification()).called(1),
+  );
+
+  blocTest<AuthCubit, AuthState>(
+    'failed register does not mail a verification link',
+    build: () {
+      when(() => ds.register(any(), any(), any()))
+          .thenThrow(FirebaseAuthException(code: 'weak-password'));
+      return AuthCubit(ds);
+    },
+    act: (c) => c.register('a@b.com', '123'),
+    expect: () => [isA<AuthLoading>(), isA<AuthError>()],
+    verify: (_) => verifyNever(() => ds.sendEmailVerification()),
   );
 
   blocTest<AuthCubit, AuthState>(

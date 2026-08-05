@@ -32,6 +32,10 @@ class AuthCubit extends Cubit<AuthState> {
       // No display name is collected at sign-up — the account screen falls
       // back to the email address for the avatar initial and contact label.
       await _ds.register(email.trim(), password, null);
+      // The address is unproven until the link is clicked. Firebase signs the
+      // user in regardless, so the router — not this cubit — is what holds
+      // them at the verify screen.
+      await _ds.sendEmailVerification();
       await LocalStore.instance.setLoggedIn();
       emit(AuthAuthenticated());
     } on FirebaseAuthException catch (e) {
@@ -126,6 +130,20 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthError(_mapError(e.code)));
     } catch (_) {
       emit(AuthError("Google orqali kirishda xato yuz berdi"));
+    }
+  }
+
+  /// Re-sends the verification link from the verify screen.
+  Future<void> resendEmailVerification() async {
+    try {
+      await _ds.sendEmailVerification();
+      emit(AuthInfo(
+        "Tasdiqlash havolasi qayta yuborildi (spam papkasini ham tekshiring)",
+      ));
+    } on FirebaseAuthException catch (e) {
+      emit(AuthError(_mapError(e.code)));
+    } catch (_) {
+      emit(AuthError("Xato yuz berdi. Qaytadan urinib ko'ring"));
     }
   }
 

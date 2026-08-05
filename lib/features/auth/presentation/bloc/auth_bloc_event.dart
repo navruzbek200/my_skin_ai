@@ -14,5 +14,12 @@ class AuthUserChanged extends AuthEvent {
   final User? user;
 
   @override
-  List<Object?> get props => [user?.uid];
+  List<Object?> get props => [user?.uid, user?.emailVerified];
+}
+
+/// Re-reads the current user from the server. `authStateChanges()` never fires
+/// when someone clicks the verification link in their mail client — the flag
+/// only changes on the Auth record — so the verify screen polls with this.
+class AuthRefreshRequested extends AuthEvent {
+  const AuthRefreshRequested();
 }

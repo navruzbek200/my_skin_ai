@@ -6,6 +6,7 @@ import 'package:real_beauty_ai/features/account/presentation/pages/account_page.
 import 'package:real_beauty_ai/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:real_beauty_ai/features/auth/presentation/pages/auth_page.dart';
 import 'package:real_beauty_ai/features/auth/presentation/pages/forgot_password_page.dart';
+import 'package:real_beauty_ai/features/auth/presentation/pages/verify_email_page.dart';
 import 'package:real_beauty_ai/features/cosmetologists/presentation/pages/cosmetologist_detail_page.dart';
 import 'package:real_beauty_ai/features/lessons/presentation/pages/article_detail_page.dart';
 import 'package:real_beauty_ai/features/lessons/presentation/pages/lesson_detail_page.dart';
@@ -35,10 +36,22 @@ final GoRouter appRouter = GoRouter(
   // session truth, and it already mirrors authStateChanges().
   refreshListenable: GoRouterRefreshStream(sl<AuthBloc>().stream),
   redirect: (context, state) {
-    final loggedIn = sl<AuthBloc>().state.isAuthenticated;
+    final session = sl<AuthBloc>().state;
+    final loggedIn = session.isAuthenticated;
+    final verified = session.isEmailVerified;
     final path = state.matchedLocation;
     if (!loggedIn && _protectedPaths.contains(path)) return '/auth';
-    if (loggedIn && _authOnlyPaths.contains(path)) return '/home';
+    // An account exists but the address is unproven: hold it at the verify
+    // screen. Signing up with someone else's or a made-up address therefore
+    // never reaches the app.
+    if (loggedIn && !verified && path != '/verify-email') {
+      if (_protectedPaths.contains(path) || _authOnlyPaths.contains(path)) {
+        return '/verify-email';
+      }
+    }
+    if (loggedIn && verified && path == '/verify-email') return '/home';
+    if (!loggedIn && path == '/verify-email') return '/auth';
+    if (loggedIn && verified && _authOnlyPaths.contains(path)) return '/home';
     if (const {'/scan-instructions', '/face-scan'}.contains(path) &&
         state.extra is! List) {
       return '/home';
@@ -62,6 +75,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/auth',
       pageBuilder: (context, state) => _fade(state, const AuthScreen()),
+    ),
+    GoRoute(
+      path: '/verify-email',
+      pageBuilder: (context, state) => _fade(state, const VerifyEmailScreen()),
     ),
     GoRoute(
       path: '/forgot',

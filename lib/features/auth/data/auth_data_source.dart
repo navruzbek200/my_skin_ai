@@ -12,6 +12,10 @@ abstract class AuthDataSource {
   Future<void> reauthenticate(String password);
   Future<void> sendPasswordReset(String email);
 
+  /// Mails the verification link to the signed-in address. No-op when the
+  /// address is already verified, so a stray tap cannot spam the inbox.
+  Future<void> sendEmailVerification();
+
   /// Returns false when user dismisses the Google account picker (not an error).
   Future<bool> signInWithGoogle();
 
@@ -99,5 +103,12 @@ class FirebaseAuthDataSource implements AuthDataSource {
   @override
   Future<void> sendPasswordReset(String email) async {
     await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+  }
+
+  @override
+  Future<void> sendEmailVerification() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || user.emailVerified) return;
+    await user.sendEmailVerification();
   }
 }

@@ -27,6 +27,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthSessionState> {
                 ),
         ) {
     on<AuthUserChanged>(_onUserChanged);
+    on<AuthRefreshRequested>(_onRefreshRequested);
 
     _subscription = _auth.authStateChanges().listen(
           (user) => add(AuthUserChanged(user)),
@@ -41,6 +42,28 @@ class AuthBloc extends Bloc<AuthEvent, AuthSessionState> {
     emit(user == null
         ? const AuthUnauthenticated()
         : AuthAuthenticatedSession(user));
+  }
+
+  Future<void> _onRefreshRequested(
+    AuthRefreshRequested event,
+    Emitter<AuthSessionState> emit,
+  ) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      emit(const AuthUnauthenticated());
+      return;
+    }
+    try {
+      await user.reload();
+    } catch (_) {
+      // Offline or a transient Auth error — keep the state we already have and
+      // let the next poll try again.
+      return;
+    }
+    final refreshed = _auth.currentUser;
+    emit(refreshed == null
+        ? const AuthUnauthenticated()
+        : AuthAuthenticatedSession(refreshed));
   }
 
   @override
