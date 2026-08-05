@@ -49,7 +49,11 @@ QUALITY = 92
 # silently ship a soft picture.
 MIN_GOOD_WIDTH = 1200
 
-REQUIRED = ["id", "image", "brand", "name", "subtitle", "price", "category"]
+# `price` is deliberately absent: nothing in the UI draws it yet, so demanding
+# it would block the catalogue on data that changes nothing on screen. The
+# column still rides along in the CSV and the seed, ready for when a price tag
+# is actually added to the card.
+REQUIRED = ["id", "image", "brand", "name", "subtitle", "category"]
 
 
 def read_rows() -> list[dict]:
