@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:real_beauty_ai/core/colors.dart';
+import 'package:real_beauty_ai/core/theme/colors.dart';
+import 'package:real_beauty_ai/data/skin_problems_data.dart';
 import 'package:real_beauty_ai/models/skin_analysis_result.dart';
 import 'package:real_beauty_ai/services/local_store.dart';
 import 'package:go_router/go_router.dart';
@@ -25,15 +26,15 @@ class ScannerScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Skanerla',
+                    'Teri tahlilini boshlang',
                     style: GoogleFonts.nunito(
-                      fontSize: 38,
+                      fontSize: 32,
                       fontWeight: FontWeight.w800,
                       color: const Color(0xFF7060AA),
                     ),
                   ).animate().fadeIn(duration: 400.ms),
                   Text(
-                    'Kamera orqali yuzni tahlil qiling',
+                    'Savolnoma orqali teri tipingizni aniqlang',
                     style: GoogleFonts.nunito(
                       fontSize: 14,
                       color: AppColors.muted,
@@ -41,10 +42,14 @@ class ScannerScreen extends StatelessWidget {
                   ).animate().fadeIn(delay: 100.ms),
                   const SizedBox(height: 36),
                   _buildScanCard(context),
+                  const SizedBox(height: 10),
+                  const _AiDisclaimer().animate().fadeIn(delay: 200.ms),
                   if (history.isNotEmpty) ...[
                     const SizedBox(height: 28),
                     _ScanHistorySection(history: history),
                   ],
+                  const SizedBox(height: 32),
+                  const _SkinProblemsSection(),
                 ],
               ),
             ),
@@ -55,85 +60,81 @@ class ScannerScreen extends StatelessWidget {
   }
 
   Widget _buildScanCard(BuildContext context) {
-    return GestureDetector(
-      onTap: () => context.push('/quiz'),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.88),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: const Color(0xFF9B7DD4).withValues(alpha: 0.25),
-            width: 1.5,
+    return Semantics(
+      button: true,
+      label: 'Teri tahlilini boshlash — savolnoma orqali',
+      child: GestureDetector(
+        onTap: () => context.push('/quiz'),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.88),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: const Color(0xFF9B7DD4).withValues(alpha: 0.25),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF7060AA).withValues(alpha: 0.08),
+                blurRadius: 20,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF7060AA).withValues(alpha: 0.08),
-              blurRadius: 20,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF9B7DD4), Color(0xFF7060AA)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+          child: Row(
+            children: [
+              ClipRRect(
                 borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  'assets/face tahlil.jpg',
+                  width: 68,
+                  height: 68,
+                  fit: BoxFit.cover,
+                ),
               ),
-              child: const Icon(
-                Icons.face_retouching_natural_rounded,
-                color: Colors.white,
-                size: 28,
-              ),
-            ),
-            const SizedBox(width: 18),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Yuzni tahlil qilish',
-                    style: GoogleFonts.nunito(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF2D2050),
+              const SizedBox(width: 18),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Teri tahlilini boshlash',
+                      style: GoogleFonts.nunito(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF2D2050),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Kamera va savol-javob orqali teri tipingizni aniqlang',
-                    style: GoogleFonts.nunito(
-                      fontSize: 12,
-                      color: AppColors.muted,
-                      height: 1.4,
+                    const SizedBox(height: 4),
+                    Text(
+                      'Bir necha daqiqa vaqt ajrating',
+                      style: GoogleFonts.nunito(
+                        fontSize: 12,
+                        color: AppColors.muted,
+                        height: 1.4,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: const Color(0xFF7060AA).withValues(alpha: 0.10),
-                shape: BoxShape.circle,
+              const SizedBox(width: 8),
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7060AA).withValues(alpha: 0.10),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 13,
+                  color: Color(0xFF7060AA),
+                ),
               ),
-              child: const Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 13,
-                color: Color(0xFF7060AA),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     ).animate().fadeIn(delay: 150.ms).slideY(begin: 0.08);
@@ -171,7 +172,7 @@ class _ScanHistorySection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Taraqqiyot',
+          'Natijalar',
           style: GoogleFonts.nunito(
             fontSize: 20,
             fontWeight: FontWeight.w800,
@@ -180,15 +181,13 @@ class _ScanHistorySection extends StatelessWidget {
         ).animate().fadeIn(delay: 200.ms),
         const SizedBox(height: 12),
         if (history.length < 2)
-          _EmptyStateCard()
+          const _EmptyStateCard()
         else
           _ComparisonCard(latest: history[0], previous: history[1]),
       ],
     ).animate().fadeIn(delay: 250.ms).slideY(begin: 0.08);
   }
 }
-
-// ── Empty state (only 1 scan recorded) ───────────────────────
 
 class _EmptyStateCard extends StatelessWidget {
   const _EmptyStateCard();
@@ -256,24 +255,11 @@ class _EmptyStateCard extends StatelessWidget {
   }
 }
 
-// ── Comparison card (≥2 entries) ──────────────────────────────
-
 class _ComparisonCard extends StatelessWidget {
   final SkinAnalysisResult latest;
   final SkinAnalysisResult previous;
 
   const _ComparisonCard({required this.latest, required this.previous});
-
-  static const _concernLabels = <String, String>{
-    'acne': 'Toshma',
-    'darkSpots': "Qo'ng'ir dog'lar",
-    'pores': "Keng g'ovaklar",
-    'wrinkles': 'Ajinlar',
-    'darkCircles': "Ko'z xalqalari",
-    'eyeBags': "Ko'z xaltalari",
-    'blackheads': 'Qora nuqtalar',
-    'oiliness': "Yog'lilik",
-  };
 
   static String _fmtDate(DateTime dt) {
     const months = [
@@ -285,9 +271,6 @@ class _ComparisonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasScores =
-        latest.scores != null && latest.scores!.isNotEmpty;
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -305,7 +288,6 @@ class _ComparisonCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row
           Row(
             children: [
               Container(
@@ -331,186 +313,26 @@ class _ComparisonCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Text(
-                _fmtDate(latest.takenAt),
-                style: GoogleFonts.nunito(
-                  fontSize: 12,
-                  color: const Color(0xFF9490B0),
-                ),
-              ),
             ],
           ),
           const SizedBox(height: 16),
-          if (hasScores) ...[
-            ...latest.scores!.entries.map((e) {
-              final prevVal = previous.scores?[e.key];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _ConcernRow(
-                  label: _concernLabels[e.key] ?? e.key,
-                  value: e.value,
-                  prevValue: prevVal,
-                ),
-              );
-            }),
-          ] else ...[
-            _SkinTypeRow(
-              label: "So'nggi",
-              skinType: latest.skinType,
-              date: _fmtDate(latest.takenAt),
-            ),
-            const SizedBox(height: 8),
-            _SkinTypeRow(
-              label: 'Oldingi',
-              skinType: previous.skinType,
-              date: _fmtDate(previous.takenAt),
-              muted: true,
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF0ECF8),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.info_outline_rounded,
-                    size: 14,
-                    color: Color(0xFF9490B0),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Kamera skan qilgandan so\'ng aniq ballar ko\'rsatiladi',
-                      style: GoogleFonts.nunito(
-                        fontSize: 12,
-                        color: const Color(0xFF9490B0),
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+          _SkinTypeRow(
+            label: "So'nggi",
+            skinType: latest.skinType,
+            date: _fmtDate(latest.takenAt),
+          ),
+          const SizedBox(height: 8),
+          _SkinTypeRow(
+            label: 'Oldingi',
+            skinType: previous.skinType,
+            date: _fmtDate(previous.takenAt),
+            muted: true,
+          ),
         ],
       ),
     );
   }
 }
-
-// ── Concern score bar row ─────────────────────────────────────
-
-class _ConcernRow extends StatelessWidget {
-  final String label;
-  final double value; // 0–1
-  final double? prevValue;
-
-  const _ConcernRow({
-    required this.label,
-    required this.value,
-    this.prevValue,
-  });
-
-  Color _barColor(double v) {
-    if (v < 0.33) return const Color(0xFF4CAF50);
-    if (v < 0.66) return const Color(0xFFFF8A35);
-    return const Color(0xFFE05555);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final pct = (value * 100).round();
-    final prevPct = prevValue != null ? (prevValue! * 100).round() : null;
-    final delta = prevPct != null ? pct - prevPct : null;
-    final barColor = _barColor(value);
-
-    return Row(
-      children: [
-        SizedBox(
-          width: 108,
-          child: Text(
-            label,
-            style: GoogleFonts.nunito(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF4A4070),
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: Stack(
-              children: [
-                Container(
-                  height: 8,
-                  color: const Color(0xFFF0ECF8),
-                ),
-                TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0, end: value.clamp(0.0, 1.0)),
-                  duration: const Duration(milliseconds: 700),
-                  curve: Curves.easeOut,
-                  builder: (_, v, _) => FractionallySizedBox(
-                    alignment: Alignment.centerLeft,
-                    widthFactor: v,
-                    child: Container(
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: barColor,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        SizedBox(
-          width: 56,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text(
-                '$pct',
-                style: GoogleFonts.nunito(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF2D2050),
-                ),
-              ),
-              if (delta != null) ...[
-                const SizedBox(width: 3),
-                Text(
-                  delta > 0 ? '+$delta' : '$delta',
-                  style: GoogleFonts.nunito(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    // lower is better: negative delta = improvement = green
-                    color: delta < 0
-                        ? const Color(0xFF4CAF50)
-                        : delta > 0
-                            ? const Color(0xFFE05555)
-                            : const Color(0xFF9490B0),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ── Skin type row (quiz-only, no scores) ─────────────────────
 
 class _SkinTypeRow extends StatelessWidget {
   final String label;
@@ -567,6 +389,394 @@ class _SkinTypeRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _AiDisclaimer extends StatelessWidget {
+  const _AiDisclaimer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(
+          Icons.auto_awesome_rounded,
+          size: 13,
+          color: Color(0xFFB8A8D8),
+        ),
+        const SizedBox(width: 5),
+        Text(
+          'AI tahlili — tibbiy tashxis emas',
+          style: GoogleFonts.nunito(
+            fontSize: 11,
+            color: const Color(0xFFB8A8D8),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Skin problems section ─────────────────────────────────────
+
+class _SkinProblemsSection extends StatelessWidget {
+  const _SkinProblemsSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Teri muammolari',
+          style: GoogleFonts.nunito(
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF2D2050),
+          ),
+        ).animate().fadeIn(delay: 150.ms),
+        const SizedBox(height: 4),
+        Text(
+          'Sabablari va yechimlari',
+          style: GoogleFonts.nunito(
+            fontSize: 13,
+            color: const Color(0xFF9490B0),
+          ),
+        ).animate().fadeIn(delay: 200.ms),
+        const SizedBox(height: 16),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 0.82,
+          ),
+          itemCount: skinProblems.length,
+          itemBuilder: (context, i) => _SkinProblemCard(
+            problem: skinProblems[i],
+            index: i,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SkinProblemCard extends StatefulWidget {
+  final SkinProblem problem;
+  final int index;
+
+  const _SkinProblemCard({required this.problem, required this.index});
+
+  @override
+  State<_SkinProblemCard> createState() => _SkinProblemCardState();
+}
+
+class _SkinProblemCardState extends State<_SkinProblemCard> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.problem;
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => SkinProblemDetailPage(problem: p),
+          ),
+        );
+      },
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedScale(
+        scale: _pressed ? 0.95 : 1.0,
+        duration: const Duration(milliseconds: 120),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Hero(
+                tag: 'skin_problem_${p.id}',
+                child: p.imagePath != null
+                    ? Image.asset(
+                        p.imagePath!,
+                        fit: BoxFit.cover,
+                        cacheWidth: 360,
+                        errorBuilder: (_, _, _) =>
+                            _GradientPlaceholder(problem: p),
+                      )
+                    : _GradientPlaceholder(problem: p),
+              ),
+              Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, Color(0xCC000000)],
+                    stops: [0.38, 1.0],
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 12,
+                right: 12,
+                bottom: 12,
+                child: Text(
+                  p.name,
+                  style: GoogleFonts.nunito(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    shadows: const [
+                      Shadow(blurRadius: 6, color: Colors.black45),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    )
+        .animate(delay: Duration(milliseconds: 100 + widget.index * 50))
+        .fadeIn(duration: const Duration(milliseconds: 300));
+  }
+}
+
+class _GradientPlaceholder extends StatelessWidget {
+  final SkinProblem problem;
+  const _GradientPlaceholder({required this.problem});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            problem.color.withValues(alpha: 0.85),
+            problem.color.withValues(alpha: 0.55),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          problem.icon,
+          size: 52,
+          color: Colors.white.withValues(alpha: 0.9),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Skin problem detail page ──────────────────────────────────
+
+class SkinProblemDetailPage extends StatelessWidget {
+  final SkinProblem problem;
+  const SkinProblemDetailPage({super.key, required this.problem});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F6FC),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 300,
+            pinned: true,
+            backgroundColor: const Color(0xFFF8F6FC),
+            foregroundColor: const Color(0xFF2D2050),
+            surfaceTintColor: Colors.transparent,
+            leading: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.28),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Hero(
+                tag: 'skin_problem_${problem.id}',
+                child: problem.imagePath != null
+                    ? Image.asset(
+                        problem.imagePath!,
+                        fit: BoxFit.cover,
+                        cacheWidth: 800,
+                        errorBuilder: (_, _, _) =>
+                            _GradientPlaceholder(problem: problem),
+                      )
+                    : _GradientPlaceholder(problem: problem),
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 48),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    problem.name,
+                    style: GoogleFonts.nunito(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF2D2050),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: problem.color,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  _DetailCard(
+                    icon: Icons.help_outline_rounded,
+                    label: 'Sababi',
+                    text: problem.cause,
+                    accentColor: const Color(0xFF7060AA),
+                  ),
+                  const SizedBox(height: 14),
+                  _DetailCard(
+                    icon: Icons.check_circle_outline_rounded,
+                    label: 'Yechimi',
+                    text: problem.solution,
+                    accentColor: const Color(0xFF16A34A),
+                  ),
+                  if (problem.note != null) ...[
+                    const SizedBox(height: 14),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: problem.color.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: problem.color.withValues(alpha: 0.18),
+                        ),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.lightbulb_outline_rounded,
+                            size: 18,
+                            color: problem.color,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              problem.note!,
+                              style: GoogleFonts.nunito(
+                                fontSize: 13,
+                                color: problem.color,
+                                fontWeight: FontWeight.w600,
+                                height: 1.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DetailCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String text;
+  final Color accentColor;
+
+  const _DetailCard({
+    required this.icon,
+    required this.label,
+    required this.text,
+    required this.accentColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, size: 16, color: accentColor),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                label,
+                style: GoogleFonts.nunito(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: accentColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            text,
+            style: GoogleFonts.nunito(
+              fontSize: 14,
+              color: const Color(0xFF2D2050),
+              height: 1.65,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

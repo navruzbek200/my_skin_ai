@@ -1,4 +1,3 @@
-import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:real_beauty_ai/core/utils/logger.dart';
@@ -27,19 +26,12 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  Future<void> register(
-    String email,
-    String password,
-    String firstName,
-    String lastName,
-  ) async {
+  Future<void> register(String email, String password) async {
     emit(AuthLoading());
     try {
-      await _ds.register(
-        email.trim(),
-        password,
-        '${firstName.trim()} ${lastName.trim()}',
-      );
+      // No display name is collected at sign-up — the account screen falls
+      // back to the email address for the avatar initial and contact label.
+      await _ds.register(email.trim(), password, null);
       await LocalStore.instance.setLoggedIn();
       emit(AuthAuthenticated());
     } on FirebaseAuthException catch (e) {
@@ -62,19 +54,20 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> deleteAccount() async {
     try {
       await _ds.deleteAccount();
-      await LocalStore.instance.setLoggedOut();
-      emit(AuthInitial());
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'requires-recent-login') {
-        emit(AuthError("Akkauntni o'chirish uchun qayta kiring"));
-      } else {
-        emit(AuthError(_mapError(e.code)));
-      }
-    } catch (_) {
-      emit(AuthError("Xato yuz berdi. Qaytadan urinib ko'ring"));
+      // Any failure must stop here — signing the user out locally while the
+      // Auth record still exists would report a deletion that never happened.
+      emit(AuthError(e.code == 'requires-recent-login'
+          ? "Akkauntni o'chirish uchun qayta kiring"
+          : _mapError(e.code)));
+      return;
     }
+    await LocalStore.instance.setLoggedOut();
+    emit(AuthDeleted());
   }
 
+  /// Re-authenticates with the account password, then deletes. A wrong password
+  /// surfaces as [AuthError] and no deletion happens.
   Future<void> reauthenticateAndDelete(String password) async {
     emit(AuthLoading());
     try {
@@ -87,6 +80,35 @@ class AuthCubit extends Cubit<AuthState> {
     } catch (_) {
       emit(AuthError("Xato yuz berdi. Qaytadan urinib ko'ring"));
     }
+  }
+
+  /// Google users re-authenticate through the picker instead of a password.
+  Future<void> reauthenticateWithGoogleAndDelete() async {
+    emit(AuthLoading());
+    try {
+      final confirmed = await _ds.reauthenticateWithGoogle();
+      if (!confirmed) {
+        emit(AuthInitial());
+        return;
+      }
+      await _ds.deleteAccount();
+      await LocalStore.instance.setLoggedOut();
+      emit(AuthDeleted());
+    } on FirebaseAuthException catch (e) {
+      emit(AuthError(_mapError(e.code)));
+    } catch (_) {
+      emit(AuthError("Xato yuz berdi. Qaytadan urinib ko'ring"));
+    }
+  }
+
+  /// True when the current user signed in via Google — they re-authenticate
+  /// through the Google picker, not a password.
+  bool get isGoogleOnlyUser {
+    final providers =
+        FirebaseAuth.instance.currentUser?.providerData.map((p) => p.providerId) ??
+            const Iterable<String>.empty();
+    return providers.contains('google.com') &&
+        !providers.contains('password');
   }
 
   Future<void> signInWithGoogle() async {

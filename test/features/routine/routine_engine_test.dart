@@ -42,83 +42,83 @@ void main() {
   // ── Skin-type AM labels ──────────────────────────────────────────────
 
   group('AM labels by skin type', () {
-    test('oily → oil-control foam cleanse', () {
+    test('oily → thorough foam cleanse', () {
       final r = RoutineEngine.generate(skinType: "Yog'li", concerns: {}, date: _mon);
-      expect(r.morning.first.title, "Ko'pikli tozalash");
+      expect(r.morning.first.title, 'Penka bilan yuzni yaxshilab yuving');
     });
 
-    test('dry → gentle cream cleanse', () {
+    test('dry → warm-water cleanse', () {
       final r = RoutineEngine.generate(skinType: 'Quruq', concerns: {}, date: _mon);
-      expect(r.morning.first.title, 'Yumshoq kremsimon tozalash');
+      expect(r.morning.first.title, 'Yuzni iliq suv bilan yuving');
     });
 
-    test('normal → soft gel cleanse', () {
+    test('normal → foam cleanse', () {
       final r = RoutineEngine.generate(skinType: 'Normal', concerns: {}, date: _mon);
-      expect(r.morning.first.title, 'Yumshoq gel tozalash');
+      expect(r.morning.first.title, 'Penka bilan yuzni yuving');
     });
 
     test('pigmentation/aging concern → Vitamin C serum in AM', () {
       final r = RoutineEngine.generate(skinType: 'Normal', concerns: {'W'}, date: _mon);
-      expect(r.morning[2].title, 'C-vitamin serum');
+      expect(r.morning[2].title, contains('C-vitamin serum'));
     });
 
-    test('no aging concern + oily → niacinamide serum in AM', () {
+    test('no aging concern + oily → pore-minimizing serum in AM', () {
       final r = RoutineEngine.generate(skinType: "Yog'li", concerns: {}, date: _mon);
-      expect(r.morning[2].title, 'Niasinamid serum');
+      expect(r.morning[2].title, contains('teri teshikchalarini kichraytiradi'));
     });
   });
 
-  // ── PM dry skin ──────────────────────────────────────────────────────
+  // ── PM moisturizer ───────────────────────────────────────────────────
 
-  group('PM labels — dry skin', () {
+  group('PM labels — moisturizer', () {
     test('dry → rich night cream in pm_moist slot', () {
       final r = RoutineEngine.generate(skinType: 'Quruq', concerns: {}, date: _mon);
-      expect(r.evening[3].title, 'Boy tungi krem');
+      expect(r.evening[3].title, contains('Tungi kremni qalin qilib surting'));
     });
 
-    test('oily → light gel cream in pm_moist slot', () {
+    test('oily → light moisturizer in pm_moist slot', () {
       final r = RoutineEngine.generate(skinType: "Yog'li", concerns: {}, date: _mon);
-      expect(r.evening[3].title, 'Yengil gel krem');
+      expect(r.evening[3].title, contains('Yengil namlantiruvchi surting'));
     });
   });
 
   // ── Active nights ────────────────────────────────────────────────────
 
   group('active nights (Tue / Thu / Sat)', () {
-    test('oily + blackheads on Tue → BHA/AHA treatment', () {
+    test('oily + blackheads on Tue → exfoliating treatment', () {
       final r = RoutineEngine.generate(skinType: "Yog'li", concerns: {'Bh'}, date: _tue);
-      expect(r.evening[2].title, 'BHA/AHA eksfoliatsiya');
+      expect(r.evening[2].title, contains('Piling surting'));
     });
 
-    test('oily + blackheads on Mon (not active) → restorative serum', () {
+    test('oily + blackheads on Mon (not active) → hydrating serum', () {
       final r = RoutineEngine.generate(skinType: "Yog'li", concerns: {'Bh'}, date: _mon);
-      expect(r.evening[2].title, 'Tiklovchi namlovchi serum');
+      expect(r.evening[2].title, 'Namlantiruvchi serum surting');
     });
 
     test('aging concern on Thu → retinol treatment', () {
       final r = RoutineEngine.generate(skinType: 'Normal', concerns: {'W'}, date: _thu);
-      expect(r.evening[2].title, 'Retinol (haftada 3 marta)');
+      expect(r.evening[2].title, contains('Retinol serum surting'));
     });
 
-    test('retinol preferred over BHA when both aging+exfoliate concerns on active night', () {
+    test('retinol preferred over exfoliation when both concerns on active night', () {
       final r = RoutineEngine.generate(skinType: "Yog'li", concerns: {'W', 'Bh'}, date: _tue);
-      expect(r.evening[2].title, 'Retinol (haftada 3 marta)');
+      expect(r.evening[2].title, contains('Retinol serum surting'));
     });
   });
 
   // ── Sensitive skin ───────────────────────────────────────────────────
 
   group('sensitive skin', () {
-    test('sensitive blocks BHA even on active night', () {
+    test('sensitive blocks exfoliation even on active night', () {
       final r = RoutineEngine.generate(
         skinType: "Yog'li",
         concerns: {'S', 'Bh'},
         date: _tue, // active night
       );
-      expect(r.evening[2].title, 'Tinchlantiruvchi baryer serum');
+      expect(r.evening[2].title, contains('Tinchlantiruvchi serum'));
     });
 
-    test('sensitive barrier serum every day of the week', () {
+    test('sensitive calming serum every day of the week', () {
       // Jan 15–21 = Mon–Sun
       for (var day = 15; day <= 21; day++) {
         final r = RoutineEngine.generate(
@@ -128,7 +128,7 @@ void main() {
         );
         expect(
           r.evening[2].title,
-          'Tinchlantiruvchi baryer serum',
+          contains('Tinchlantiruvchi serum'),
           reason: 'day=$day',
         );
       }
@@ -140,17 +140,17 @@ void main() {
   group('Sunday mask night', () {
     test('oily + Sunday → clay mask in pm_last', () {
       final r = RoutineEngine.generate(skinType: "Yog'li", concerns: {}, date: _sun);
-      expect(r.evening.last.title, 'Loy niqob');
+      expect(r.evening.last.title, contains('Loy niqob'));
     });
 
     test('normal/dry + Sunday → hydrating mask in pm_last', () {
       final r = RoutineEngine.generate(skinType: 'Normal', concerns: {}, date: _sun);
-      expect(r.evening.last.title, 'Namlovchi niqob');
+      expect(r.evening.last.title, contains('Namlantiruvchi niqob'));
     });
 
     test('eye concern overrides Sunday mask (eye cream wins)', () {
       final r = RoutineEngine.generate(skinType: 'Normal', concerns: {'Ew'}, date: _sun);
-      expect(r.evening.last.title, "Ko'z kremi");
+      expect(r.evening.last.title, contains("Ko'z atrofiga maxsus krem"));
     });
   });
 
@@ -159,17 +159,17 @@ void main() {
   group('eye concern', () {
     test('Ew concern on weekday → eye cream in pm_last', () {
       final r = RoutineEngine.generate(skinType: 'Normal', concerns: {'Ew'}, date: _mon);
-      expect(r.evening.last.title, "Ko'z kremi");
+      expect(r.evening.last.title, contains("Ko'z atrofiga maxsus krem"));
     });
 
     test('Ed concern on weekday → eye cream in pm_last', () {
       final r = RoutineEngine.generate(skinType: 'Normal', concerns: {'Ed'}, date: _mon);
-      expect(r.evening.last.title, "Ko'z kremi");
+      expect(r.evening.last.title, contains("Ko'z atrofiga maxsus krem"));
     });
 
-    test('no eye concern weekday → tungi niqob fallback', () {
+    test('no eye concern weekday → night mask fallback', () {
       final r = RoutineEngine.generate(skinType: 'Normal', concerns: {}, date: _mon);
-      expect(r.evening.last.title, 'Tungi namlovchi niqob');
+      expect(r.evening.last.title, "Tungi namlantiruvchi niqob qo'ying");
     });
   });
 }

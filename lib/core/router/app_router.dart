@@ -1,8 +1,9 @@
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:real_beauty_ai/core/di/injection.dart';
 import 'package:real_beauty_ai/features/account/presentation/pages/account_page.dart';
+import 'package:real_beauty_ai/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:real_beauty_ai/features/auth/presentation/pages/auth_page.dart';
 import 'package:real_beauty_ai/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:real_beauty_ai/features/cosmetologists/presentation/pages/cosmetologist_detail_page.dart';
@@ -30,11 +31,11 @@ final _authOnlyPaths = {'/auth', '/intro'};
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
-  refreshListenable: GoRouterRefreshStream(
-    FirebaseAuth.instance.authStateChanges(),
-  ),
+  // Guards read AuthBloc, not FirebaseAuth: the bloc is the single source of
+  // session truth, and it already mirrors authStateChanges().
+  refreshListenable: GoRouterRefreshStream(sl<AuthBloc>().stream),
   redirect: (context, state) {
-    final loggedIn = FirebaseAuth.instance.currentUser != null;
+    final loggedIn = sl<AuthBloc>().state.isAuthenticated;
     final path = state.matchedLocation;
     if (!loggedIn && _protectedPaths.contains(path)) return '/auth';
     if (loggedIn && _authOnlyPaths.contains(path)) return '/home';

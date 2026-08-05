@@ -266,4 +266,48 @@ final List<Lesson> lessons = [
       ),
     ],
   ),
+  Lesson(
+    id: 'peeling',
+    title: 'Piling nima?',
+    subtitle: 'Qora nuqtalar va o\'lik hujayralarni tozalash',
+    category: 'Parvarish',
+    duration: '7 daqiqa',
+    level: 'Boshlang\'ich',
+    color: Color(0xFFE84393),
+    steps: [
+      LessonStep(
+        type: LessonStepType.intro,
+        title: 'Piling nima?',
+        body: 'Piling — teri yuzasidagi o\'lik hujayralarni va poralar ichidagi iflosliklarni eritib tozalaydigan vosita. U skrabdan farq qiladi: skrab mexanik (ishqalaydi), piling esa kimyoviy (eritadi) ishlaydi. Shu sababli piling nozikroq va ko\'proq nazorat ostida.',
+      ),
+      LessonStep(
+        type: LessonStepType.fact,
+        title: 'Ikki asosiy turi',
+        keyword: 'AHA va BHA',
+        body: 'AHA (alfa-gidroksi kislota) — tabiiy manbalardan olinadi: glikolik kislota shakar qamishidan, limon kislota limon va apelsindan, laktik kislota sutdan, mandel kislota bodom danagidan. Teri yuzasini yorqinlashtiradi, dog\'larni yo\'qotadi, tekislaydi. BHA (beta-gidroksi kislota) — salitsilik kislota, temir daraxt po\'stlog\'idan olinadi. Poraga chuqur kirib, yog\' va qora nuqtalarni eritadi.',
+      ),
+      LessonStep(
+        type: LessonStepType.list,
+        title: 'Piling nimalarga foydali?',
+        body: '',
+        items: [
+          'Qora va oq nuqtalarni (komed) poradan chiqaradi',
+          'O\'lik teri hujayralarini tozalab, yuz rangini yorqinlashtiradi',
+          'Akne iz va dog\'larini asta-sekin yo\'qotadi',
+          'Serum va kremlarning teri ichiga kirishini osonlashtiradi',
+          'Teri yuzasini tekislaydi va silliqlashtiradi',
+        ],
+      ),
+      LessonStep(
+        type: LessonStepType.tip,
+        title: 'Qachon va qanday ishlating?',
+        body: 'Faqat kechqurun ishlating — piling teri fotosensitiv qiladi, quyoshda yuz qizaradi. Haftada 1–2 martadan ko\'p ishlatmang — aks holda teri qizaradi va quruq bo\'ladi. Retinol bilan bir kechada ishlatmang — juda kuchli bo\'ladi. Ertasi kuni albatta SPF surting.',
+      ),
+      LessonStep(
+        type: LessonStepType.intro,
+        title: 'Xulosa',
+        body: 'Yog\'li va aralash teri uchun BHA piling eng samarali — qora nuqtalarni ichidan tozalaydi. Quruq va normal teri uchun AHA yaxshiroq — yuzni yorqinlashtiradi. Birinchi marta ishlatganda 5–10 daqiqadan boshlang, keyin vaqtni oshiring. Shoshilmang — piling sekin lekin ishonchli natija beradi.',
+      ),
+    ],
+  ),
 ];

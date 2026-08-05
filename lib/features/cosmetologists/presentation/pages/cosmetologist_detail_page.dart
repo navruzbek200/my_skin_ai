@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:real_beauty_ai/core/colors.dart';
+import 'package:real_beauty_ai/core/theme/colors.dart';
 import 'package:real_beauty_ai/models/cosmetolog.dart';
 import 'package:real_beauty_ai/features/cosmetologists/presentation/pages/cosmetologist_page.dart';
 
@@ -15,7 +16,6 @@ class KosmetologDetailScreen extends StatefulWidget {
 }
 
 class _KosmetologDetailScreenState extends State<KosmetologDetailScreen> {
-  bool _saved = false;
   bool _scrolled = false;
   late final ScrollController _scrollCtrl;
 
@@ -37,28 +37,45 @@ class _KosmetologDetailScreenState extends State<KosmetologDetailScreen> {
     super.dispose();
   }
 
+  Future<void> _launch(Uri uri) async {
+    try {
+      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!ok && mounted) _showLaunchError();
+    } catch (_) {
+      if (mounted) _showLaunchError();
+    }
+  }
+
+  void _showLaunchError() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Ilovani ochib bo\'lmadi',
+          style: GoogleFonts.nunito(color: Colors.white),
+        ),
+        backgroundColor: AppColors.primary,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
   void _openPhone() {
     HapticFeedback.mediumImpact();
-    launchUrl(
-      Uri.parse('tel:${c.phone.replaceAll(' ', '')}'),
-      mode: LaunchMode.externalApplication,
-    );
+    if (c.phone.trim().isEmpty) return;
+    _launch(Uri.parse('tel:${c.phone.replaceAll(' ', '')}'));
   }
 
   void _openTelegram() {
     HapticFeedback.mediumImpact();
-    launchUrl(
-      Uri.parse('https://t.me/${c.telegram.replaceFirst('@', '')}'),
-      mode: LaunchMode.externalApplication,
-    );
+    if (c.telegram.trim().isEmpty) return;
+    _launch(Uri.parse('https://t.me/${c.telegram.replaceFirst('@', '')}'));
   }
 
   void _openInstagram() {
     HapticFeedback.mediumImpact();
-    launchUrl(
-      Uri.parse('https://instagram.com/${c.instagram.replaceFirst('@', '')}'),
-      mode: LaunchMode.externalApplication,
-    );
+    if (c.instagram.trim().isEmpty) return;
+    _launch(Uri.parse('https://instagram.com/${c.instagram.replaceFirst('@', '')}'));
   }
 
   @override
@@ -95,45 +112,41 @@ class _KosmetologDetailScreenState extends State<KosmetologDetailScreen> {
                     child: const Icon(Icons.chevron_left, color: AppColors.text, size: 24),
                   ),
                 ),
-                actions: [
-                  GestureDetector(
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      setState(() => _saved = !_saved);
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.all(8),
-                      width: 40, height: 40,
-                      decoration: BoxDecoration(
-                        color: _scrolled
-                            ? AppColors.background
-                            : Colors.white.withValues(alpha: 0.9),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Icon(
-                          _saved ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
-                          color: _saved ? AppColors.red : AppColors.text,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                ],
               ),
 
               // ── Header: avatar · ism · unvon · rating ───────────────
               SliverToBoxAdapter(
                 child: Container(
-                  color: AppColors.background,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0xFFE4DCF5), Color(0xFFF6F3FB), Colors.white],
+                      stops: [0.0, 0.62, 1.0],
+                    ),
+                  ),
                   padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
                   child: Column(
                     children: [
-                      CosmetologAvatar(
-                        name: c.name,
-                        gradientColors: c.gradientColors,
-                        size: 112,
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.18),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: CosmetologAvatar(
+                          name: c.name,
+                          gradientColors: c.gradientColors,
+                          photoUrl: c.photoUrl,
+                          size: 112,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       Row(
@@ -168,24 +181,12 @@ class _KosmetologDetailScreenState extends State<KosmetologDetailScreen> {
                         c.title,
                         style: GoogleFonts.nunito(fontSize: 14, color: AppColors.muted),
                       ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CosmetologStarRating(value: c.rating, size: 16),
-                          const SizedBox(width: 8),
-                          Text(
-                            '${c.rating} · ${c.reviewCount} sharh',
-                            style: GoogleFonts.nunito(fontSize: 13, color: AppColors.muted),
-                          ),
-                        ],
-                      ),
                     ],
                   ),
                 ),
               ),
 
-              // ── Stat tiles: Tajriba · Sharhlar ─────────────────────
+              // ── Stat tiles: Tajriba · Manzil ───────────────────────
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -201,9 +202,9 @@ class _KosmetologDetailScreenState extends State<KosmetologDetailScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: _StatTile(
-                          icon: Icons.star_outline_rounded,
-                          label: 'Sharhlar',
-                          value: '${c.reviewCount} ta',
+                          icon: Icons.location_on_outlined,
+                          label: 'Manzil',
+                          value: c.city,
                         ),
                       ),
                     ],
@@ -212,19 +213,20 @@ class _KosmetologDetailScreenState extends State<KosmetologDetailScreen> {
               ),
 
               // ── Telefon (tappable InfoRow) ──────────────────────────
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _SectionLabel('TELEFON'),
-                      const SizedBox(height: 10),
-                      _PhoneRow(phone: c.phone, onTap: _openPhone),
-                    ],
+              if (c.phone.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _SectionLabel('TELEFON'),
+                        const SizedBox(height: 10),
+                        _PhoneRow(phone: c.phone, onTap: _openPhone),
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
               // ── Haqida ──────────────────────────────────────────────
               SliverToBoxAdapter(
@@ -287,6 +289,7 @@ class _KosmetologDetailScreenState extends State<KosmetologDetailScreen> {
           ),
 
           // ── Bottom bar: Telegram (outlined) · Instagram (filled) ─────
+          if (c.telegram.isNotEmpty || c.instagram.isNotEmpty)
           Positioned(
             bottom: 0, left: 0, right: 0,
             child: Container(
@@ -303,10 +306,15 @@ class _KosmetologDetailScreenState extends State<KosmetologDetailScreen> {
               ),
               child: Row(
                 children: [
+                  if (c.telegram.isNotEmpty)
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: _openTelegram,
-                      icon: const Icon(Icons.send_rounded, size: 18),
+                      icon: SvgPicture.asset(
+                        'assets/icons/telegram.svg',
+                        width: 18,
+                        height: 18,
+                      ),
                       label: Text(
                         'Telegram',
                         style: GoogleFonts.nunito(
@@ -324,11 +332,21 @@ class _KosmetologDetailScreenState extends State<KosmetologDetailScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  if (c.telegram.isNotEmpty && c.instagram.isNotEmpty)
+                    const SizedBox(width: 12),
+                  if (c.instagram.isNotEmpty)
                   Expanded(
                     child: FilledButton.icon(
                       onPressed: _openInstagram,
-                      icon: const Icon(Icons.photo_camera_outlined, size: 18),
+                      icon: SvgPicture.asset(
+                        'assets/icons/instagram.svg',
+                        width: 18,
+                        height: 18,
+                        colorFilter: const ColorFilter.mode(
+                          Colors.white,
+                          BlendMode.srcIn,
+                        ),
+                      ),
                       label: Text(
                         'Instagram',
                         style: GoogleFonts.nunito(
@@ -457,22 +475,26 @@ class _StatTile extends StatelessWidget {
             child: Icon(icon, color: AppColors.primary, size: 20),
           ),
           const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: GoogleFonts.nunito(
-                  fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.muted,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.nunito(
+                    fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.muted,
+                  ),
                 ),
-              ),
-              Text(
-                value,
-                style: GoogleFonts.nunito(
-                  fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.text,
+                Text(
+                  value,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.nunito(
+                    fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.text,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

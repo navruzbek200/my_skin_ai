@@ -68,9 +68,9 @@ class _SplashScreenState extends State<SplashScreen>
                     center: Alignment.center,
                     radius: radius,
                     colors: [
-                      const Color(0xFFB8A8E8).withValues(alpha: _lerp(0.0, 0.55, v)),
-                      const Color(0xFF9B7DD4).withValues(alpha: _lerp(0.0, 0.22, v)),
-                      const Color(0xFF7060AA).withValues(alpha: _lerp(0.0, 0.06, v)),
+                      const Color(0xFF9B7DD4).withValues(alpha: _lerp(0.0, 0.55, v)),
+                      const Color(0xFF7060AA).withValues(alpha: _lerp(0.0, 0.22, v)),
+                      const Color(0xFF4A3A9A).withValues(alpha: _lerp(0.0, 0.06, v)),
                       Colors.white.withValues(alpha: 0.0),
                     ],
                     stops: const [0.0, 0.42, 0.72, 1.0],
@@ -91,7 +91,7 @@ class _SplashScreenState extends State<SplashScreen>
               },
               child: Image.asset(
                 'assets/splash.png',
-                width: size.width * 0.72,
+                width: size.width * 0.90,
               ),
             ),
           ),

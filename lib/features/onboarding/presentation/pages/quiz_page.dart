@@ -35,6 +35,7 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
   late final AnimationController _slideCtrl;
   bool _forward = true;
   int _prevIndex = 0;
+  bool _exiting = false;
 
   static const _bg = Color(0xFFF0ECF8);
   static const _cardBg = Color(0xFFFFFFFF);
@@ -68,7 +69,7 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
   void _showExitConfirm() {
     showDialog<void>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         backgroundColor: Colors.white,
         title: Text(
@@ -82,15 +83,15 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(ctx).pop(),
             child: Text('Bekor qilish',
                 style: GoogleFonts.nunito(
                     fontWeight: FontWeight.w600, color: _textMuted, fontSize: 14)),
           ),
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
+              Navigator.of(ctx).pop();
+              _exit();
             },
             child: Text('Chiqish',
                 style: GoogleFonts.nunito(
@@ -157,10 +158,25 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
     if (context.read<QuizCubit>().hasAnyAnswer) {
       _showExitConfirm();
     } else {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) Navigator.of(context).pop();
-      });
+      _exit();
     }
+  }
+
+  // Guarded exit: prevents double-pop (back gesture + X tap, or double tap)
+  // from popping the route below the quiz and leaving an empty navigator.
+  void _exit() {
+    if (_exiting) return;
+    _exiting = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        // Quiz was the only route (e.g. deep link) — go home instead of
+        // popping into a black screen.
+        context.go('/home');
+      }
+    });
   }
 
   void _goNext(QuizInProgress state) {

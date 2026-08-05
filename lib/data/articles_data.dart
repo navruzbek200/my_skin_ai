@@ -179,4 +179,104 @@ const List<Article> articles = [
       ),
     ],
   ),
+  Article(
+    icon: Icons.ac_unit_outlined,
+    iconColor: Color(0xFF7060AA),
+    title: 'Yuzga muz surish: foyda yoki zarar?',
+    duration: '4 daqiqa',
+    summary:
+        'Ijtimoiy tarmoqlarda mashhur bo\'lgan muz kursi haqiqatda teriga nima qiladi — ilmiy javob.',
+    sections: [
+      ArticleSection(
+        heading: 'Afsona: muz yuzni yaxshilaydi',
+        body:
+            'Ko\'pchilik muz surish teriga juda foyda qiladi deb o\'ylaydi — poralarni yopadi, yuzni yoshartiradi, ajinlarni yo\'qotadi deyishadi. Bu qisman to\'g\'ri, qisman esa butunlay noto\'g\'ri.',
+      ),
+      ArticleSection(
+        heading: 'Haqiqat: nima foydali',
+        body:
+            'Sovuq ta\'sir qon tomir va shishlikni vaqtincha kamaytiradi — shu sababli ertalab ko\'z ostidagi shish tushadi. Yallig\'langan akne ustiga muz qo\'yish og\'riq va qizarishni bosadi. Sport yoki issiq havoda yuzni muzsiz suv yoki muz bilan sovutish yaxshi his beradi.',
+      ),
+      ArticleSection(
+        heading: 'Haqiqat: nima zarar',
+        body:
+            'To\'g\'ridan-to\'g\'ri muz teri yuzasiga qo\'yilsa, sovuq kuyishi (frostbite) bo\'lishi mumkin — ayniqsa sezgir teriga. Poralar yopilmaydi — bu anatomik jihatdan imkonsiz, poralar mushak emas. Ajinlarni yo\'qotmaydi — bu faqat vaqtinchalik gullash effekti.',
+      ),
+      ArticleSection(
+        heading: 'To\'g\'ri ishlatish yo\'li',
+        body:
+            'Muzni bevosita yuzga surmasdan, mato yoki soft bezga o\'rab ishlating. 1–2 daqiqadan ko\'p tutmang. Har kuni emas — haftada 2–3 marta yetarli. Sezgir va quruq teri uchun umuman tavsiya etilmaydi.',
+      ),
+    ],
+  ),
+  Article(
+    icon: Icons.phone_android_outlined,
+    iconColor: Color(0xFF7060AA),
+    title: 'Telefon ko\'k nuri va teri: haqiqat nimada?',
+    duration: '5 daqiqa',
+    summary:
+        'Telefon ekranidan chiqadigan ko\'k nur teringizni qarittira oladimi — tadqiqotlar nima deydi.',
+    sections: [
+      ArticleSection(
+        heading: 'Ko\'k nur nima?',
+        body:
+            'Ko\'k nur (blue light / HEV nur) — quyosh nuri va barcha ekranlardan — telefon, kompyuter, televizordan chiqadi. Quyosh chiqaradigan ko\'k nur ekranga nisbatan yuzlab marta kuchliroq.',
+      ),
+      ArticleSection(
+        heading: 'Afsona: telefon ko\'k nuri teringizni jiddiy qarittiradi',
+        body:
+            'Laboratoriya sharoitida juda yuqori ko\'k nur ta\'sirida pigmentatsiya kuzatilgan — lekin bu telefon ekranidan bo\'lgan 8 soatlik ta\'sirga teng emas. Haqiqiy hayotda telefon ekranidan teringizga zarar etishiga ilmiy dalil hozircha yo\'q.',
+      ),
+      ArticleSection(
+        heading: 'Haqiqiy zarar: uyqu',
+        body:
+            'Telefon ko\'k nuri teringizni emas, uyqungizni buzadi. Ko\'k nur melatonin (uyqu gormoni) ajralishini to\'xtatadi. Bu uyquni qiyinlashtiradi — uyqu kam bo\'lsa teri to\'sig\'i zaiflanadi, kollagen kamayadi, akne kuchayadi. Ko\'k nurning asosiy zarar yo\'li shu.',
+      ),
+      ArticleSection(
+        heading: 'Nima qilish kerak?',
+        body:
+            'Uxlashdan 1 soat oldin telefonni qo\'ying. Kechqurun ekranda "Night Mode" yoki sariq filtr yoqing. Ko\'k nurdan teri uchun maxsus krem sotib olish shart emas — bu reklamaviy gap. Asosiy himoya — uyquni tartibga solish.',
+      ),
+    ],
+  ),
+  Article(
+    icon: Icons.self_improvement_outlined,
+    iconColor: Color(0xFF7060AA),
+    title: 'Teri qarishi haqida 6 afsona va haqiqat',
+    duration: '6 daqiqa',
+    summary:
+        'Quyosh, stress, uyqu, his-tuyg\'ular va yosh ko\'rinish haqida keng tarqalgan noto\'g\'ri tushunchalar.',
+    sections: [
+      ArticleSection(
+        heading: 'Afsona 1: Ko\'p kulish ajin tushiradi',
+        body:
+            'Haqiqat: kulish va mimika harakatlar vaqt o\'tishi bilan "mimika ajinlari" hosil qiladi — lekin bu normal va sog\'lom hayot belgisi. Kulmaslik ajin oldini olmaydi. Ajinlar asosan namlash, SPF va uyqu bilan kechiktiriladi.',
+      ),
+      ArticleSection(
+        heading: 'Afsona 2: Quyoshda yurish terini "chiniqtiradi"',
+        body:
+            'Haqiqat: UV nur teri DNA sini shikastlaydi va bu jarayon to\'planadi. Kuniga 10 daqiqa quyosh ham zarar. Quyosh terini aslo chiniqtirmaydi — aksincha elastin va kollageni yo\'q qiladi, ajin va dog\'lar paydo bo\'ladi.',
+      ),
+      ArticleSection(
+        heading: 'Afsona 3: Stressdan teri qarimaydi',
+        body:
+            'Haqiqat: surunkali stress kortizol darajasini oshiradi. Kortizol kollagen sintezini to\'xtatadi, yallig\'lanishni kuchaytiradi va teri to\'sig\'ini zaiflashtiradi. Stress teriga jiddiy ta\'sir qiladi — bu ilmiy isbotlangan.',
+      ),
+      ArticleSection(
+        heading: 'Afsona 4: Ertaroq uxlash yosh ko\'rinish beradi',
+        body:
+            'Haqiqat: bu to\'g\'ri! Kech soat 22:00–02:00 oralig\'ida teri hujayralari eng tez yangilanadi. Kollagen ham asosan tunda ishlab chiqariladi. Shu sababli 7–9 soat, vaqtida uxlash terini rostdan yaxshilaydi.',
+      ),
+      ArticleSection(
+        heading: 'Afsona 5: Ko\'p suv ichsang teri yangilanadi',
+        body:
+            'Haqiqat: suv teri uchun zarur, lekin mo\'l-ko\'l suv ichish ajin yo\'qotmaydi. Teri namligi asosan kremdan keladi, ichdan emas. Suv ichish umumiy salomatlik uchun yaxshi — lekin "8 stakan suv = yosh teri" afsonasi.',
+      ),
+      ArticleSection(
+        heading: 'Afsona 6: Tabiiy teri qarishga yo\'l yo\'q',
+        body:
+            'Haqiqat: 80% teri qarishi tashqi sabablardan — quyosh, chekish, uyqusizlik, stress. Faqat 20% genetika. Demak, odatlarni to\'g\'rilash teri qarishi sur\'atini sezilarli kamaytiradi. Eng muhim 3 qadam: SPF, uyqu, namlash.',
+      ),
+    ],
+  ),
 ];

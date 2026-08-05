@@ -25,125 +25,116 @@ class SkinLogic {
     9: 'W',  // sagging
   };
 
-  // primary-concern choice index -> code to bubble to front
-  static const Map<int, String?> _primaryToCode = {
-    0: 'Bh', 1: 'P', 2: null, 3: 'W', 4: 'Ew', 5: 'S',
-  };
-
   static const _baseRecommendations = {
-    'Quruq': '''Sizning teringiz QURUQ teri turiga mansub.
+    'Quruq': '''Sizning yuz teringiz QURUQ.
 
-Quruq teri uchun asosiy parvarishda namlantirishga alohida e'tibor bering. Kuniga kamida 2 marta namlantiruvchi krem ishlating — ertalab va kechqurun. Gialuron kislota, serozidin, shea yog'i va ceramidlar asosidagi mahsulotlarni tanlang.
+Quruq teri uchun asosiy maqsad – terini chuqur namlash, himoya qatlamini tiklash va namlikni saqlab qolishdir. Yuzni kuniga 2 marta yumshoq va terini quritmaydigan tozalagich bilan tozalash tavsiya etiladi.
 
-Yuvish uchun yumshoq, kremsimon tozalovchi vositalardan foydalaning. Spirt, salitsilik kislota yoki agressiv tarkibli mahsulotlardan saqlaning.
+Tarkibida gialuron kislotasi, pantenol (provitamin B5), keramidlar yoki niatsinamid (vitamin B3) bo'lgan serum va namlovchi kremlar terining namlik balansini tiklashga yordam beradi. Juda kuchli skrablar yoki agressiv kislotalardan saqlanish muhim, chunki ular terini yanada quritishi mumkin.''',
 
-Tana uchun ham alohida namlantiruvchi krem ishlating, ayniqsa cho'milgandan so'ng. Ko'proq suv iching va havo namligini tartibga soluvchi humidifikator ishlating.''',
+    'Aralash': '''Sizning yuz teringiz ARALASH.
 
-    'Aralash': '''Sizning teringiz ARALASH teri turiga mansub.
+Aralash terida odatda T-zona (peshona, burun va iyak) yog'li bo'ladi, yanoqlar esa quruq yoki normal bo'lishi mumkin. Bunday teri uchun asosiy maqsad – yog' ajralishini nazorat qilish bilan birga terining namlik balansini saqlashdir.
 
-T-zona (peshona, burun, iyak) yog'li, qolgan qismlari esa quruq bo'ladi. Parvarishda ushbu ikki hududga turlicha yondashuv talab etiladi.
+Yuzni kuniga 2 marta yumshoq gel tozalagich bilan tozalash tavsiya etiladi. Tarkibida niatsinamid (vitamin B3), gialuron kislotasi yoki yengil AHA/BHA kislotalari bo'lgan serum va kremlar terining balansini saqlashga yordam beradi. T-zonada ortiqcha yog'ni kamaytirish uchun haftasiga 1–2 marta maska qo'llash, piling ishlatish mumkin, yanoqlarni esa yaxshi namlab turish muhim.''',
 
-T-zona uchun engil, gel yoki suv asosidagi namlantiruvchilar tanlang. Yanoqlar va ko'z atrofi uchun esa kreminiy, boyroq mahsulotlar ishlating.
+    'Normal': '''Sizning yuz teringiz NORMAL.
 
-Yuzni ikki marta — ertalab va kechqurun yuving. Haftada 1–2 marta yengil eksfoliatsiya qiling. Niasinamid, gialuron kislota va hafif AHA/BHA asosidagi mahsulotlar mos keladi.''',
+Normal teri odatda yog' va namlik jihatdan muvozanatlangan bo'lib, poralar kichik, teri silliq va sog'lom ko'rinishga ega bo'ladi. Bunday teri uchun asosiy maqsad – mavjud balansni saqlab qolish va terini tashqi omillardan himoya qilishdir.
 
-    'Normal': '''Sizning teringiz NORMAL teri turiga mansub.
+Yumshoq tozalash, engilgina namlantirishni kundalik tartibga kiriting. Antioksidantlar (C vitamini, niasinamid) va SPF ni unutmang — bu holatni uzoq yillar saqlab qolishning eng oson yo'li.''',
 
-Bu eng maqbul teri turi — u nisbatan barqaror va parvarish qilish nisbatan oson. Asosiy maqsad: teri barrierni saqlash va yosh ko'rinishni qo'llab-quvvatlash.
+    "Yog'li": '''Sizning yuz teringiz YOG'LI.
 
-Yumshoq tozalash, engilgina namlantirishni kundalik tartibga kiriting. Antioxidantlar (C vitamini, niasinamid) va SPF ni unutmang.
+Yog'li teri uchun asosiy maqsad – ortiqcha yog' ajralishini nazorat qilish, poralarni toza saqlash va teri balansini tiklashdir. Lekin quritishdan saqlaning — bu aksincha ko'proq yog' ishlab chiqishga olib keladi.
 
-Teringiz holati yaxshi saqlanishi uchun ovqatlanishga, uyquga va suvni yetarli miqdorda ichishga e'tibor bering.''',
-
-    "Yog'li": '''Sizning teringiz YOG'LI teri turiga mansub.
-
-Yog'li teri uchun asosiy maqsad — sebum ishlab chiqarishni muvozanatlash va poralarni toza saqlash. Lekin quritishdan saqlaning — bu aksincha ko'proq yog' ishlab chiqishga olib keladi.
-
-Engil, oil-free yoki gel asosidagi namlantiruvchilar tanlang. Niasinamid, salitsilik kislota (BHA) va tuproq asosidagi maskalar foydali.
-
-Yuzni kuchli yumasdan, 2 marta yuving. Namlantirishni o'tkazib yubormang va doimo SPF ishlating.''',
+Yuzni kuniga 2 marta yengil gel yoki penka bilan yuving. Niasinamid, salitsilik kislota (BHA) va oil-free, gidrojel asosidagi namlantiruvchilar tanlang. Namlantirishni hech qachon o'tkazib yubormang va doimo SPF ishlating.''',
   };
 
   static const _additionalRecommendations = {
     'P0': {
-      'title': 'Katta poralar',
-      'text': '''Sizda kengaygan poralar muammosi bor.
+      'title': 'Poralar',
+      'text': '''Teringizda poralar ochiq.
 
-Sog'ish poriklarni kichraytirish uchun niasinamid (5–10%) va retinol samarali ishlaydi. Haftada 1–2 marta BHA (salitsilik kislota) asosidagi eksfoliatsiyalovchi mahsulot ishlating.
+Yuzingizni kuniga 2 marta yengil gel yoki salitsil kislotali penka bilan tozalang, niatsinamid tarkibli serum, yog'siz (oil-free) namlantiruvchi qo'llash va har kuni SPF krem surishni tavsiya qilamiz.
 
-Makiyaj ostiga primer ishlating va yuz yuvishdan keyin tonerni o'tkazib yurmang.''',
+Haftasiga 1–2 marta yengil kimyoviy eksfoliatsiya (AHA/BHA) qilish ham poralarni tozalashga yordam beradi. Juda yog'li va og'ir krem ishlatmaslik kerak. To'g'ri parvarish bilan poralar kichikroq ko'rinadi va teri teksturasi yaxshilanadi.''',
     },
     'S': {
-      'title': 'Sezgir teri',
-      'text': '''Sizda sezgir teri muammosi mavjud.
+      'title': 'Ta’sirchanlik',
+      'text': '''Teringizda ta'sirchanlik bor.
 
-Sezgir teri uchun parfyumersiz (fragrance-free), gippoallergenik mahsulotlarni tanlang. Yangi mahsulotni avval yelka yoki quloq ostida sinab ko'ring.
+Yuzni kuniga 2 marta yumshoq va terini bezovta qilmaydigan tozalagich bilan yuving. Teri himoya qatlamini tiklash va qizarishni kamaytirish uchun tarkibida pantenol (provitamin B5), sentella aziatika, aloe vera, keramidlar va niatsinamid (vitamin B3) bo'lgan serum yoki namlovchi kremlar ishlatish tavsiya etiladi.
 
-Qo'shimcha tarkiblar: panthenol (B5 vitamini), allantoin, beta-glyukan teri to'siqini mustahkamlaydi. Agressiv kislotalar, spirt va eterli moylardan saqlaning.''',
+Juda kuchli skrablar, yuqori konsentratsiyali kislotalar va spirtli kosmetika terini yanada sezgir qilishi mumkin, shuning uchun ulardan saqlanish kerak. Har kuni SPF 50 quyoshdan himoya kremi ishlating, chunki sezgir teri quyosh ta'siriga tez reaksiyaga kirishadi.''',
     },
     'Bh': {
-      'title': 'Qora nuqtalar (komed)',
-      'text': '''Sizda qora nuqtalar muammosi bor.
+      'title': 'Qora nuqtalar',
+      'text': '''Yuzingizda qora nuqtalar bor.
 
-Qora nuqtalarni kesish yoki siqishning o'rniga BHA (salitsilik kislota) asosidagi tozalovchi vositalar ishlating — ular poralarni ichkaridadn tozalaydi.
+Yuzni kuniga 2 marta salitsil kislotali yoki yengil gel teksturali penka bilan tozalash poralardagi ortiqcha yog' va kirni kamaytirishga yordam beradi. Tarkibida salitsil kislotasi, niatsinamid yoki retinol bo'lgan vositalar poralarning tiqilib qolishini kamaytiradi va qora nuqtalarni asta-sekin yo'qotishga yordam beradi.
 
-Yuzni kuchli ishqalamasdan, yumshoq aylana harakatlar bilan yuving. Haftada 1–2 marta kaolin yoki bentonit asosidagi maska qo'llang.''',
+Haftasiga 1–2 marta AHA/BHA eksfoliatsiya, yengil pilinglar maska poralarni chuqur tozalaydi. Qora nuqtalarni tirnoq bilan siqib chiqarmang — bu yallig'lanish va chandiqqa olib kelishi mumkin.''',
     },
     'Wh': {
-      'title': 'Jiroviklar (oq nuqtalar)',
-      'text': '''Sizda jirovik (milium) muammosi bor.
+      'title': 'Oq nuqtalar (jiroviklar)',
+      'text': '''Yuzingizda oq nuqtalar (jiroviklar) bor.
 
-Jiroviklar — bu teri ostida to'plangan keratin. Ularni mexanik yo'l bilan siqmang. Retinol yoki AHA (glikolik kislota) asosidagi mahsulotlar uzoq muddatda samarali.
+Jiroviklar — teri ostida to'plangan keratin bo'lib, ularni mexanik yo'l bilan siqib chiqarish tavsiya etilmaydi. Tarkibida salitsil kislotasi, niatsinamid yoki retinol bo'lgan vositalar poralarning tiqilib qolishini kamaytiradi va jiroviklarni asta-sekin yo'qotishga yordam beradi.
 
-Komedogen (poralarni berkituvchi) mahsulotlardan saqlaning. Non-comedogenic deb belgilangan mahsulotlar tanlang.''',
+Yuzni kuniga 2 marta yengil gel teksturali penka bilan tozalang. Haftasiga 1–2 marta AHA/BHA eksfoliatsiya poralarni chuqur tozalaydi. Komedogen (poralarni berkituvchi) og'ir kremlardan saqlaning.''',
     },
     'P': {
-      'title': 'Pigmentatsiya',
-      'text': '''Sizda pigmentatsiya va dog' muammolari bor.
+      'title': "Dog', sepkillar",
+      'text': '''Teringiz dog'ga, pigmentatsiyaga moyil.
 
-Pigmentatsiyaga qarshi eng samarali tarkiblar: C vitamini (10–20%), niasinamid (5%), arbutin, kojik kislota va alfa-arbutin. Har kuni SPF 30+ quyosh kremini ishlating — bu eng muhim qadam.
+Yuzni kuniga 2 marta yumshoq tozalagich bilan tozalang. Tarkibida vitamin C, niacinamide, arbutin yoki AHA kislotalari bo'lgan serum va kremlar dog'larni asta-sekin kamaytirishga yordam beradi. Har kuni SPF 50++ quyoshdan himoya kremi qo'llash juda muhim, chunki quyosh nuri pigmentatsiyani kuchaytiradi.
 
-Giperpigmentatsiyani davolash uzoq muddat (3–6 oy) talab etadi. Kechqurun retinol yoki AHA ishlating.''',
+Haftasiga 1–2 marta yengil eksfoliatsiya (AHA/BHA) qilish ham teri rangini bir tekis qilishga yordam beradi. Doimiy va to'g'ri parvarish bilan dog'lar sekin-asta kamayib, teri yanada tiniq va yorqin ko'rinadi. Natija uchun 2–3 oy sabr talab etiladi.''',
     },
     'Ew': {
       'title': "Ko'z atrofidagi ajinlar",
-      'text': '''Sizda ko'z atrofi ajinlari muammosi bor.
+      'text': '''Ko'z atrofida mayda ajinlar aniqlandi.
 
-Ko'z atrofi terisi juda nozik va alohida parvarishni talab etadi. Maxsus ko'z krem yoki serumlarini ishlating — ular ko'z atrofi uchun mo'ljallangan.
+Ko'z atrofidagi teri juda nozik bo'lgani uchun maxsus ko'z krem ishlatish muhim. Tarkibida gialuron kislotasi, peptidlar yoki kollagen bo'lgan kremlar terini namlaydi va ajinlarning ko'rinishini kamaytirishga yordam beradi.
 
-Samarali tarkiblar: retinol (past konsentratsiyada), peptidlar, kofein (shishlikka qarshi) va gialuron kislota. Ko'zingizni ishqalamasdan, teginmasdan namlantiringiz.''',
+Ko'z atrofini yumshoq massaj qilish, yetarli uyqu va ekrandan tez-tez dam olish ham muhim.''',
     },
     'Ed': {
       'title': "Ko'z tagidagi qorayishlar",
-      'text': '''Sizda ko'z tagida qorayish muammosi bor.
+      'text': '''Ko'z tagida qorayishlar bor.
 
-Qorayishlarning sababi turlicha bo'lishi mumkin: qon aylanish, pigmentatsiya yoki teri yupqaligi. Kofein va vitamin K qon aylanishni yaxshilaydi.
+Ko'z atrofidagi nozik teri uchun maxsus ko'z krem ishlatish muhim. Tarkibida vitamin C, kofein yoki niatsinamid bo'lgan kremlar teri rangini yorqinlashtirishga va qorayishni kamaytirishga yordam beradi.
 
-Yetarli uxlash, ko'z krem ishlating va quyoshdan himoyaning. C vitamini va niasinamid pigmentatsion qorayishga yordam beradi.''',
+Yetarli uyqu, ko'proq suv ichish va ko'z atrofini yumshoq parvarish qilish ham muhim — uyqu yetishmasligi qorayishning eng keng tarqalgan sababi.''',
     },
     'W': {
-      'title': "Teri bo'shashishi",
-      'text': '''Sizda teri bo'shashishi muammosi bor.
+      'title': 'Ajinli, osilgan yuz',
+      'text': '''Teringiz elastikligini yo'qotgan, ajinlar va terida osilish kuzatilmoqda.
 
-Teri elastikligini saqlash uchun kollagen sintezini rag'batlantiruvchi tarkiblar tanlang: retinol, C vitamini, peptidlar (Argireline, Matrixyl).
+Tarkibida retinol, peptidlar, kollagen va gialuron kislotasi bo'lgan serum yoki krem ishlatish teri elastikligini oshirishga yordam beradi. Har kuni SPF krem qo'llash juda muhim, chunki quyosh nuri ajinlarni tezlashtiradi.
 
-Yuzni massaj qilish qon aylanishini yaxshilaydi. Gua sha yoki yuz massaj yo'llaridan foydalaning. Antioksidant serumlar va SPF ni doimo ishlating.''',
+Haftasiga 1–2 marta namlovchi va tiklovchi maskalar qilish, hamda yuz massaji yoki yuz-yoga mashqlari terining tarangligini yaxshilashga yordam beradi. Doimiy parvarish bilan teri yanada silliq, tarang va sog'lom ko'rinadi.''',
     },
     'Ao': {
-      'title': "Yog'li teri acne",
-      'text': '''Sizda yog'li teri turida akne muammosi bor.
+      'title': "Husnbuzarlar (yog'li teri)",
+      'text': '''Husnbuzarlar bilan ham ishlash kerak.
 
-Yog'li teri uchun akne davolanishida BHA (salitsilik kislota 2%), benzoil peroksid va niasinamid samarali. Oil-free va non-comedogenic mahsulotlar tanlang.
+Yuzni kuniga 2 marta yumshoq antibakterial penka bilan tozalash, tarkibida salitsil kislotasi, niatsinamid, yashil choy ekstrakti bo'lgan vositalardan foydalanish husnbuzarlarni kamaytirishga yordam beradi. Teri toza bo'lishi uchun yengil eksfoliatsiya haftasiga 1–2 marta qilish mumkin.
 
-Teri quritish o'rniga muvozanatlashtirishga intiling. Gidrojel yoki suv asosidagi namlantirishdan foydalaning.''',
+Juda yog'li va poralarni yopib qo'yadigan kremlardan saqlaning, husnbuzarlarni siqmang. Aktiv bo'lgan holatda terini tinchlantiruvchi tarkibli mahsulotlardan ishlating, iloji boricha makiyaj qilmasdan, yuzingizga ko'p teginmang. Har kuni SPF krem ishlatish ham dog' paydo bo'lishining oldini oladi.
+
+Muhim: husnbuzarlar asosan ichki sabablardan — gormonal o'zgarishlar, noto'g'ri ovqatlanish, uyqu betartibligi, oshqozon-ichak muammolaridan paydo bo'ladi. Aktiv holatda ham ichki, ham tashqi tomondan davolanish tavsiya etiladi: shifokor-dermatologga yoki endokrinologga ko'rinish foydali bo'lishi mumkin.''',
     },
     'Ad': {
-      'title': 'Acne va post-acne',
-      'text': '''Sizda akne muammosi bor.
+      'title': "Husnbuzarlar (quruq teri)",
+      'text': '''Quruq terida ham husnbuzar paydo bo'lishi mumkin, shuning uchun parvarish juda yumshoq va namlovchi bo'lishi kerak.
 
-Akne davolashda sabr talab etadi. Faol ingredientlar: niasinamid (yallig'lanishga qarshi), salitsilik kislota (qora nuqtalar), benzoil peroksid (bakteriyalarga qarshi).
+Yuzni kuniga 2 marta yumshoq, terini quritmaydigan penka bilan tozalash tavsiya etiladi. Tarkibida niatsinamid yoki past konsentratsiyadagi salitsil kislotasi bo'lgan vositalar husnbuzarlarni kamaytirishga yordam beradi. Gialuron kislotasi yoki namlovchi krem terining qurib ketishini oldini oladi.
 
-Post-acne izlarni yo'qotish uchun: C vitamini, AHA, retinol va quyosh kremini birga ishlating. Husnbuzarlarni siqmang — bu ko'proq chandiq qoldiradi.''',
+Juda agressiv skrablar va qurituvchi mahsulotlardan saqlaning, har kuni SPF krem qo'llang.
+
+Muhim: husnbuzarlar asosan ichki sabablardan — gormonal o'zgarishlar, noto'g'ri ovqatlanish, uyqu betartibligi, oshqozon-ichak muammolaridan paydo bo'ladi. Aktiv holatda ham ichki, ham tashqi tomondan davolanish tavsiya etiladi: shifokor-dermatologga yoki endokrinologga ko'rinish foydali bo'lishi mumkin.''',
     },
   };
 
@@ -171,37 +162,11 @@ Post-acne izlarni yo'qotish uchun: C vitamini, AHA, retinol va quyosh kremini bi
       if (_safeInt(answers, e.key) >= _threshold) addCode(e.value);
     }
 
-    // primary concern → move matching block to front (or add it if not yet triggered)
-    final primary = _safeInt(answers, 11, defaultVal: -1);
-    final pCode = _primaryToCode[primary];
-    if (pCode != null) {
-      addCode(pCode);
-      final i = blocks.indexWhere((b) => b['code'] == pCode);
-      if (i > 0) {
-        final b = blocks.removeAt(i);
-        blocks.insert(0, b);
-      }
-    }
-
-    // age (index 10): value 3=35-44, 4=45+ → gentle anti-aging note if no aging block yet
-    final age = _safeInt(answers, 10, defaultVal: 0);
-    final hasAging = blocks.any((b) => b['code'] == 'W' || b['code'] == 'Ew');
-    if (age >= 3 && !hasAging) {
-      blocks.add({
-        'code': 'AgeNote',
-        'title': 'Yoshga mos profilaktika',
-        'text': "Yoshingizni hisobga olib, kollagenni qo'llab-quvvatlovchi "
-            'profilaktik parvarish foydali: kechqurun retinol (past konsentratsiya), '
-            'ertalab C-vitamin va doimiy SPF. Ajin chuqurlashishidan oldin boshlash eng samarali.',
-      });
-    }
-
     return SkinAnalysisResult(
       skinType: skinType,
       skinTypeCode: skinCode,
       baseRecommendation: baseRec,
       additionalBlocks: blocks,
-      source: AnalysisSource.quizEstimate,
     );
   }
 

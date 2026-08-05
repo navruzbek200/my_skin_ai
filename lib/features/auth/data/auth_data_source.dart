@@ -1,6 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+/// Native Firebase email/password auth plus Google Sign-In. No Cloud Functions
+/// and no backend — everything here runs on the Firebase Auth SDK directly, so
+/// it works on the free Spark plan.
 abstract class AuthDataSource {
   Future<void> signIn(String email, String password);
   Future<void> register(String email, String password, String? displayName);
@@ -8,8 +11,13 @@ abstract class AuthDataSource {
   Future<void> deleteAccount();
   Future<void> reauthenticate(String password);
   Future<void> sendPasswordReset(String email);
+
   /// Returns false when user dismisses the Google account picker (not an error).
   Future<bool> signInWithGoogle();
+
+  /// Re-runs the Google picker to prove ownership before a sensitive action.
+  /// Returns false if the user dismisses it.
+  Future<bool> reauthenticateWithGoogle();
 }
 
 class FirebaseAuthDataSource implements AuthDataSource {
@@ -61,26 +69,35 @@ class FirebaseAuthDataSource implements AuthDataSource {
   }
 
   @override
-  Future<void> reauthenticate(String password) async {
+  Future<bool> reauthenticateWithGoogle() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return false;
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null || user.email == null) return;
-      final cred = EmailAuthProvider.credential(
-        email: user.email!,
-        password: password,
-      );
-      await user.reauthenticateWithCredential(cred);
-    } on FirebaseAuthException {
+      final account = await GoogleSignIn.instance.authenticate();
+      final idToken = account.authentication.idToken;
+      if (idToken == null) return false;
+      final credential = GoogleAuthProvider.credential(idToken: idToken);
+      await user.reauthenticateWithCredential(credential);
+      return true;
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) return false;
       rethrow;
     }
   }
 
   @override
+  Future<void> reauthenticate(String password) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || user.email == null) return;
+    final cred = EmailAuthProvider.credential(
+      email: user.email!,
+      password: password,
+    );
+    await user.reauthenticateWithCredential(cred);
+  }
+
+  @override
   Future<void> sendPasswordReset(String email) async {
-    try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-    } on FirebaseAuthException {
-      rethrow;
-    }
+    await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
   }
 }

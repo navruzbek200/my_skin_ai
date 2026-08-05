@@ -29,8 +29,6 @@ dependencies:
   get_it: ^7.7.0
   google_sign_in: ^7.2.0
   equatable: ^2.0.8
-  cloud_functions: ^5.1.2
-  flutter_image_compress: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -38,6 +36,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   mocktail: ^0.3.0
   bloc_test: ^9.1.7
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
@@ -46,13 +45,23 @@ flutter:
     - assets/banner_skin.jpg
     - assets/products_banner.jpg
     - assets/onboarding.jpg
-    - assets/logo.png
     - assets/skin_result_banner.webp
     - assets/products/
     - assets/icons/
     - assets/videos/
     - assets/videos/scan/
+    - assets/videos/yoga_voice/
 
 
     - assets/yoga_avatar.jpg
+    - assets/yoga avatar 2.jpg
+    - assets/face tahlil.jpg
+    - assets/skin_problems/
     - assets/data/
+    - assets/cosmetologists/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  remove_alpha_ios: true # iOS uchun shaffoflikni olib tashlaydi
+  image_path: "assets/icon.png"

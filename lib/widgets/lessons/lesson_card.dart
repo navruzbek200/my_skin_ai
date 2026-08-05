@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../core/colors.dart';
+import '../../core/theme/colors.dart';
 import '../../models/lesson.dart';
 import 'package:go_router/go_router.dart';
 import 'info_row_card.dart';
@@ -24,35 +24,25 @@ class LessonCard extends StatelessWidget {
         context.push('/lesson-detail', extra: lesson);
       },
       content: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+        padding: const EdgeInsets.fromLTRB(16, 12, 10, 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    // lesson.color kept in model; UI uses primary for calm palette
-                    color: AppColors.primary.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    lesson.category,
-                    style: GoogleFonts.nunito(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
-                    ),
-                  ),
+            // Category chip
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.09),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                lesson.category,
+                style: GoogleFonts.nunito(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primary,
                 ),
-                const Spacer(),
-                Text(
-                  lesson.duration,
-                  style: GoogleFonts.nunito(fontSize: 11, color: AppColors.muted),
-                ),
-              ],
+              ),
             ),
             const SizedBox(height: 5),
             Text(
@@ -65,26 +55,37 @@ class LessonCard extends StatelessWidget {
             ),
             Text(
               lesson.subtitle,
-              style: GoogleFonts.nunito(fontSize: 12, color: AppColors.muted),
+              style: GoogleFonts.nunito(
+                fontSize: 12,
+                color: AppColors.muted,
+                height: 1.35,
+              ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 7),
+            // Metadata
             Row(
               children: [
-                const Icon(Icons.signal_cellular_alt, size: 13, color: AppColors.primary),
-                const SizedBox(width: 4),
+                const Icon(Icons.signal_cellular_alt, size: 12, color: AppColors.primary),
+                const SizedBox(width: 3),
                 Text(
                   lesson.level,
                   style: GoogleFonts.nunito(
                     fontSize: 11,
-                    color: AppColors.primary,
                     fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
                   ),
+                ),
+                const SizedBox(width: 10),
+                const Icon(Icons.timer_outlined, size: 12, color: AppColors.muted),
+                const SizedBox(width: 3),
+                Text(
+                  lesson.duration,
+                  style: GoogleFonts.nunito(fontSize: 11, color: AppColors.muted),
                 ),
                 const Spacer(),
                 Text(
                   '${lesson.steps.length} qadam',
-                  style:
-                      GoogleFonts.nunito(fontSize: 11, color: AppColors.muted),
+                  style: GoogleFonts.nunito(fontSize: 11, color: AppColors.muted),
                 ),
               ],
             ),

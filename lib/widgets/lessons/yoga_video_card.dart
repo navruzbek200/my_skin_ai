@@ -4,7 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-import '../../core/colors.dart';
+import '../../core/theme/colors.dart';
 import '../../data/yoga_data.dart';
 import '../../services/video_playback_manager.dart';
 import 'lesson_styles.dart';
@@ -19,27 +19,27 @@ const double _kSourceAspect = 720 / 1280;
 class YogaVideoCard extends StatefulWidget {
   final YogaExercise exercise;
   final int index;
+  final bool withAudio;
 
   const YogaVideoCard({
     super.key,
     required this.exercise,
     required this.index,
+    this.withAudio = false,
   });
 
   @override
   State<YogaVideoCard> createState() => _YogaVideoCardState();
 }
 
-class _YogaVideoCardState extends State<YogaVideoCard>
-    with AutomaticKeepAliveClientMixin {
+class _YogaVideoCardState extends State<YogaVideoCard> {
   VideoPlayerController? _ctrl;
   _VideoState _state = _VideoState.idle;
   bool _isVisible = false;
+  int _generation = 0;
 
-  @override
-  bool get wantKeepAlive => true;
-
-  String get _id => 'yoga_${widget.index}';
+  String get _id =>
+      widget.withAudio ? 'yoga_voice_${widget.index}' : 'yoga_${widget.index}';
 
   @override
   void initState() {
@@ -68,12 +68,13 @@ class _YogaVideoCardState extends State<YogaVideoCard>
     if (!mounted) return;
     setState(() => _state = _VideoState.loading);
 
+    final gen = ++_generation;
     final ctrl = VideoPlayerController.asset(widget.exercise.videoPath);
     try {
       await ctrl.initialize();
       await ctrl.setLooping(true);
-      await ctrl.setVolume(0.0);
-      if (!mounted) {
+      await ctrl.setVolume(widget.withAudio ? 1.0 : 0.0);
+      if (!mounted || gen != _generation) {
         ctrl.dispose();
         return;
       }
@@ -85,12 +86,13 @@ class _YogaVideoCardState extends State<YogaVideoCard>
       }
     } catch (_) {
       ctrl.dispose();
-      if (!mounted) return;
+      if (!mounted || gen != _generation) return;
       setState(() => _state = _VideoState.error);
     }
   }
 
   void _release() {
+    _generation++;
     _ctrl?.dispose();
     _ctrl = null;
     VideoPlaybackManager.instance.notifyHidden(_id);
@@ -120,7 +122,6 @@ class _YogaVideoCardState extends State<YogaVideoCard>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     final ex = widget.exercise;
     return VisibilityDetector(
       key: Key(_id),

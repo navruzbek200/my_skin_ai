@@ -1,0 +1,26 @@
+rules_version = '2';
+
+// The app is client-only: it reads two public catalogs and keeps everything
+// else (skin profile, routine, scan history) in local SharedPreferences.
+// No client or Cloud Function writes Firestore, so every rule is read-or-deny.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Public read-only catalogs rendered by the app.
+    match /products/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /cosmetologists/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Everything else is closed. Catalog edits go through the console or the
+    // Admin SDK, both of which bypass these rules.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

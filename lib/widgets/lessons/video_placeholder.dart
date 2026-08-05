@@ -8,9 +8,18 @@ class VideoPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: color.withValues(alpha: 0.08),
+      color: const Color(0xFFF5F3FA),
       child: Center(
-        child: Icon(icon, size: 40, color: color.withValues(alpha: 0.4)),
+        child: SizedBox(
+          width: 32,
+          height: 32,
+          child: CircularProgressIndicator(
+            strokeWidth: 2.5,
+            valueColor: AlwaysStoppedAnimation<Color>(
+              color.withValues(alpha: 0.55),
+            ),
+          ),
+        ),
       ),
     );
   }

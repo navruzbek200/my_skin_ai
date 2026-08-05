@@ -3,6 +3,9 @@
     "public": "public",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
   },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
   "functions": {
     "source": "functions",
     "codebase": "default",
@@ -19,7 +22,7 @@
       "android": {
         "default": {
           "projectId": "real-beauty-2b6b0",
-          "appId": "1:211589998133:android:a3682bd854e1024044f37c",
+          "appId": "1:211589998133:android:e4258d76e58e88a844f37c",
           "fileOutput": "android/app/google-services.json"
         }
       },

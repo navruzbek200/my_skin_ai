@@ -113,13 +113,22 @@ class _BugunScreenState extends State<BugunScreen>
     _dailyProgress = LocalStore.instance.getDailyProgress(_total);
     // Reflect today's in-progress state in the maps.
     final ratio = _total > 0 ? _doneCount / _total : 0.0;
-    _streaks[_todayKey] = _doneCount == _total && _total > 0;
+    _streaks[_todayKey] = LocalStore.isStreakDay(_doneCount, _total);
     _dailyProgress[_todayKey] = ratio;
   }
 
   // ── Task toggle ───────────────────────────────────────────────
 
   void _toggleTask(String k) {
+    // Day may have rolled over while the app stayed foregrounded (e.g. on
+    // another tab) — reload instead of writing stale state to the new day.
+    if (_loadedForDay != _todayKey) {
+      setState(() {
+        _loadToday();
+        _loadHistory();
+      });
+      return;
+    }
     HapticFeedback.selectionClick();
     final nowDone = !_done.contains(k);
     if (nowDone) {
@@ -131,7 +140,7 @@ class _BugunScreenState extends State<BugunScreen>
     LocalStore.instance.setTaskDone(_todayKey, k, nowDone);
     // Update streak/progress maps for today.
     final ratio = _total > 0 ? _doneCount / _total : 0.0;
-    _streaks[_todayKey] = _doneCount == _total && _total > 0;
+    _streaks[_todayKey] = LocalStore.isStreakDay(_doneCount, _total);
     _dailyProgress[_todayKey] = ratio;
     setState(() {});
   }
@@ -152,6 +161,17 @@ class _BugunScreenState extends State<BugunScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Catch midnight rollover on rebuilds that don't come through the
+    // lifecycle observer (e.g. returning to this tab in the IndexedStack).
+    if (_loadedForDay != _todayKey) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() {
+          _loadToday();
+          _loadHistory();
+        });
+      });
+    }
     final topPad = MediaQuery.of(context).padding.top;
     final now = DateTime.now();
     final todayProgress = _total > 0 ? _doneCount / _total : 0.0;
@@ -559,7 +579,9 @@ class _StreakCalendarSheetState extends State<_StreakCalendarSheet> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       padding: EdgeInsets.fromLTRB(20, 0, 20, bottom + 24),
-      child: Column(
+      // Scrollable so 6-row months + streak card fit on small screens.
+      child: SingleChildScrollView(
+        child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(height: 12),
@@ -663,6 +685,7 @@ class _StreakCalendarSheetState extends State<_StreakCalendarSheet> {
             ),
           ),
         ],
+        ),
       ),
     );
   }
@@ -1049,6 +1072,7 @@ class _TaskCardState extends State<_TaskCard>
   late final AnimationController _ctrl;
   late final Animation<double> _fade;
   late final Animation<double> _slideY;
+  bool _pressed = false;
 
   @override
   void initState() {
@@ -1092,7 +1116,13 @@ class _TaskCardState extends State<_TaskCard>
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
         child: GestureDetector(
           onTap: widget.onTap,
-          child: AnimatedContainer(
+          onTapDown: (_) => setState(() => _pressed = true),
+          onTapUp: (_) => setState(() => _pressed = false),
+          onTapCancel: () => setState(() => _pressed = false),
+          child: AnimatedOpacity(
+            opacity: _pressed ? 0.72 : 1.0,
+            duration: const Duration(milliseconds: 80),
+            child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             padding:
                 const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
@@ -1142,6 +1172,7 @@ class _TaskCardState extends State<_TaskCard>
                 ),
               ],
             ),
+          ),
           ),
         ),
       ),

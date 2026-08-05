@@ -22,6 +22,22 @@
           }
         },
         {
+          "client_id": "211589998133-bi06ga8tdopc57lokfpm4ohe4uipejes.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "uz.realbeauty.app",
+            "certificate_hash": "672b90fba5afd94b1df0194876c6a45bd9c0bdf1"
+          }
+        },
+        {
+          "client_id": "211589998133-neb76s078ket3jog4bkrjtrlurja2ekj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "uz.realbeauty.app",
+            "certificate_hash": "6994cdf37edddae227cdd3a7979b7a71464db58b"
+          }
+        },
+        {
           "client_id": "211589998133-oktsmveknmmq3iqb41sdbqt1se4g66m1.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -39,10 +55,10 @@
               "client_type": 3
             },
             {
-              "client_id": "211589998133-gfr31b1iqe2tbhr1f7h5rl9q16taro2t.apps.googleusercontent.com",
+              "client_id": "211589998133-fvi84gpke2f3nt9ss7ng87i94nv21p23.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.realBeautyAi"
+                "bundle_id": "uz.realbeauty.app"
               }
             }
           ]

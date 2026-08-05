@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:real_beauty_ai/core/colors.dart';
+import 'package:real_beauty_ai/core/theme/colors.dart';
 import 'package:real_beauty_ai/data/products_data.dart';
 import 'package:real_beauty_ai/features/products/presentation/bloc/products_cubit.dart';
 import 'package:real_beauty_ai/widgets/chip_button.dart';
@@ -180,11 +180,29 @@ class _ProductsBodyState extends State<_ProductsBody> {
                 ),
               ),
               if (state is ProductsLoading)
-                const SliverFillRemaining(
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primary,
-                      strokeWidth: 2.5,
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                  sliver: SliverGrid(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 0.65,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (_, _) => Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEEEAF8),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      )
+                          .animate(onPlay: (c) => c.repeat())
+                          .shimmer(
+                            duration: const Duration(milliseconds: 1200),
+                            color: Colors.white.withValues(alpha: 0.55),
+                          ),
+                      childCount: 6,
                     ),
                   ),
                 )
@@ -281,6 +299,7 @@ Widget _productImage(Product product, {BoxFit fit = BoxFit.contain}) {
   return Image.asset(
     product.imagePath,
     fit: fit,
+    cacheWidth: 400,
     errorBuilder: (_, _, _) =>
         const Icon(Icons.image_outlined, size: 40, color: Color(0xFFCCC8E0)),
   );

@@ -11,19 +11,7 @@ import 'package:real_beauty_ai/core/permissions/camera_permission_service.dart';
 import 'package:real_beauty_ai/core/router/route_args.dart';
 import 'package:real_beauty_ai/core/utils/logger.dart';
 
-enum _FaceState {
-  waiting,
-  tooFar,
-  tooClose,
-  offCenter,
-  notFrontal,
-  eyesClosed,
-  tooDark,
-  ready,
-  countdown,
-  done,
-  timedOut,
-}
+enum _ScanPhase { idle, scanning, analyzing, complete }
 
 class FaceScanScreen extends StatefulWidget {
   final List<dynamic> quizAnswers;
@@ -41,36 +29,79 @@ class FaceScanScreen extends StatefulWidget {
 class _FaceScanScreenState extends State<FaceScanScreen>
     with TickerProviderStateMixin, WidgetsBindingObserver {
 
+  // ── Camera ────────────────────────────────────────────────────
   CameraController? _cam;
   bool _isCameraInitializing = false;
-  FaceDetector? _fastDetector;
+  FaceDetector? _detector;
   bool _isDetecting = false;
   bool _isDone = false;
+  bool _dialogVisible = false;
+  int _lastRotationDeg = 0;
   double _lightLevel = 0.5;
   int _frameSkip = 0;
+  bool _hasFace = false;
+  Timer? _scanTickTimer;
 
+  // ── State ─────────────────────────────────────────────────────
+  _ScanPhase _phase = _ScanPhase.idle;
+  final _guidanceNotifier = ValueNotifier<String?>('Yuzingizni ramkaga olib keling');
+  final _analysisTextNotifier = ValueNotifier<String>('');
+
+  static const _analysisPhrases = [
+    'Savolnoma javoblari qayta ishlanmoqda',
+    'Teri tipi aniqlanmoqda',
+    'Tavsiyalar shakllantirilmoqda',
+    'Natija tayyorlanmoqda',
+  ];
+
+  // ── Timers ────────────────────────────────────────────────────
   Timer? _stabilityTimer;
-  Timer? _countdownTimer;
   Timer? _timeoutTimer;
+  Timer? _analysisTimer;
 
-  late final AnimationController _pulseCtrl;
+  // ── Rotation segments (Face ID style) ────────────────────────
+  static const _kSegments = 60;
+  final _segFilled = List<bool>.filled(60, false);
+  int _filledCount = 0;
 
-  final ValueNotifier<_FaceState> _faceStateNotifier =
-      ValueNotifier(_FaceState.waiting);
-  final ValueNotifier<int?> _countdownNotifier = ValueNotifier(null);
-  final ValueNotifier<bool> _captureEnabledNotifier = ValueNotifier(false);
+  // ── Animation controllers (all in parent — no child ticker widgets) ──
+  late final AnimationController _ambientCtrl; // breathing glow, repeat
+  late final AnimationController _morphCtrl;   // face-detected glow
+  late final AnimationController _scanCtrl;    // segment fill progress
+  late final AnimationController _fadeCtrl;    // analysis overlay fade-in
+  late final AnimationController _dotsCtrl;    // analysis dots loop
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    _pulseCtrl = AnimationController(
+    _ambientCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 2200),
     )..repeat(reverse: true);
 
-    _fastDetector = FaceDetector(
+    _morphCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 260),
+    );
+
+    _scanCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+
+    _fadeCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    _dotsCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+
+    _detector = FaceDetector(
       options: FaceDetectorOptions(
         performanceMode: FaceDetectorMode.fast,
         enableClassification: true,
@@ -99,98 +130,78 @@ class _FaceScanScreenState extends State<FaceScanScreen>
   }
 
   void _showRationaleSheet() {
+    if (_dialogVisible || !mounted) return;
+    _dialogVisible = true;
     showModalBottomSheet<void>(
       context: context,
       isDismissible: false,
       enableDrag: false,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      backgroundColor: const Color(0xFF1A1A2E),
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.fromLTRB(
-            24, 24, 24, MediaQuery.of(ctx).padding.bottom + 24),
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => PopScope(
+        canPop: false,
+        child: _GlassSheet(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'Kamera ruxsati kerak',
-              style: GoogleFonts.nunito(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white),
-            ),
+            Text('Kamera ruxsati kerak',
+                style: GoogleFonts.nunito(
+                    fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
             const SizedBox(height: 12),
             Text(
-              'Teri tahlili uchun old kamera bilan yuzingizni skanerlashimiz kerak.',
-              style: GoogleFonts.nunito(
-                  fontSize: 14, color: Colors.white70, height: 1.5),
+              "Yuzingizni to'g'ri joylashtirish uchun old kamera kerak. Tahlil natijasi savolnoma javoblaringiz asosida tayyorlanadi.",
+              style: GoogleFonts.nunito(fontSize: 14, color: Colors.white60, height: 1.5),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(ctx).pop();
-                  _initCameraWithPermission();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4CAF50),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(999)),
-                  elevation: 0,
-                ),
-                child: Text(
-                  'Ruxsat berish',
-                  style: GoogleFonts.nunito(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white),
-                ),
-              ),
+            _PrimaryButton(
+              label: 'Ruxsat berish',
+              onTap: () {
+                Navigator.of(ctx).pop();
+                _initCameraWithPermission();
+              },
             ),
             const SizedBox(height: 12),
             TextButton(
               onPressed: () {
                 Navigator.of(ctx).pop();
-                _navigateFallback();
+                _navigateToAnalysis();
               },
-              child: Text(
-                'Anketa bilan davom etish',
-                style: GoogleFonts.nunito(fontSize: 14, color: Colors.white38),
-              ),
+              child: Text('Anketa bilan davom etish',
+                  style: GoogleFonts.nunito(fontSize: 14, color: Colors.white30)),
             ),
           ],
         ),
+        ),
       ),
-    );
+    ).whenComplete(() => _dialogVisible = false);
   }
 
   void _showSettingsDialog() {
+    if (_dialogVisible || !mounted) return;
+    _dialogVisible = true;
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
+      builder: (ctx) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+        backgroundColor: const Color(0xFF0D0D1A),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text("Kamera ruxsati o'chirilgan",
             style: GoogleFonts.nunito(
                 color: Colors.white, fontWeight: FontWeight.w800)),
         content: Text(
-          'Teri tahlili uchun Sozlamalardan "Kamera" ruxsatini yoqing.',
-          style: GoogleFonts.nunito(
-              color: Colors.white70, fontSize: 14, height: 1.5),
+          'Yuzingizni joylashtirish uchun Sozlamalardan "Kamera" ruxsatini yoqing (ixtiyoriy).',
+          style: GoogleFonts.nunito(color: Colors.white60, fontSize: 14, height: 1.5),
         ),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
-              _navigateFallback();
+              _navigateToAnalysis();
             },
-            child: Text('Anketa bilan davom etish',
-                style: GoogleFonts.nunito(color: Colors.white38)),
+            child: Text("O'tkazib yuborish",
+                style: GoogleFonts.nunito(color: Colors.white30)),
           ),
           TextButton(
             onPressed: () {
@@ -199,12 +210,12 @@ class _FaceScanScreenState extends State<FaceScanScreen>
             },
             child: Text('Sozlamalar',
                 style: GoogleFonts.nunito(
-                    color: const Color(0xFF4CAF50),
-                    fontWeight: FontWeight.w700)),
+                    color: const Color(0xFF9D7FEA), fontWeight: FontWeight.w700)),
           ),
         ],
+        ),
       ),
-    );
+    ).whenComplete(() => _dialogVisible = false);
   }
 
   // ── Camera ────────────────────────────────────────────────────
@@ -219,28 +230,23 @@ class _FaceScanScreenState extends State<FaceScanScreen>
         _showNoCameraDialog();
         return;
       }
-
-      final front = cameras.firstWhere(
+      final target = cameras.firstWhere(
         (c) => c.lensDirection == CameraLensDirection.front,
         orElse: () => cameras.first,
       );
-
       final ctrl = CameraController(
-        front,
-        ResolutionPreset.high,
+        target,
+        ResolutionPreset.medium,
         enableAudio: false,
         imageFormatGroup: Platform.isAndroid
             ? ImageFormatGroup.yuv420
             : ImageFormatGroup.bgra8888,
       );
-
       await ctrl.initialize();
-
       if (!mounted) {
         ctrl.dispose();
         return;
       }
-
       setState(() => _cam = ctrl);
       ctrl.startImageStream(_processFrame);
       _startTimeout();
@@ -248,7 +254,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
       AppLogger.error('Camera init failed', e, st);
       if (mounted) _showNoCameraDialog();
     } catch (e, st) {
-      AppLogger.error('Camera init unexpected error', e, st);
+      AppLogger.error('Camera init error', e, st);
       if (mounted) _showNoCameraDialog();
     } finally {
       _isCameraInitializing = false;
@@ -256,40 +262,44 @@ class _FaceScanScreenState extends State<FaceScanScreen>
   }
 
   void _showNoCameraDialog() {
+    if (_dialogVisible || !mounted) return;
+    _dialogVisible = true;
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
+      builder: (ctx) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+        backgroundColor: const Color(0xFF0D0D1A),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text('Kamera topilmadi',
             style: GoogleFonts.nunito(
                 color: Colors.white, fontWeight: FontWeight.w800)),
         content: Text(
           'Qurilmangizda kamera ishlamayapti. Anketa asosida davom etish mumkin.',
-          style: GoogleFonts.nunito(
-              color: Colors.white70, fontSize: 14, height: 1.5),
+          style: GoogleFonts.nunito(color: Colors.white60, fontSize: 14, height: 1.5),
         ),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
-              _navigateFallback();
+              _navigateToAnalysis();
             },
             child: Text('Davom etish',
                 style: GoogleFonts.nunito(
-                    color: const Color(0xFF4CAF50),
-                    fontWeight: FontWeight.w700)),
+                    color: const Color(0xFF9D7FEA), fontWeight: FontWeight.w700)),
           ),
         ],
+        ),
       ),
-    );
+    ).whenComplete(() => _dialogVisible = false);
   }
 
   // ── Lifecycle ─────────────────────────────────────────────────
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_isDone) return;
     switch (state) {
       case AppLifecycleState.inactive:
       case AppLifecycleState.paused:
@@ -303,12 +313,17 @@ class _FaceScanScreenState extends State<FaceScanScreen>
   }
 
   Future<void> _pauseCamera() async {
-    _cancelStabilityTimers();
+    _cancelStabilityTimer();
+    _timeoutTimer?.cancel();
     final cam = _cam;
     if (cam == null) return;
     _cam = null;
-    try { await cam.stopImageStream(); } catch (_) {}
-    try { await cam.dispose(); } catch (_) {}
+    try {
+      await cam.stopImageStream();
+    } catch (_) {}
+    try {
+      await cam.dispose();
+    } catch (_) {}
     if (mounted) setState(() {});
   }
 
@@ -317,254 +332,264 @@ class _FaceScanScreenState extends State<FaceScanScreen>
     final result = await widget.permissionService.check();
     if (!mounted) return;
     if (result == CameraPermissionResult.granted) {
+      if (_dialogVisible) {
+        // User granted permission from system settings — close the stale
+        // settings dialog/rationale sheet before starting the camera.
+        Navigator.of(context, rootNavigator: true).pop();
+      }
       await _initCamera();
+    } else if (result == CameraPermissionResult.permanentlyDenied ||
+        result == CameraPermissionResult.restricted) {
+      _showSettingsDialog();
+    } else {
+      _showRationaleSheet();
     }
   }
 
   // ── Frame processing ──────────────────────────────────────────
 
   Future<void> _processFrame(CameraImage image) async {
-    _frameSkip = (_frameSkip + 1) % 3;
+    _frameSkip = (_frameSkip + 1) % 2;
     if (_frameSkip != 0) return;
-    if (_isDetecting || _isDone) return;
+    if (_isDetecting || _isDone || _dialogVisible) return;
+    if (_phase == _ScanPhase.analyzing || _phase == _ScanPhase.complete) return;
+
     _isDetecting = true;
     try {
       _updateLuminance(image);
-
       final inputImage = _buildInputImage(image);
-      if (inputImage == null || _fastDetector == null) return;
+      if (inputImage == null || _detector == null) return;
 
-      final faces = await _fastDetector!.processImage(inputImage);
-      if (!mounted || _isDone) return;
+      final faces = await _detector?.processImage(inputImage);
+      if (faces == null || !mounted || _isDone) return;
 
-      final state = _evaluateState(faces, image);
-      _faceStateNotifier.value = state;
-      _captureEnabledNotifier.value = faces.isNotEmpty;
+      final guidance = _evaluateGuidance(faces, image);
 
-      if (state == _FaceState.ready) {
+      if (_phase == _ScanPhase.scanning) {
+        _hasFace = guidance == null;
+        _guidanceNotifier.value = guidance ?? 'Yuzingizni tutib turing';
+        return;
+      }
+      _guidanceNotifier.value = guidance;
+
+      // Idle phase
+      if (guidance == null) {
+        _morphCtrl.forward();
         _ensureStabilityTimer();
       } else {
-        _cancelStabilityTimers();
+        _morphCtrl.reverse();
+        _cancelStabilityTimer();
       }
     } catch (e, st) {
-      AppLogger.error('Frame processing error', e, st);
+      AppLogger.error('Frame error', e, st);
     } finally {
       _isDetecting = false;
     }
   }
 
-  _FaceState _evaluateState(List<Face> faces, CameraImage image) {
-    if (_lightLevel < 0.18) return _FaceState.tooDark;
-    if (faces.isEmpty) return _FaceState.waiting;
-    if (faces.length > 1) return _FaceState.waiting;
-
+  String? _evaluateGuidance(List<Face> faces, CameraImage image) {
+    if (_lightLevel < 0.12) return "Yorug'roq joyga o'ting";
+    if (faces.isEmpty) return 'Yuzingizni ramkaga olib keling';
+    if (faces.length > 1) return "Bitta yuz ko'rsating";
     final face = faces.first;
-    final refDim = math.min(image.width, image.height).toDouble();
+    // ML Kit returns coordinates in the upright (rotated) frame — swap
+    // buffer dimensions for 90/270 rotations before comparing.
+    final swapDims = _lastRotationDeg == 90 || _lastRotationDeg == 270;
+    final iw = (swapDims ? image.height : image.width).toDouble();
+    final ih = (swapDims ? image.width : image.height).toDouble();
+    final refDim = math.min(iw, ih);
     final faceRatio = face.boundingBox.width / refDim;
-
-    if (faceRatio < 0.35) return _FaceState.tooFar;
-    if (faceRatio > 0.80) return _FaceState.tooClose;
-
-    final xOff =
-        ((face.boundingBox.center.dx - image.width / 2) / image.width).abs();
-    final yOff =
-        ((face.boundingBox.center.dy - image.height / 2) / image.height).abs();
-    if (xOff > 0.15 || yOff > 0.15) return _FaceState.offCenter;
-
-    final eulerY = face.headEulerAngleY ?? 0.0;
-    final eulerZ = face.headEulerAngleZ ?? 0.0;
-    if (eulerY.abs() > 12 || eulerZ.abs() > 12) return _FaceState.notFrontal;
-
-    final leftEye = face.leftEyeOpenProbability;
-    final rightEye = face.rightEyeOpenProbability;
-    if (leftEye != null && rightEye != null) {
-      if (leftEye < 0.4 && rightEye < 0.4) return _FaceState.eyesClosed;
+    if (faceRatio < 0.18) return 'Yaqinroq keling';
+    if (faceRatio > 0.90) return 'Sal uzoqlashing';
+    final xOff = ((face.boundingBox.center.dx - iw / 2) / iw).abs();
+    final yOff = ((face.boundingBox.center.dy - ih / 2) / ih).abs();
+    if (xOff > 0.25 || yOff > 0.25) return 'Yuzni markazga oling';
+    // Skip euler/eye checks during scanning — user is actively rotating head.
+    if (_phase != _ScanPhase.scanning) {
+      final eulerY = face.headEulerAngleY ?? 0.0;
+      final eulerZ = face.headEulerAngleZ ?? 0.0;
+      if (eulerY.abs() > 30 || eulerZ.abs() > 25) return "To'g'ri qarang";
+      final lEye = face.leftEyeOpenProbability;
+      final rEye = face.rightEyeOpenProbability;
+      if (lEye != null && rEye != null && lEye < 0.2 && rEye < 0.2) {
+        return "Ko'zingizni oching";
+      }
     }
-
-    return _FaceState.ready;
+    return null;
   }
+
+  // ── Stability & scan ──────────────────────────────────────────
 
   void _ensureStabilityTimer() {
     if (_stabilityTimer != null) return;
-    _stabilityTimer = Timer(const Duration(milliseconds: 1200), () {
-      if (_isDone || !mounted) return;
-      _startCountdown();
+    _stabilityTimer = Timer(const Duration(milliseconds: 900), () {
+      _stabilityTimer = null;
+      if (_isDone || !mounted || _dialogVisible) return;
+      if (_guidanceNotifier.value != null) return;
+      if (_morphCtrl.value < 0.85) return;
+      _startScan();
     });
   }
 
-  void _cancelStabilityTimers() {
+  void _cancelStabilityTimer() {
     _stabilityTimer?.cancel();
     _stabilityTimer = null;
-    _countdownTimer?.cancel();
-    _countdownTimer = null;
-    if (_faceStateNotifier.value == _FaceState.countdown) {
-      _faceStateNotifier.value = _FaceState.waiting;
-    }
-    _countdownNotifier.value = null;
   }
 
-  void _startCountdown() {
-    if (_isDone || !mounted) return;
-    _faceStateNotifier.value = _FaceState.countdown;
-    _countdownNotifier.value = 3;
+  void _startScan() {
+    if (_isDone || _dialogVisible || _phase != _ScanPhase.idle || !mounted) {
+      return;
+    }
+    HapticFeedback.mediumImpact();
+    _segFilled.fillRange(0, _kSegments, false);
+    _filledCount = 0;
+    _scanCtrl.value = 0;
+    _hasFace = true;
+    setState(() => _phase = _ScanPhase.scanning);
+    _guidanceNotifier.value = 'Yuzingizni tutib turing';
+    _startScanTicker();
+  }
 
-    int count = 3;
-    _countdownTimer = Timer.periodic(const Duration(milliseconds: 333), (t) {
-      count--;
-      if (count > 0) {
-        _countdownNotifier.value = count;
-      } else {
-        t.cancel();
-        _countdownTimer = null;
-        _countdownNotifier.value = null;
-        _captureNow();
+  void _startScanTicker() {
+    _scanTickTimer?.cancel();
+    _scanTickTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
+      if (_isDone || !mounted || _dialogVisible) return;
+      if (_phase != _ScanPhase.scanning || !_hasFace) return;
+      for (int i = 0; i < _kSegments; i++) {
+        if (!_segFilled[i]) {
+          _segFilled[i] = true;
+          _filledCount++;
+          final progress = _filledCount / _kSegments;
+          _scanCtrl.animateTo(progress,
+              duration: const Duration(milliseconds: 120), curve: Curves.easeOut);
+          if (progress >= 0.75 && !_isDone) _startAnalysis();
+          break;
+        }
       }
     });
   }
 
-  // ── Capture ───────────────────────────────────────────────────
+  void _stopScanTicker() {
+    _scanTickTimer?.cancel();
+    _scanTickTimer = null;
+  }
 
-  Future<void> _captureNow() async {
-    if (_isDone) return;
+  // ── Analysis ──────────────────────────────────────────────────
+
+  void _startAnalysis() {
+    if (_isDone || !mounted) return;
+    _timeoutTimer?.cancel();
+    _stopScanTicker();
+    setState(() => _phase = _ScanPhase.analyzing);
+    HapticFeedback.heavyImpact();
+    _fadeCtrl.forward();
+    _dotsCtrl.repeat();
+    _analysisTextNotifier.value = _analysisPhrases[0];
+    int idx = 0;
+    _analysisTimer = Timer.periodic(const Duration(milliseconds: 750), (t) {
+      if (!mounted || _isDone) {
+        t.cancel();
+        return;
+      }
+      idx++;
+      if (idx < _analysisPhrases.length) {
+        _analysisTextNotifier.value = _analysisPhrases[idx];
+      } else {
+        t.cancel();
+        _completeAnalysis();
+      }
+    });
+  }
+
+  void _completeAnalysis() {
+    if (_isDone || !mounted) return;
     _isDone = true;
     _timeoutTimer?.cancel();
-    _cancelStabilityTimers();
-    _faceStateNotifier.value = _FaceState.done;
-    HapticFeedback.heavyImpact();
-
-    final cam = _cam;
-    if (cam == null) {
-      _navigateFallback();
-      return;
-    }
-
-    try { await cam.stopImageStream(); } catch (_) {}
-
-    XFile? xfile;
-    try {
-      xfile = await cam.takePicture();
-    } catch (e, st) {
-      AppLogger.error('takePicture failed', e, st);
-    }
-
-    if (xfile == null) {
-      _showCaptureErrorDialog();
-      return;
-    }
-
-    await _validateAndNavigate(xfile.path);
+    setState(() => _phase = _ScanPhase.complete);
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) _navigateToAnalysis();
+    });
   }
 
-  Future<void> _validateAndNavigate(String path) async {
-    FaceDetector? accurateDetector;
-    try {
-      accurateDetector = FaceDetector(
-        options: FaceDetectorOptions(
-          performanceMode: FaceDetectorMode.accurate,
-          enableClassification: true,
+  // ── Timeout ───────────────────────────────────────────────────
+
+  void _startTimeout() {
+    _timeoutTimer?.cancel();
+    _timeoutTimer = Timer(const Duration(seconds: 50), () {
+      if (_isDone || !mounted) return;
+      _showTimeoutDialog();
+    });
+  }
+
+  void _showTimeoutDialog() {
+    if (_dialogVisible || !mounted) return;
+    _dialogVisible = true;
+    _cancelStabilityTimer();
+    _stopScanTicker();
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+        backgroundColor: const Color(0xFF0D0D1A),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('Vaqt tugadi',
+            style: GoogleFonts.nunito(
+                color: Colors.white, fontWeight: FontWeight.w800)),
+        content: Text(
+          "Qayta urinasizmi yoki davom etasizmi?",
+          style: GoogleFonts.nunito(color: Colors.white60, fontSize: 14, height: 1.5),
         ),
-      );
-      final inputImage = InputImage.fromFilePath(path);
-      final faces = await accurateDetector.processImage(inputImage);
-
-      if (!mounted) return;
-
-      if (faces.length == 1) {
-        final face = faces.first;
-        final eulerY = face.headEulerAngleY ?? 0.0;
-        final eulerZ = face.headEulerAngleZ ?? 0.0;
-        if (eulerY.abs() <= 20 && eulerZ.abs() <= 20) {
-          await Future.delayed(const Duration(milliseconds: 400));
-          if (mounted) _navigateToAnalysis(path);
-          return;
-        }
-      }
-
-      _showRetryDialog("Yuz aniq chiqmadi, qayta urinib ko'ring");
-    } catch (e, st) {
-      AppLogger.error('Final validation failed', e, st);
-      if (mounted) _showRetryDialog("Tekshirishda xato, qayta urinib ko'ring");
-    } finally {
-      accurateDetector?.close();
-    }
-  }
-
-  void _showCaptureErrorDialog() {
-    if (!mounted) return;
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text("Suratga olib bo'lmadi",
-            style: GoogleFonts.nunito(
-                color: Colors.white, fontWeight: FontWeight.w800)),
-        content: Text('Kamera xatosi yuz berdi.',
-            style: GoogleFonts.nunito(
-                color: Colors.white70, fontSize: 14, height: 1.5)),
         actions: [
           TextButton(
-            onPressed: () { Navigator.of(ctx).pop(); _resetCapture(); },
-            child: Text('Qayta urinish',
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              _reset();
+            },
+            child: Text('Qayta',
                 style: GoogleFonts.nunito(
-                    color: const Color(0xFF4CAF50),
-                    fontWeight: FontWeight.w700)),
+                    color: const Color(0xFF9D7FEA), fontWeight: FontWeight.w700)),
           ),
           TextButton(
-            onPressed: () { Navigator.of(ctx).pop(); _navigateFallback(); },
-            child: Text('Anketa bilan davom etish',
-                style: GoogleFonts.nunito(color: Colors.white38)),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              _navigateToAnalysis();
+            },
+            child: Text('Davom etish',
+                style: GoogleFonts.nunito(color: Colors.white30)),
           ),
         ],
+        ),
       ),
-    );
+    ).whenComplete(() => _dialogVisible = false);
   }
 
-  void _showRetryDialog(String msg) {
-    if (!mounted) return;
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('Surat mos kelmadi',
-            style: GoogleFonts.nunito(
-                color: Colors.white, fontWeight: FontWeight.w800)),
-        content: Text(msg,
-            style: GoogleFonts.nunito(
-                color: Colors.white70, fontSize: 14, height: 1.5)),
-        actions: [
-          TextButton(
-            onPressed: () { Navigator.of(ctx).pop(); _resetCapture(); },
-            child: Text('Qayta urinish',
-                style: GoogleFonts.nunito(
-                    color: const Color(0xFF4CAF50),
-                    fontWeight: FontWeight.w700)),
-          ),
-          TextButton(
-            onPressed: () { Navigator.of(ctx).pop(); _navigateFallback(); },
-            child: Text('Anketa bilan davom etish',
-                style: GoogleFonts.nunito(color: Colors.white38)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _resetCapture() async {
+  Future<void> _reset() async {
     if (!mounted) return;
     _isDone = false;
     _frameSkip = 0;
-    _faceStateNotifier.value = _FaceState.waiting;
-    _captureEnabledNotifier.value = false;
-    _countdownNotifier.value = null;
+    _lightLevel = 0.5;
+    _morphCtrl.value = 0;
+    _guidanceNotifier.value = 'Yuzingizni ramkaga olib keling';
+    _segFilled.fillRange(0, _kSegments, false);
+    _filledCount = 0;
+    _scanCtrl.value = 0;
+    _fadeCtrl.value = 0;
+    _dotsCtrl.stop();
+    _analysisTimer?.cancel();
+    _cancelStabilityTimer();
+    _stopScanTicker();
+    _hasFace = false;
+    if (!_ambientCtrl.isAnimating) _ambientCtrl.repeat(reverse: true);
+    setState(() => _phase = _ScanPhase.idle);
 
     final cam = _cam;
     if (cam != null && cam.value.isInitialized) {
       try {
-        await cam.startImageStream(_processFrame);
+        if (!cam.value.isStreamingImages) {
+          await cam.startImageStream(_processFrame);
+        }
         _startTimeout();
       } catch (_) {
         await _pauseCamera();
@@ -575,83 +600,34 @@ class _FaceScanScreenState extends State<FaceScanScreen>
     }
   }
 
-  // ── Timeout ───────────────────────────────────────────────────
+  // ── Navigation ────────────────────────────────────────────────
 
-  void _startTimeout() {
-    _timeoutTimer?.cancel();
-    _timeoutTimer = Timer(const Duration(seconds: 40), () {
-      if (_isDone || !mounted) return;
-      _cancelStabilityTimers();
-      _faceStateNotifier.value = _FaceState.timedOut;
-      _showTimeoutDialog();
+  void _stopAnims() {
+    _ambientCtrl.stop();
+    _morphCtrl.stop();
+    _scanCtrl.stop();
+    _fadeCtrl.stop();
+    _dotsCtrl.stop();
+  }
+
+  void _navigateToAnalysis() {
+    if (!mounted) return;
+    _isDone = true; // stop frame processing during the route transition
+    _stopAnims();
+    // Camera teardown happens in dispose() when the route is removed —
+    // disposing here would leave CameraPreview painting a dead controller
+    // (red error screen in debug builds).
+    // Defer to post-frame: ensures any pending rebuild (setState) fully commits
+    // before pushReplacement triggers route deactivation. Prevents the
+    // _EffectiveTickerMode InheritedElement unmounting while AnimatedSwitcher
+    // dependents are still registered (_dependents.isEmpty assertion).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.pushReplacement('/analysis',
+          extra: AnalysisArgs(quizAnswers: widget.quizAnswers));
     });
   }
 
-  void _showTimeoutDialog() {
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A2E),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text("Suratga olib bo'lmadi",
-            style: GoogleFonts.nunito(
-                color: Colors.white, fontWeight: FontWeight.w800)),
-        content: Text(
-          "Qayta urinasizmi yoki anketa bo'yicha davom etasizmi?",
-          style: GoogleFonts.nunito(
-              color: Colors.white70, fontSize: 14, height: 1.5),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              _resetCapture();
-            },
-            child: Text('Qayta urinish',
-                style: GoogleFonts.nunito(
-                    color: const Color(0xFF4CAF50),
-                    fontWeight: FontWeight.w700)),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              _navigateFallback();
-            },
-            child: Text('Anketa bilan davom etish',
-                style: GoogleFonts.nunito(color: Colors.white38)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── Navigation ────────────────────────────────────────────────
-
-  void _navigateToAnalysis(String imagePath) {
-    if (!mounted) return;
-    context.pushReplacement(
-      '/analysis',
-      extra: AnalysisArgs(quizAnswers: widget.quizAnswers, imagePath: imagePath),
-    );
-  }
-
-  void _navigateFallback() {
-    if (!mounted) return;
-    context.pushReplacement(
-      '/analysis',
-      extra: AnalysisArgs(quizAnswers: widget.quizAnswers),
-    );
-  }
-
-  void _goBack() {
-    if (!mounted) return;
-    if (context.canPop()) {
-      context.pop();
-    } else {
-      context.go('/home', extra: 1);
-    }
-  }
 
   // ── Luminance ─────────────────────────────────────────────────
 
@@ -659,11 +635,11 @@ class _FaceScanScreenState extends State<FaceScanScreen>
     try {
       if (Platform.isAndroid && image.planes.isNotEmpty) {
         final yBytes = image.planes[0].bytes;
-        final yStride = image.planes[0].bytesPerRow;
+        final stride = image.planes[0].bytesPerRow;
         int sum = 0, count = 0;
         for (int row = 0; row < image.height; row += 8) {
           for (int col = 0; col < image.width; col += 8) {
-            final idx = row * yStride + col;
+            final idx = row * stride + col;
             if (idx < yBytes.length) {
               sum += yBytes[idx] & 0xFF;
               count++;
@@ -692,22 +668,21 @@ class _FaceScanScreenState extends State<FaceScanScreen>
     } catch (_) {}
   }
 
-  // ── InputImage (stream, NV21/BGRA for live guidance) ──────────
+  // ── InputImage ────────────────────────────────────────────────
 
   InputImage? _buildInputImage(CameraImage image) {
     final cam = _cam;
     if (cam == null || image.planes.isEmpty) return null;
     final camera = cam.description;
-    final sensorOrientation = camera.sensorOrientation;
-    final int rawRotation = camera.lensDirection == CameraLensDirection.front
-        ? (360 - sensorOrientation) % 360
-        : sensorOrientation;
-    final rotation = InputImageRotationValue.fromRawValue(rawRotation)
-        ?? InputImageRotation.rotation0deg;
-
-    if (Platform.isAndroid) {
-      return _buildInputImageAndroid(image, rotation);
-    }
+    // Rotation per the official ML Kit sample: iOS uses sensorOrientation
+    // directly; on Android the device-orientation compensation term is always
+    // 0 because the app is portrait-locked, so front and back cameras both
+    // reduce to sensorOrientation as well.
+    final int rawRotation = camera.sensorOrientation % 360;
+    _lastRotationDeg = rawRotation;
+    final rotation = InputImageRotationValue.fromRawValue(rawRotation) ??
+        InputImageRotation.rotation0deg;
+    if (Platform.isAndroid) return _buildInputImageAndroid(image, rotation);
     final plane = image.planes.first;
     return InputImage.fromBytes(
       bytes: plane.bytes,
@@ -723,37 +698,27 @@ class _FaceScanScreenState extends State<FaceScanScreen>
   InputImage? _buildInputImageAndroid(
       CameraImage image, InputImageRotation rotation) {
     if (image.planes.length < 3) return null;
-
     final yPlane = image.planes[0];
     final uPlane = image.planes[1];
     final vPlane = image.planes[2];
-
     final int ySize = image.width * image.height;
     final nv21 = Uint8List(ySize + ySize ~/ 2);
-
-    int nv21Idx = 0;
+    int idx = 0;
     for (int row = 0; row < image.height; row++) {
-      nv21.setRange(nv21Idx, nv21Idx + image.width,
-          yPlane.bytes, row * yPlane.bytesPerRow);
-      nv21Idx += image.width;
+      nv21.setRange(
+          idx, idx + image.width, yPlane.bytes, row * yPlane.bytesPerRow);
+      idx += image.width;
     }
-
-    final vRowStride = vPlane.bytesPerRow;
-    final vPixelStride = vPlane.bytesPerPixel ?? 1;
-    final uRowStride = uPlane.bytesPerRow;
-    final uPixelStride = uPlane.bytesPerPixel ?? 1;
-    final uvHeight = image.height ~/ 2;
-    final uvWidth = image.width ~/ 2;
-    for (int row = 0; row < uvHeight; row++) {
-      for (int col = 0; col < uvWidth; col++) {
-        final vIdx = row * vRowStride + col * vPixelStride;
-        final uIdx = row * uRowStride + col * uPixelStride;
-        if (vIdx >= vPlane.bytes.length || uIdx >= uPlane.bytes.length) continue;
-        nv21[nv21Idx++] = vPlane.bytes[vIdx];
-        nv21[nv21Idx++] = uPlane.bytes[uIdx];
+    final vRS = vPlane.bytesPerRow, vPS = vPlane.bytesPerPixel ?? 1;
+    final uRS = uPlane.bytesPerRow, uPS = uPlane.bytesPerPixel ?? 1;
+    for (int row = 0; row < image.height ~/ 2; row++) {
+      for (int col = 0; col < image.width ~/ 2; col++) {
+        final vi = row * vRS + col * vPS;
+        final ui = row * uRS + col * uPS;
+        nv21[idx++] = vi < vPlane.bytes.length ? vPlane.bytes[vi] : 128;
+        nv21[idx++] = ui < uPlane.bytes.length ? uPlane.bytes[ui] : 128;
       }
     }
-
     return InputImage.fromBytes(
       bytes: nv21,
       metadata: InputImageMetadata(
@@ -769,15 +734,25 @@ class _FaceScanScreenState extends State<FaceScanScreen>
 
   @override
   void dispose() {
+    _isDone = true;
     WidgetsBinding.instance.removeObserver(this);
     _timeoutTimer?.cancel();
     _stabilityTimer?.cancel();
-    _countdownTimer?.cancel();
-    _pulseCtrl.dispose();
-    _faceStateNotifier.dispose();
-    _countdownNotifier.dispose();
-    _captureEnabledNotifier.dispose();
-    _fastDetector?.close();
+    _analysisTimer?.cancel();
+    _scanTickTimer?.cancel();
+    _ambientCtrl.stop();
+    _morphCtrl.stop();
+    _scanCtrl.stop();
+    _fadeCtrl.stop();
+    _dotsCtrl.stop();
+    _ambientCtrl.dispose();
+    _morphCtrl.dispose();
+    _scanCtrl.dispose();
+    _fadeCtrl.dispose();
+    _dotsCtrl.dispose();
+    _guidanceNotifier.dispose();
+    _analysisTextNotifier.dispose();
+    _detector?.close();
     final cam = _cam;
     _cam = null;
     if (cam != null) {
@@ -790,122 +765,111 @@ class _FaceScanScreenState extends State<FaceScanScreen>
 
   @override
   Widget build(BuildContext context) {
-    final top = MediaQuery.of(context).padding.top;
-    final bottom = MediaQuery.of(context).padding.bottom;
+    final mq = MediaQuery.of(context);
+    final top = mq.padding.top;
+    final bottom = mq.padding.bottom;
+    final h = mq.size.height;
 
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Camera preview — only rebuilt when _cam changes
-          RepaintBoundary(child: _buildCameraLayer()),
+          // 1. Camera feed
+          RepaintBoundary(child: _buildCameraPreview()),
 
-          // Oval mask + state-colored border — isolated repaint
+          // 2. Scan overlay (CustomPainter)
           RepaintBoundary(
-            child: ValueListenableBuilder<_FaceState>(
-              valueListenable: _faceStateNotifier,
-              builder: (_, state, _) => AnimatedBuilder(
-                animation: _pulseCtrl,
-                builder: (_, _) => CustomPaint(
-                  painter: _ScanPainter(
-                    state: state,
-                    pulseValue: _pulseCtrl.value,
-                  ),
+            child: AnimatedBuilder(
+              animation:
+                  Listenable.merge([_ambientCtrl, _morphCtrl, _scanCtrl]),
+              builder: (_, _) => CustomPaint(
+                painter: _ScanPainter(
+                  phase: _phase,
+                  ambient: _ambientCtrl.value,
+                  morphProgress: _morphCtrl.value,
+                  segments: _segFilled,
+                  filledCount: _filledCount,
                 ),
               ),
             ),
           ),
 
-          // Countdown number
-          ValueListenableBuilder<int?>(
-            valueListenable: _countdownNotifier,
-            builder: (_, count, _) {
-              if (count == null) return const SizedBox.shrink();
-              return Center(
-                child: Text(
-                  '$count',
-                  style: GoogleFonts.nunito(
-                    fontSize: 96,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    shadows: const [
-                      Shadow(color: Colors.black54, blurRadius: 20),
-                    ],
+          // 3. Analysis overlay — inlined, uses parent controllers (no child tickers)
+          if (_phase == _ScanPhase.analyzing || _phase == _ScanPhase.complete)
+            FadeTransition(
+              opacity: _fadeCtrl,
+              child: _buildAnalysisOverlay(h),
+            ),
+
+          // 4. Guidance badge — no AnimatedSwitcher (avoids TickerMode dependency)
+          if (_phase == _ScanPhase.idle || _phase == _ScanPhase.scanning)
+            Positioned(
+              bottom: bottom + 60,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: ValueListenableBuilder<String?>(
+                  valueListenable: _guidanceNotifier,
+                  builder: (_, text, _) => AnimatedOpacity(
+                    opacity: text != null ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeInOut,
+                    child: _GuidanceBadge(text: text ?? ''),
                   ),
                 ),
-              );
-            },
-          ),
-
-          // Top bar — static, never rebuilt by animation ticks
-          Positioned(
-            top: top + 14,
-            left: 20,
-            right: 20,
-            child: Row(
-              children: [
-                _CircleBtn(
-                  onTap: _goBack,
-                  child: const Icon(Icons.arrow_back_ios_new_rounded,
-                      color: Colors.white, size: 16),
-                ),
-                const Spacer(),
-                _CircleBtn(
-                  onTap: () => _showHelp(context),
-                  child: const Icon(Icons.help_outline_rounded,
-                      color: Colors.white, size: 18),
-                ),
-              ],
+              ),
             ),
-          ),
 
-          // Bottom: status pill + manual capture button
-          Positioned(
-            bottom: bottom + 32,
-            left: 32,
-            right: 32,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ValueListenableBuilder<_FaceState>(
-                  valueListenable: _faceStateNotifier,
-                  builder: (_, state, _) => _buildStatus(state),
-                ),
-                const SizedBox(height: 24),
-                ValueListenableBuilder<bool>(
-                  valueListenable: _captureEnabledNotifier,
-                  builder: (_, enabled, _) => GestureDetector(
-                    onTap: enabled && !_isDone ? _captureNow : null,
-                    child: AnimatedOpacity(
-                      opacity: enabled ? 1.0 : 0.35,
-                      duration: const Duration(milliseconds: 200),
-                      child: Container(
-                        width: 72,
-                        height: 72,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.5),
-                            width: 3,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.white.withValues(alpha: 0.25),
-                              blurRadius: 12,
-                            ),
-                          ],
-                        ),
-                        child: const Center(
-                          child: Icon(Icons.camera_alt_rounded,
-                              color: Colors.black87, size: 28),
-                        ),
+          // 5. Scan progress badge — visible only while scanning
+          if (_phase == _ScanPhase.scanning)
+            Positioned(
+              top: top + 64,
+              left: 0,
+              right: 0,
+              child: AnimatedBuilder(
+                animation: _scanCtrl,
+                builder: (_, _) => Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.42),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      '${(_filledCount / _kSegments * 100).round()}%',
+                      style: GoogleFonts.nunito(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF4ADE80),
+                        letterSpacing: 1.2,
                       ),
                     ),
                   ),
                 ),
-              ],
+              ),
+            ),
+
+          // 6. Top bar — fades during analysis so it doesn't overlap overlay
+          Positioned(
+            top: top + 14,
+            left: 20,
+            right: 20,
+            child: AnimatedOpacity(
+              opacity: (_phase == _ScanPhase.analyzing ||
+                      _phase == _ScanPhase.complete)
+                  ? 0.0
+                  : 1.0,
+              duration: const Duration(milliseconds: 300),
+              child: Row(
+                children: [
+                  const Spacer(),
+                  _GlassIconButton(
+                      icon: Icons.help_outline_rounded,
+                      onTap: () => _showHelpSheet(context)),
+                ],
+              ),
             ),
           ),
         ],
@@ -913,10 +877,120 @@ class _FaceScanScreenState extends State<FaceScanScreen>
     );
   }
 
-  Widget _buildCameraLayer() {
+  Widget _buildAnalysisOverlay(double h) {
+    // Oval bottom: cy + ry = h*0.45 + h*0.37 = h*0.82
+    final textTop = h * 0.82 + 32;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Container(color: Colors.black.withValues(alpha: 0.35)),
+        Positioned(
+          top: textTop,
+          left: 32,
+          right: 32,
+          child: Column(
+            children: [
+              Text(
+                'Natija tayyorlanmoqda...',
+                style: GoogleFonts.nunito(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  letterSpacing: 0.3,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 14),
+              ValueListenableBuilder<String>(
+                valueListenable: _analysisTextNotifier,
+                builder: (_, text, _) => Text(
+                  text,
+                  style: GoogleFonts.nunito(
+                    fontSize: 14,
+                    color: Colors.white54,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.2,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Dots — driven by parent _dotsCtrl, no child StatefulWidget
+              AnimatedBuilder(
+                animation: _dotsCtrl,
+                builder: (_, _) => Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(3, (i) {
+                    final p = (_dotsCtrl.value * 3 - i).clamp(0.0, 1.0);
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFF9D7FEA).withValues(
+                            alpha: math.sin(p * math.pi).clamp(0.2, 1.0)),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCameraLoadingView() {
+    return Container(
+      color: Colors.black,
+      child: AnimatedBuilder(
+        animation: _ambientCtrl,
+        builder: (_, _) {
+          final pulse = 0.25 + _ambientCtrl.value * 0.45;
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 88,
+                  height: 88,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF9D7FEA).withValues(alpha: pulse),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.camera_front_outlined,
+                    color: const Color(0xFF9D7FEA).withValues(alpha: pulse),
+                    size: 36,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Kamera tayyorlanmoqda',
+                  style: GoogleFonts.nunito(
+                    fontSize: 14,
+                    color: Colors.white.withValues(alpha: pulse * 0.7),
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildCameraPreview() {
     final cam = _cam;
     if (cam == null || !cam.value.isInitialized) {
-      return Container(color: Colors.black);
+      return _buildCameraLoadingView();
     }
     return SizedBox.expand(
       child: FittedBox(
@@ -930,73 +1004,11 @@ class _FaceScanScreenState extends State<FaceScanScreen>
     );
   }
 
-  Widget _buildStatus(_FaceState state) {
-    return switch (state) {
-      _FaceState.waiting => const _StatusPill(
-          text: 'Yuzingizni ramka ichiga joylang',
-          color: Colors.white,
-        ),
-      _FaceState.tooFar => const _StatusPill(
-          text: 'Yaqinroq keling',
-          icon: Icons.zoom_in_rounded,
-          color: Colors.white,
-        ),
-      _FaceState.tooClose => const _StatusPill(
-          text: 'Sal uzoqlashing',
-          icon: Icons.zoom_out_rounded,
-          color: Colors.white,
-        ),
-      _FaceState.offCenter => const _StatusPill(
-          text: 'Yuzni markazga oling',
-          icon: Icons.center_focus_strong_rounded,
-          color: Colors.white,
-        ),
-      _FaceState.notFrontal => const _StatusPill(
-          text: "To'g'ri qarang",
-          icon: Icons.face_rounded,
-          color: Colors.white,
-        ),
-      _FaceState.eyesClosed => const _StatusPill(
-          text: "Ko'zingizni oching",
-          icon: Icons.remove_red_eye_outlined,
-          color: Color(0xFFFFC107),
-        ),
-      _FaceState.tooDark => const _StatusPill(
-          text: "Yorug'roq joyga o'ting",
-          icon: Icons.wb_sunny_rounded,
-          color: Color(0xFFFFC107),
-        ),
-      _FaceState.ready => const _StatusPill(
-          text: 'Qimirlamang...',
-          icon: Icons.check_circle_outline_rounded,
-          color: Color(0xFF4CAF50),
-        ),
-      _FaceState.countdown => const _StatusPill(
-          text: 'Suratga olinmoqda',
-          color: Color(0xFF4CAF50),
-        ),
-      _FaceState.done => const _StatusPill(
-          text: 'Tahlil qilinmoqda...',
-          icon: Icons.check_circle_rounded,
-          color: Color(0xFF4CAF50),
-        ),
-      _FaceState.timedOut => const _StatusPill(
-          text: 'Vaqt tugadi',
-          icon: Icons.warning_amber_rounded,
-          color: Color(0xFFFF8A35),
-        ),
-    };
-  }
-
-  void _showHelp(BuildContext context) {
+  void _showHelpSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1A1A2E),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (_) => Padding(
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
+      backgroundColor: Colors.transparent,
+      builder: (_) => _GlassSheet(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1012,7 +1024,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
               "• To'g'ri va frontal qarang\n"
               "• Ko'zingizni oching\n"
               "• Yaxshi yorug'lik bo'lsin\n"
-              "• Avtomatik suratga olinadi yoki tugmani bosing",
+              "• Skaner avtomatik boshlanadi",
               style: GoogleFonts.nunito(
                   fontSize: 14, color: Colors.white54, height: 1.7),
             ),
@@ -1020,18 +1032,15 @@ class _FaceScanScreenState extends State<FaceScanScreen>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.12),
+                color: const Color(0xFF9D7FEA).withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                    color: Colors.orange.withValues(alpha: 0.30)),
+                    color: const Color(0xFF9D7FEA).withValues(alpha: 0.25)),
               ),
               child: Text(
-                "Bu kosmetik tahlil bo'lib, tibbiy tashxis hisoblanmaydi. "
-                'Teri muammolari bo\'lsa mutaxassisga murojaat qiling.',
+                "Bu kosmetik tahlil bo'lib, tibbiy tashxis hisoblanmaydi.",
                 style: GoogleFonts.nunito(
-                    fontSize: 12,
-                    color: Colors.orange.shade300,
-                    height: 1.5),
+                    fontSize: 12, color: const Color(0xFF9D7FEA), height: 1.5),
               ),
             ),
           ],
@@ -1041,54 +1050,182 @@ class _FaceScanScreenState extends State<FaceScanScreen>
   }
 }
 
-// ── Status pill ───────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// Scan Painter
+// ─────────────────────────────────────────────────────────────
 
-class _StatusPill extends StatelessWidget {
-  final String text;
-  final Color color;
-  final IconData? icon;
-  const _StatusPill({required this.text, required this.color, this.icon});
+class _ScanPainter extends CustomPainter {
+  final _ScanPhase phase;
+  final double ambient;
+  final double morphProgress;
+  final List<bool> segments;
+  final int filledCount;
+
+  const _ScanPainter({
+    required this.phase,
+    required this.ambient,
+    required this.morphProgress,
+    required this.segments,
+    required this.filledCount,
+  });
+
+  static const _purple = Color(0xFF9D7FEA);
 
   @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.60),
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: color.withValues(alpha: 0.30), width: 1),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null) ...[
-              Icon(icon, size: 14, color: color),
-              const SizedBox(width: 6),
-            ],
-            Flexible(
-              child: Text(
-                text,
-                style: GoogleFonts.nunito(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: color),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-        ),
-      ),
+  void paint(Canvas canvas, Size size) {
+    final cx = size.width / 2;
+    final cy = size.height * 0.45;
+    final rx = size.width * 0.44;
+    final ry = size.height * 0.37;
+    final ovalRect =
+        Rect.fromCenter(center: Offset(cx, cy), width: rx * 2, height: ry * 2);
+
+    // Vignette
+    final vRect = Rect.fromLTWH(0, 0, size.width, size.height);
+    canvas.drawRect(
+      vRect,
+      Paint()
+        ..shader = RadialGradient(
+          center: const Alignment(0, -0.05),
+          radius: 0.9,
+          colors: [Colors.transparent, Colors.black.withValues(alpha: 0.45)],
+        ).createShader(vRect),
     );
+
+    // Dark overlay with oval cutout
+    canvas.drawPath(
+      Path()
+        ..addRect(Rect.fromLTWH(0, 0, size.width, size.height))
+        ..addOval(ovalRect)
+        ..fillType = PathFillType.evenOdd,
+      Paint()..color = Colors.black.withValues(alpha: 0.58),
+    );
+
+    // Purple glow when face detected
+    if (morphProgress > 0.05) {
+      canvas.drawOval(
+        ovalRect.inflate(1),
+        Paint()
+          ..color =
+              _purple.withValues(alpha: morphProgress * (0.10 + ambient * 0.08))
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 20
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18),
+      );
+    }
+
+    // Oval border
+    final isScanning = phase == _ScanPhase.scanning;
+    final borderA = isScanning
+        ? 0.35 + ambient * 0.15
+        : (0.10 + morphProgress * 0.25 + ambient * 0.06).clamp(0.0, 1.0);
+    canvas.drawOval(
+      ovalRect,
+      Paint()
+        ..color = Colors.white.withValues(alpha: borderA)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0,
+    );
+
+    if (isScanning || phase == _ScanPhase.analyzing) {
+      _drawWireMesh(canvas, cx, cy, rx, ry);
+      _drawSegmentRing(canvas, cx, cy, rx, ry);
+    }
   }
+
+  void _drawWireMesh(
+      Canvas canvas, double cx, double cy, double rx, double ry) {
+    canvas.save();
+    canvas.clipPath(Path()
+      ..addOval(Rect.fromCenter(
+          center: Offset(cx, cy), width: rx * 2, height: ry * 2)));
+
+    final paint = Paint()
+      ..color = Colors.white
+          .withValues(alpha: (0.055 + ambient * 0.035).clamp(0.0, 1.0))
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.5;
+
+    for (int i = 1; i < 13; i++) {
+      final t = i / 13;
+      final y = (cy - ry) + ry * 2 * t;
+      final ny = (y - cy) / ry;
+      final hw = rx * math.sqrt(math.max(0.0, 1 - ny * ny));
+      final bow = ny.abs() > 0.5 ? -5.0 : 7.0;
+      canvas.drawPath(
+        Path()
+          ..moveTo(cx - hw, y)
+          ..quadraticBezierTo(cx, y + bow * (1 - ny.abs()), cx + hw, y),
+        paint,
+      );
+    }
+
+    for (int i = 1; i < 8; i++) {
+      final t = i / 8;
+      final x = (cx - rx) + rx * 2 * t;
+      final nx = (x - cx) / rx;
+      final hh = ry * math.sqrt(math.max(0.0, 1 - nx * nx));
+      final bow = nx.abs() > 0.5 ? -3.0 : 4.0;
+      canvas.drawPath(
+        Path()
+          ..moveTo(x, cy - hh)
+          ..quadraticBezierTo(x + bow * (1 - nx.abs()), cy, x, cy + hh),
+        paint,
+      );
+    }
+
+    canvas.restore();
+  }
+
+  void _drawSegmentRing(
+      Canvas canvas, double cx, double cy, double rx, double ry) {
+    final n = segments.length;
+    const innerS = 1.038;
+    const outerS = 1.095;
+
+    final filledPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.0
+      ..strokeCap = StrokeCap.butt;
+
+    final emptyPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.butt
+      ..color = Colors.white.withValues(alpha: 0.22);
+
+    for (int i = 0; i < n; i++) {
+      final theta = (i / n) * 2 * math.pi - math.pi / 2;
+      final c = math.cos(theta);
+      final s = math.sin(theta);
+      canvas.drawLine(
+        Offset(cx + rx * innerS * c, cy + ry * innerS * s),
+        Offset(cx + rx * outerS * c, cy + ry * outerS * s),
+        segments[i]
+            ? (filledPaint
+              ..color = const Color(0xFF4ADE80)
+                  .withValues(alpha: 0.85 + ambient * 0.15))
+            : emptyPaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_ScanPainter old) =>
+      old.phase != phase ||
+      old.ambient != ambient ||
+      old.morphProgress != morphProgress ||
+      old.filledCount != filledCount;
 }
 
-// ── Circle button ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// Reusable UI components
+// ─────────────────────────────────────────────────────────────
 
-class _CircleBtn extends StatelessWidget {
-  final Widget child;
+class _GlassIconButton extends StatelessWidget {
+  final IconData icon;
   final VoidCallback onTap;
-  const _CircleBtn({required this.child, required this.onTap});
+  const _GlassIconButton({required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -1098,80 +1235,89 @@ class _CircleBtn extends StatelessWidget {
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.35),
           shape: BoxShape.circle,
-          border: Border.all(
-              color: Colors.white.withValues(alpha: 0.18), width: 1),
+          color: Colors.white.withValues(alpha: 0.10),
+          border:
+              Border.all(color: Colors.white.withValues(alpha: 0.18), width: 1),
         ),
-        child: child,
+        child: Icon(icon, color: Colors.white.withValues(alpha: 0.90), size: 17.6),
       ),
     );
   }
 }
 
-// ── Scan painter — oval cutout + state border ─────────────────
-
-class _ScanPainter extends CustomPainter {
-  final _FaceState state;
-  final double pulseValue;
-
-  const _ScanPainter({required this.state, required this.pulseValue});
+class _GuidanceBadge extends StatelessWidget {
+  final String text;
+  const _GuidanceBadge({required this.text});
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final cx = size.width / 2;
-    final cy = size.height * 0.42;
-    final ovalRx = size.width * 0.365;
-    final ovalRy = size.height * 0.265;
-
-    final ovalRect = Rect.fromCenter(
-        center: Offset(cx, cy), width: ovalRx * 2, height: ovalRy * 2);
-
-    // Dark overlay with oval cutout
-    final path = Path()
-      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height))
-      ..addOval(ovalRect);
-    path.fillType = PathFillType.evenOdd;
-    canvas.drawPath(path, Paint()..color = Colors.black.withValues(alpha: 0.72));
-
-    final isGood = state == _FaceState.ready ||
-        state == _FaceState.countdown ||
-        state == _FaceState.done;
-    final isWarn =
-        state == _FaceState.tooDark || state == _FaceState.eyesClosed;
-
-    final borderColor = isGood
-        ? const Color(0xFF4CAF50)
-        : isWarn
-            ? const Color(0xFFFFC107)
-            : Colors.white;
-    final borderAlpha =
-        isGood ? 0.55 + pulseValue * 0.45 : 0.28 + pulseValue * 0.12;
-
-    // Glow when ready/countdown
-    if (isGood) {
-      canvas.drawOval(
-        ovalRect,
-        Paint()
-          ..color = const Color(0xFF4CAF50)
-              .withValues(alpha: 0.12 + pulseValue * 0.18)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 10
-          ..maskFilter =
-              MaskFilter.blur(BlurStyle.normal, 14 + pulseValue * 8),
-      );
-    }
-
-    canvas.drawOval(
-      ovalRect,
-      Paint()
-        ..color = borderColor.withValues(alpha: borderAlpha)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.5,
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(999),
+        border:
+            Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
+      ),
+      child: Text(
+        text,
+        style: GoogleFonts.nunito(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: Colors.white.withValues(alpha: 0.90),
+          letterSpacing: 0.2,
+        ),
+      ),
     );
   }
+}
+
+class _GlassSheet extends StatelessWidget {
+  final Widget child;
+  const _GlassSheet({required this.child});
 
   @override
-  bool shouldRepaint(_ScanPainter old) =>
-      old.state != state || old.pulseValue != pulseValue;
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.all(12),
+      padding: EdgeInsets.fromLTRB(
+          24, 24, 24, MediaQuery.of(context).padding.bottom + 24),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0D0D1A).withValues(alpha: 0.95),
+        borderRadius: BorderRadius.circular(24),
+        border:
+            Border.all(color: Colors.white.withValues(alpha: 0.10), width: 1),
+      ),
+      child: child,
+    );
+  }
+}
+
+class _PrimaryButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  const _PrimaryButton({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF9D7FEA),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+          elevation: 0,
+        ),
+        child: Text(label,
+            style: GoogleFonts.nunito(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: Colors.white)),
+      ),
+    );
+  }
 }

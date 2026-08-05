@@ -4,9 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:real_beauty_ai/core/colors.dart';
+import 'package:real_beauty_ai/core/theme/colors.dart';
 import 'package:real_beauty_ai/features/cosmetologists/presentation/bloc/cosmetologists_cubit.dart';
 import 'package:real_beauty_ai/models/cosmetolog.dart';
+import 'package:real_beauty_ai/widgets/chip_button.dart';
 import 'package:go_router/go_router.dart';
 
 class KonnikmaScreen extends StatelessWidget {
@@ -57,7 +58,12 @@ class _KonnikmaBodyState extends State<_KonnikmaBody> {
       backgroundColor: AppColors.background,
       body: BlocBuilder<CosmetologistsCubit, CosmetologistsState>(
         builder: (context, state) {
-          return CustomScrollView(
+          return NotificationListener<ScrollStartNotification>(
+            onNotification: (_) {
+              FocusScope.of(context).unfocus();
+              return false;
+            },
+            child: CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
                 child: SafeArea(
@@ -70,7 +76,7 @@ class _KonnikmaBodyState extends State<_KonnikmaBody> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Ko'nikma",
+                              'Kosmetologlar',
                               style: GoogleFonts.nunito(
                                 fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.text,
                               ),
@@ -139,47 +145,19 @@ class _KonnikmaBodyState extends State<_KonnikmaBody> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        SizedBox(
-                          height: 44,
-                          child: ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: _filters.length,
-                            separatorBuilder: (_, _) => const SizedBox(width: 8),
-                            itemBuilder: (_, i) {
-                              final f = _filters[i];
-                              final sel = f == _filter;
-                              return GestureDetector(
-                                onTap: () {
-                                  HapticFeedback.selectionClick();
-                                  setState(() => _filter = f);
-                                },
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 180),
-                                  padding: const EdgeInsets.symmetric(horizontal: 18),
-                                  decoration: BoxDecoration(
-                                    color: sel ? AppColors.primary : Colors.white,
-                                    borderRadius: BorderRadius.circular(999),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.04),
-                                        blurRadius: 6,
-                                        offset: const Offset(0, 1),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: _filters
+                                .map((f) => Padding(
+                                      padding: const EdgeInsets.only(right: 8),
+                                      child: ChipButton(
+                                        label: f,
+                                        selected: f == _filter,
+                                        onTap: () => setState(() => _filter = f),
                                       ),
-                                    ],
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      f,
-                                      style: GoogleFonts.nunito(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w700,
-                                        color: sel ? Colors.white : AppColors.text,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
+                                    ))
+                                .toList(),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -190,11 +168,24 @@ class _KonnikmaBodyState extends State<_KonnikmaBody> {
               ),
 
               if (state is CosmetologistsLoading)
-                const SliverFillRemaining(
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation(AppColors.primary),
-                      strokeWidth: 2.5,
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (_, _) => Container(
+                        height: 88,
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEEEAF8),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      )
+                          .animate(onPlay: (c) => c.repeat())
+                          .shimmer(
+                            duration: const Duration(milliseconds: 1200),
+                            color: Colors.white.withValues(alpha: 0.55),
+                          ),
+                      childCount: 5,
                     ),
                   ),
                 )
@@ -280,6 +271,7 @@ class _KonnikmaBodyState extends State<_KonnikmaBody> {
                 }),
               ],
             ],
+          ),
           );
         },
       ),
@@ -375,10 +367,11 @@ class _CosmetologCardState extends State<_CosmetologCard> {
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          CosmetologStarRating(value: c.rating),
-                          const SizedBox(width: 6),
+                          const Icon(Icons.workspace_premium_outlined,
+                              size: 13, color: AppColors.muted),
+                          const SizedBox(width: 2),
                           Text(
-                            '${c.rating} (${c.reviewCount})',
+                            '${c.experienceYears} yillik tajriba',
                             style: GoogleFonts.nunito(fontSize: 12, color: AppColors.muted),
                           ),
                         ],
@@ -390,7 +383,7 @@ class _CosmetologCardState extends State<_CosmetologCard> {
                           const SizedBox(width: 2),
                           Flexible(
                             child: Text(
-                              '${c.city} · ${c.distance}',
+                              c.distance.isEmpty ? c.city : '${c.city} · ${c.distance}',
                               style: GoogleFonts.nunito(fontSize: 12, color: AppColors.muted),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -414,7 +407,7 @@ class _CosmetologCardState extends State<_CosmetologCard> {
   }
 }
 
-class CosmetologAvatar extends StatelessWidget {
+class CosmetologAvatar extends StatefulWidget {
   final String name;
   final List<Color> gradientColors;
   final String? photoUrl;
@@ -428,22 +421,99 @@ class CosmetologAvatar extends StatelessWidget {
     this.size = 60,
   });
 
+  @override
+  State<CosmetologAvatar> createState() => _CosmetologAvatarState();
+}
+
+class _CosmetologAvatarState extends State<CosmetologAvatar> {
+  OverlayEntry? _previewEntry;
+
   String get _initials {
-    final parts = name.trim().split(' ').where((p) => p.isNotEmpty).toList();
+    final parts = widget.name.trim().split(' ').where((p) => p.isNotEmpty).toList();
     if (parts.isEmpty) return 'RB';
     if (parts.length == 1) return parts[0][0].toUpperCase();
     return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
   }
 
+  Alignment get _alignment {
+    if (widget.photoUrl?.contains('nazokat_ismoilova') ?? false) {
+      return const Alignment(0, -0.6);
+    }
+    if (widget.photoUrl?.contains('muhayyo_umarova') ?? false) {
+      return const Alignment(0, 0.3);
+    }
+    return Alignment.center;
+  }
+
+  double get _scale {
+    if (widget.photoUrl?.contains('muhayyo_umarova') ?? false) {
+      return 2.6;
+    }
+    return 1.0;
+  }
+
+  void _showPreview() {
+    if (widget.photoUrl == null || _previewEntry != null) return;
+    HapticFeedback.mediumImpact();
+    _previewEntry = OverlayEntry(
+      builder: (_) => _AvatarPreviewOverlay(
+        photoUrl: widget.photoUrl!,
+        gradientColors: widget.gradientColors,
+        initials: _initials,
+        alignment: _alignment,
+        scale: _scale,
+      ),
+    );
+    Overlay.of(context).insert(_previewEntry!);
+  }
+
+  void _hidePreview() {
+    _previewEntry?.remove();
+    _previewEntry = null;
+  }
+
+  @override
+  void dispose() {
+    _previewEntry?.remove();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (photoUrl != null) {
+    return GestureDetector(
+      onLongPressStart: (_) => _showPreview(),
+      onLongPressEnd: (_) => _hidePreview(),
+      onLongPressCancel: _hidePreview,
+      child: _buildAvatar(),
+    );
+  }
+
+  Widget _buildAvatar() {
+    final url = widget.photoUrl;
+    if (url != null && url.startsWith('assets/')) {
+      return ClipOval(
+        child: Transform.scale(
+          scale: _scale,
+          alignment: _alignment,
+          child: Image.asset(
+            url,
+            width: widget.size,
+            height: widget.size,
+            fit: BoxFit.cover,
+            alignment: _alignment,
+            errorBuilder: (_, _, _) => _gradient(),
+          ),
+        ),
+      );
+    }
+    if (url != null) {
       return ClipOval(
         child: CachedNetworkImage(
-          imageUrl: photoUrl!,
-          width: size,
-          height: size,
+          imageUrl: url,
+          width: widget.size,
+          height: widget.size,
           fit: BoxFit.cover,
+          alignment: _alignment,
           placeholder: (_, _) => _gradient(),
           errorWidget: (_, _, _) => _gradient(),
         ),
@@ -454,12 +524,12 @@ class CosmetologAvatar extends StatelessWidget {
 
   Widget _gradient() {
     return Container(
-      width: size,
-      height: size,
+      width: widget.size,
+      height: widget.size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
-          colors: gradientColors,
+          colors: widget.gradientColors,
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -469,7 +539,7 @@ class CosmetologAvatar extends StatelessWidget {
           _initials,
           style: TextStyle(
             fontFamily: 'CormorantGaramond',
-            fontSize: size * 0.37,
+            fontSize: widget.size * 0.37,
             fontWeight: FontWeight.w500,
             color: AppColors.text,
             letterSpacing: 0.5,
@@ -480,24 +550,121 @@ class CosmetologAvatar extends StatelessWidget {
   }
 }
 
-class CosmetologStarRating extends StatelessWidget {
-  final double value;
-  final double size;
-  const CosmetologStarRating({super.key, required this.value, this.size = 12});
+class _AvatarPreviewOverlay extends StatefulWidget {
+  final String photoUrl;
+  final List<Color> gradientColors;
+  final String initials;
+  final Alignment alignment;
+  final double scale;
+
+  const _AvatarPreviewOverlay({
+    required this.photoUrl,
+    required this.gradientColors,
+    required this.initials,
+    required this.alignment,
+    required this.scale,
+  });
+
+  @override
+  State<_AvatarPreviewOverlay> createState() => _AvatarPreviewOverlayState();
+}
+
+class _AvatarPreviewOverlayState extends State<_AvatarPreviewOverlay> {
+  bool _visible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _visible = true);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(5, (i) {
-        final filled = i < value.floor();
-        final half = !filled && i < value;
-        return Icon(
-          half ? Icons.star_half : filled ? Icons.star : Icons.star_outline,
-          size: size,
-          color: AppColors.accent,
-        );
-      }),
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final previewSize = screenWidth * 0.75;
+    return IgnorePointer(
+      child: AnimatedOpacity(
+        opacity: _visible ? 1 : 0,
+        duration: const Duration(milliseconds: 150),
+        child: Container(
+          color: Colors.black.withValues(alpha: 0.55),
+          width: double.infinity,
+          height: double.infinity,
+          child: Center(
+            child: AnimatedScale(
+              scale: _visible ? 1 : 0.85,
+              duration: const Duration(milliseconds: 150),
+              curve: Curves.easeOutBack,
+              child: Container(
+                width: previewSize,
+                height: previewSize,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      blurRadius: 24,
+                    ),
+                  ],
+                ),
+                child: ClipOval(
+                  child: Transform.scale(
+                    scale: widget.scale,
+                    alignment: widget.alignment,
+                    child: widget.photoUrl.startsWith('assets/')
+                      ? Image.asset(
+                          widget.photoUrl,
+                          width: previewSize,
+                          height: previewSize,
+                          fit: BoxFit.cover,
+                          alignment: widget.alignment,
+                          errorBuilder: (_, _, _) => _fallback(previewSize),
+                        )
+                      : CachedNetworkImage(
+                          imageUrl: widget.photoUrl,
+                          width: previewSize,
+                          height: previewSize,
+                          alignment: widget.alignment,
+                          fit: BoxFit.cover,
+                          errorWidget: (_, _, _) => _fallback(previewSize),
+                        ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _fallback(double previewSize) {
+    return Container(
+      width: previewSize,
+      height: previewSize,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: widget.gradientColors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Center(
+        child: Text(
+          widget.initials,
+          style: TextStyle(
+            fontFamily: 'CormorantGaramond',
+            fontSize: previewSize * 0.25,
+            fontWeight: FontWeight.w500,
+            color: Colors.white,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ),
     );
   }
 }

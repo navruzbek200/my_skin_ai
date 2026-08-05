@@ -1,9 +1,8 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:real_beauty_ai/core/colors.dart';
+import 'package:real_beauty_ai/core/theme/colors.dart';
 import 'package:real_beauty_ai/features/home/presentation/pages/bugun_page.dart';
 import 'package:real_beauty_ai/features/products/presentation/pages/products_page.dart';
 import 'package:real_beauty_ai/features/scanner/presentation/pages/scanner_page.dart';
@@ -27,14 +26,18 @@ class _MainShellState extends State<MainShell> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
-    // Show on every launch until the user completes a skin analysis.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(seconds: 2), () {
-        if (!mounted) return;
-        if (!LocalStore.instance.hasSkinProfile) {
-          _showAnalysisModal();
-        }
-      });
+      _maybeShowAnalysisModal();
+    });
+  }
+
+  // Show on every launch until the user completes a skin analysis.
+  void _maybeShowAnalysisModal() {
+    Future.delayed(const Duration(seconds: 2), () {
+      if (!mounted) return;
+      if (!LocalStore.instance.hasSkinProfile) {
+        _showAnalysisModal();
+      }
     });
   }
 
@@ -121,7 +124,7 @@ class _MainShellState extends State<MainShell> {
               ),
               // Center scan button
               Semantics(
-                label: 'Skan',
+                label: 'Tahlil',
                 button: true,
                 child: GestureDetector(
                   onTap: () {
@@ -153,11 +156,12 @@ class _MainShellState extends State<MainShell> {
                           ),
                           child: const Icon(Icons.crop_free_rounded, color: Colors.white, size: 24),
                         ),
-                        const SizedBox(height: 3),
+                        const SizedBox(height: 1),
                         Text(
-                          'Skan',
+                          'Tahlil',
+                          textScaler: TextScaler.noScaling,
                           style: GoogleFonts.nunito(
-                            fontSize: 10,
+                            fontSize: 11,
                             fontWeight: FontWeight.w700,
                             color: _currentIndex == 2 ? AppColors.primary : AppColors.muted,
                           ),
@@ -178,7 +182,7 @@ class _MainShellState extends State<MainShell> {
               ),
               _NavItem(
                 imagePath: 'assets/icons/customer.png',
-                label: "Ko'nikma",
+                label: 'Kosmetolog',
                 active: _currentIndex == 4,
                 onTap: () {
                   HapticFeedback.selectionClick();
@@ -261,18 +265,22 @@ class _SkinAnalysisModalState extends State<_SkinAnalysisModal>
                   // X top-right
                   Positioned(
                     top: 12, right: 12,
-                    child: GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        width: 34, height: 34,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.35),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.close_rounded,
-                          size: 18,
-                          color: Colors.white,
+                    child: Semantics(
+                      button: true,
+                      label: 'Yopish',
+                      child: GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 44, height: 44,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.35),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close_rounded,
+                            size: 18,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -404,11 +412,11 @@ class _NavItem extends StatelessWidget {
               duration: const Duration(milliseconds: 220),
               curve: Curves.easeInOut,
               style: GoogleFonts.nunito(
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: active ? FontWeight.w700 : FontWeight.w500,
                 color: active ? AppColors.primary : AppColors.muted,
               ),
-              child: Text(label, overflow: TextOverflow.ellipsis, maxLines: 1),
+              child: Text(label, overflow: TextOverflow.ellipsis, maxLines: 1, textScaler: TextScaler.noScaling),
             ),
           ],
         ),
@@ -416,3 +424,4 @@ class _NavItem extends StatelessWidget {
     );
   }
 }
+

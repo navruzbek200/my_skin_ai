@@ -3,7 +3,6 @@ import '../models/quiz_question.dart';
 const quizGroups = [
   QuizGroup(title: 'Teri tipi', range: (0, 0)),
   QuizGroup(title: 'Muammolar', range: (1, 9)),
-  QuizGroup(title: "Qo'shimcha", range: (10, 11)),
 ];
 
 final List<QuizQuestion> quizQuestions = [
@@ -135,25 +134,6 @@ final List<QuizQuestion> quizQuestions = [
       "Ancha yo'qotgan",
       "Ko'p yo'qotgan",
       "Juda ko'p yo'qotgan",
-    ],
-  ),
-  // 10 — age (new)
-  QuizQuestion(
-    index: 10, id: 'age', type: QuestionType.scale,
-    text: "Yoshingiz nechada?",
-    scaleLabels: ['18 dan kichik', '18–24', '25–34', '35–44', '45+', '—'],
-  ),
-  // 11 — primary concern (new)
-  QuizQuestion(
-    index: 11, id: 'primary', type: QuestionType.choice,
-    text: "Sizni eng ko'p bezovta qiladigan muammo qaysi?",
-    options: [
-      'Husnbuzar / qora nuqta',
-      "Pigmentatsiya / dog'lar",
-      'Quruqlik / namsizlik',
-      "Ajin / bo'shashish",
-      "Ko'z atrofi",
-      'Sezgirlik / qizarish',
     ],
   ),
 ];

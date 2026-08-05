@@ -56,17 +56,19 @@ void main() {
     expect(find.text('Qaytadan urinish'), findsOneWidget);
   });
 
-  testWidgets('Loading state — CircularProgressIndicator visible',
+  testWidgets('Loading state — shimmer skeleton grid visible',
       (tester) async {
     when(() => cubit.state).thenReturn(ProductsLoading());
     when(() => cubit.stream).thenAnswer((_) => const Stream.empty());
 
     await tester.pumpWidget(_pump(cubit));
-    // pumpAndSettle would loop forever with CircularProgressIndicator;
+    // pumpAndSettle would loop forever with the repeating shimmer;
     // pump(1s) fires the banner's flutter_animate 0ms timer and completes it.
     await tester.pump(const Duration(seconds: 1));
 
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    // Loading renders a grid of skeleton placeholders instead of a spinner.
+    expect(find.byType(SliverGrid), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
   testWidgets('Loaded with multiple products — all brands visible',

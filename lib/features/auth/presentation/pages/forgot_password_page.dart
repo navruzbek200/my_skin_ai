@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:real_beauty_ai/core/colors.dart';
+import 'package:real_beauty_ai/core/theme/colors.dart';
 import 'package:real_beauty_ai/features/auth/presentation/bloc/auth_cubit.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -84,7 +84,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               ),
             ),
             const SizedBox(height: 40),
-            Center(child: Image.asset('assets/logo.png', height: 110)),
+            Center(child: Image.asset('assets/splash.png', height: 160)),
             const SizedBox(height: 40),
 
             if (!_sent) ...[

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/colors.dart';
+import '../../../core/theme/colors.dart';
 import '../../../models/lesson.dart';
 
 class FactStep extends StatelessWidget {

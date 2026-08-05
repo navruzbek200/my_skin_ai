@@ -2,65 +2,143 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../core/colors.dart';
+import '../../core/theme/colors.dart';
 import '../../models/article.dart';
 import 'package:go_router/go_router.dart';
-import 'info_row_card.dart';
 import 'lesson_styles.dart';
 
-class ArticleCard extends StatelessWidget {
+class ArticleCard extends StatefulWidget {
   final Article article;
   final int index;
 
   const ArticleCard({super.key, required this.article, required this.index});
 
   @override
+  State<ArticleCard> createState() => _ArticleCardState();
+}
+
+class _ArticleCardState extends State<ArticleCard> {
+  bool _pressed = false;
+
+  @override
   Widget build(BuildContext context) {
-    return InfoRowCard(
-      // article.iconColor is kept in the model for compatibility but UI uses
-      // AppColors.primary to avoid a rainbow palette.
-      accentColor: AppColors.primary,
-      showAccentBar: false,
+    final article = widget.article;
+
+    return GestureDetector(
       onTap: () {
         HapticFeedback.selectionClick();
         context.push('/article-detail', extra: article);
       },
-      leading: Container(
-        width: 56,
-        color: AppColors.primary.withValues(alpha: 0.07),
-        child: Center(
-          child: Icon(article.icon, color: AppColors.primary, size: 22),
-        ),
-      ),
-      content: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 14, 10, 14),
-        child: Text(
-          article.title,
-          style: GoogleFonts.nunito(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: AppColors.text,
-            height: 1.4,
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedOpacity(
+        opacity: _pressed ? 0.62 : 1.0,
+        duration: const Duration(milliseconds: 80),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(LessonStyles.cardRadius),
+            border: Border.all(
+              color: LessonStyles.cardBorderColor,
+              width: 0.5,
+            ),
+            boxShadow: LessonStyles.cardShadow,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top row: "Maqola" chip + reading time
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.09),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      'Maqola',
+                      style: GoogleFonts.nunito(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  const Icon(
+                    Icons.timer_outlined,
+                    size: 12,
+                    color: AppColors.muted,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    article.duration,
+                    style: GoogleFonts.nunito(
+                      fontSize: 11,
+                      color: AppColors.muted,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              // Title
+              Text(
+                article.title,
+                style: GoogleFonts.nunito(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.text,
+                  height: 1.3,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 6),
+              // Summary excerpt
+              Text(
+                article.summary,
+                style: GoogleFonts.nunito(
+                  fontSize: 12,
+                  color: AppColors.muted,
+                  height: 1.45,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 12),
+              // Bottom CTA
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    "O'qish",
+                    style: GoogleFonts.nunito(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 14,
+                    color: AppColors.primary,
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
-      trailing: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 14, 14, 14),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              article.duration,
-              style: GoogleFonts.nunito(fontSize: 10, color: AppColors.muted),
-            ),
-            const SizedBox(height: 4),
-            const Icon(Icons.arrow_forward_ios, size: 11, color: AppColors.muted),
-          ],
-        ),
-      ),
     )
-        .animate(delay: LessonStyles.stagger(index))
+        .animate(delay: LessonStyles.stagger(widget.index))
         .fadeIn(duration: LessonStyles.enterDuration)
         .slideX(begin: 0.06);
   }

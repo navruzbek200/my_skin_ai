@@ -1,12 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:real_beauty_ai/core/router/route_args.dart';
-import 'package:real_beauty_ai/core/utils/logger.dart';
-import 'package:real_beauty_ai/features/skin_analysis/domain/skin_analysis_repository.dart';
 import 'package:real_beauty_ai/logic/skin_logic.dart';
 
 class AnalysisScreen extends StatefulWidget {
@@ -31,9 +27,9 @@ class _AnalysisScreenState extends State<AnalysisScreen>
   static const _textMuted = Color(0xFF9490B0);
 
   static const _steps = [
-    'Rasm tahlilga tayyorlanmoqda',
-    "Serverga jo'natilmoqda",
-    'Teri holati aniqlanmoqda',
+    'Savollar tahlil qilinmoqda',
+    'Teri turi aniqlanmoqda',
+    'Muammolar baholanmoqda',
     'Natijalar tayyorlanmoqda',
   ];
 
@@ -61,40 +57,8 @@ class _AnalysisScreenState extends State<AnalysisScreen>
     super.dispose();
   }
 
-  // Converts domain concern scores (0-100 int) to models scores (0-1 double).
-  static Map<String, double>? _toScores(Map<SkinConcern, int>? concerns) {
-    if (concerns == null) return null;
-    return concerns.map((k, v) => MapEntry(k.name, v / 100.0));
-  }
-
   Future<void> _runAnalysis() async {
-    final skinResult = SkinLogic.analyze(widget.args.quizAnswers);
-
-    CloudSkinData? cloudData;
-    final imagePath = widget.args.imagePath;
-
-    if (imagePath != null && File(imagePath).existsSync()) {
-      try {
-        cloudData = await GetIt.instance<SkinAnalysisRepository>()
-            .analyze(File(imagePath));
-      } catch (e, st) {
-        AppLogger.error('Cloud analysis failed, quiz fallback', e, st);
-      }
-    }
-
-    // Quiz determines skin type (12 questions); cloud adds per-concern scores.
-    _pendingNav = SkinAnalysisResult(
-      skinType: skinResult.skinType,
-      skinTypeCode: skinResult.skinTypeCode,
-      baseRecommendation: skinResult.baseRecommendation,
-      additionalBlocks: skinResult.additionalBlocks,
-      source: cloudData != null
-          ? AnalysisSource.cameraAnalysis
-          : AnalysisSource.quizEstimate,
-      scores: _toScores(cloudData?.concerns),
-      takenAt: cloudData?.takenAt,
-    );
-
+    _pendingNav = SkinLogic.analyze(widget.args.quizAnswers);
     if (mounted) {
       setState(() {
         _apiDone = true;
@@ -143,9 +107,7 @@ class _AnalysisScreenState extends State<AnalysisScreen>
               ).animate().fadeIn(duration: 400.ms),
               const SizedBox(height: 8),
               Text(
-                widget.args.imagePath != null
-                    ? 'Rasmingiz cloud orqali tahlil qilinmoqda'
-                    : 'Savollaringiz asosida tahlil qilinmoqda',
+                'Savollaringiz asosida tahlil qilinmoqda',
                 style: GoogleFonts.nunito(fontSize: 14, color: _textMuted),
               ).animate().fadeIn(delay: 200.ms),
               const SizedBox(height: 56),

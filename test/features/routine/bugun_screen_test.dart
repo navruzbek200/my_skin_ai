@@ -6,7 +6,7 @@ import 'package:real_beauty_ai/services/local_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Minimal valid SkinResult JSON — oily skin with Bh concern.
-// RoutineEngine will generate "Ko'pikli tozalash" as first AM step.
+// RoutineEngine generates 'Penka bilan yuzni yaxshilab yuving' as first AM step.
 const _profileJson =
     '{"skinType":"Yog\'li","skinTypeCode":"O","baseRecommendation":"test",'
     '"additionalBlocks":[{"code":"Bh","title":"t","text":"t"}]}';
@@ -32,7 +32,10 @@ void main() {
     expect(find.text('Ertalab'), findsOneWidget);
     expect(find.text('Kechqurun'), findsOneWidget);
     // SPF is always the 4th AM slot
-    expect(find.text('SPF 50 quyosh kremi'), findsOneWidget);
+    expect(
+      find.text('Quyosh kremini surting — tashqariga chiqishdan oldin'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('tapping a task card increments done count', (tester) async {
@@ -40,7 +43,7 @@ void main() {
     await tester.pump(_settle);
 
     // Oily skin AM cleanse label
-    final taskFinder = find.text("Ko'pikli tozalash");
+    final taskFinder = find.text('Penka bilan yuzni yaxshilab yuving');
     expect(taskFinder, findsOneWidget);
 
     await tester.tap(taskFinder);
@@ -53,7 +56,7 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pump(_settle);
 
-    final taskFinder = find.text("Ko'pikli tozalash");
+    final taskFinder = find.text('Penka bilan yuzni yaxshilab yuving');
     await tester.tap(taskFinder);
     await tester.pump();
     expect(find.text('1 / 9 vazifa'), findsOneWidget);

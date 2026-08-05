@@ -20,8 +20,9 @@ class RoutineEngine {
     required Set<String> concerns,
     required DateTime date,
   }) {
-    final isOily = skinType == "Yog'li";
-    final isDry  = skinType == 'Quruq';
+    final isOily  = skinType == "Yog'li";
+    final isDry   = skinType == 'Quruq';
+    final isCombo = skinType == 'Aralash';
     final sensitive = concerns.any(_sensitiveCodes.contains);
     final hasEye = concerns.any(_eye.contains);
     final wantsVitC = concerns.any(_retinol.contains);
@@ -31,48 +32,76 @@ class RoutineEngine {
 
     // ── Morning (4 fixed slots) ──
     final amCleanse = isDry
-        ? 'Yumshoq kremsimon tozalash'
-        : isOily ? "Ko'pikli tozalash" : 'Yumshoq gel tozalash';
-    final amToner = isOily ? 'Balanslovchi toner' : 'Namlovchi toner';
+        ? 'Yuzni iliq suv bilan yuving'
+        : isOily
+            ? 'Penka bilan yuzni yaxshilab yuving'
+            : isCombo
+                ? 'Penka bilan yuving, burun va peshonaga ko\'proq e\'tibor bering'
+                : 'Penka bilan yuzni yuving';
+    final amToner = isOily
+        ? 'Toner surting — yog\'ni kamaytiradi'
+        : isCombo
+            ? 'Toner surting — burun va peshonaga yaxshilab, yanoqlarga yengil'
+            : 'Toner surting — namlaydi';
     final amSerum = wantsVitC
-        ? 'C-vitamin serum'
-        : isOily ? 'Niasinamid serum' : 'Gialuron serum';
+        ? 'C-vitamin serum surting — yuz rangini yorqinlashtiradi'
+        : isOily
+            ? 'Serum surting — teri teshikchalarini kichraytiradi'
+            : isCombo
+                ? 'Serum surting — burun-peshonaga yengil, yanoqlarga ko\'proq'
+                : 'Serum surting — namlaydi';
 
     final morning = <RoutineStep>[
       RoutineStep(id: 'am_cleanse', title: amCleanse),
       RoutineStep(id: 'am_toner',   title: amToner),
       RoutineStep(id: 'am_serum',   title: amSerum),
-      const RoutineStep(id: 'am_spf', title: 'SPF 50 quyosh kremi'),
+      const RoutineStep(id: 'am_spf', title: 'Quyosh kremini surting — tashqariga chiqishdan oldin'),
     ];
 
     // ── Evening (5 fixed slots) ──
     final pmCleanse = isOily
-        ? "Ikki bosqichli tozalash (yog' + ko'pik)"
-        : isDry ? 'Yumshoq kremsimon tozalash' : 'Yumshoq tozalash';
-    final pmToner = isOily ? 'Balanslovchi toner' : 'Namlovchi toner';
+        ? 'Avval yog\'li tozalovchi, keyin penka bilan yuving'
+        : isDry
+            ? 'Yuzni iliq suv bilan yengil yuving'
+            : isCombo
+                ? 'Penka bilan yuving, burun-peshonaga ko\'proq e\'tibor bering'
+                : 'Penka bilan yuzni yuving';
+    final pmToner = isOily
+        ? 'Toner surting — yog\'ni muvozanatlaydi'
+        : isCombo
+            ? 'Toner surting — har ikki zonaga alohida e\'tibor biling'
+            : 'Toner surting — namlaydi';
 
     final String pmTreatment;
     if (sensitive) {
-      pmTreatment = 'Tinchlantiruvchi baryer serum';
+      pmTreatment = 'Tinchlantiruvchi serum surting — terini bezovta qilmaydi';
     } else if (isActiveNight && concerns.any(_retinol.contains)) {
-      pmTreatment = 'Retinol (haftada 3 marta)';
+      pmTreatment = 'Retinol serum surting — haftada 3 marta shu qadamni bajaring';
     } else if (isActiveNight && concerns.any(_exfoliate.contains)) {
-      pmTreatment = 'BHA/AHA eksfoliatsiya';
+      pmTreatment = 'Piling surting — qora nuqtalar va o\'lik hujayralarni tozalaydi';
     } else {
-      pmTreatment = 'Tiklovchi namlovchi serum';
+      pmTreatment = 'Namlantiruvchi serum surting';
     }
 
     final pmMoist = isDry
-        ? 'Boy tungi krem'
-        : isOily ? 'Yengil gel krem' : 'Namlovchi krem';
+        ? 'Tungi kremni qalin qilib surting — teri kechasi namlaydi'
+        : isOily
+            ? 'Yengil namlantiruvchi surting — ozroq, yuzni yog\'latmang'
+            : isCombo
+                ? 'Kremni surting — yanoqlarga ko\'proq, burun-peshonaga kam'
+                : 'Namlantiruvchi kremni surting';
 
     final String pmLast;
     if (hasEye) {
-      pmLast = "Ko'z kremi";
+      pmLast = 'Ko\'z atrofiga maxsus krem surting — yengil teging';
     } else if (isMaskNight) {
-      pmLast = isOily ? 'Loy niqob' : 'Namlovchi niqob';
+      pmLast = isOily
+          ? 'Loy niqob qo\'ying — teri teshikchalarini tozalaydi, 10-15 daqiqa turing'
+          : isCombo
+              ? 'Loy niqob faqat burun-peshonaga, yanoqlarga namlantiruvchi niqob qo\'ying'
+              : 'Namlantiruvchi niqob qo\'ying — 15-20 daqiqa turing';
     } else {
-      pmLast = 'Tungi namlovchi niqob';
+      pmLast = 'Tungi namlantiruvchi niqob qo\'ying';
     }
 
     final evening = <RoutineStep>[

@@ -91,3 +91,51 @@ final List<YogaExercise> yogaExercises = [
     videoPath: 'assets/videos/eyebags6.mp4',
   ),
 ];
+
+final List<YogaExercise> yogaVoiceExercises = [
+  YogaExercise(
+    name: 'Umumiy yuz yoga',
+    duration: '1 daqiqa',
+    target: 'Butun yuz',
+    description:
+        "Butun yuz mushaklarini isitadi, qon aylanishini yaxshilaydi va mashqlarga tayyorlaydi.",
+    color: const Color(0xFFF59E0B),
+    icon: Icons.face_outlined,
+    videoPath: 'assets/videos/yoga_voice/1.mp4',
+    clipHeightFactor: 1.0,
+  ),
+  YogaExercise(
+    name: 'Lifting effect',
+    duration: '1 daqiqa',
+    target: 'Yuz terisi',
+    description:
+        "Yuz mushaklarini ko'taradi, teri tonusini oshiradi va yoshlash effektini beradi.",
+    color: const Color(0xFFEF4444),
+    icon: Icons.sentiment_satisfied_outlined,
+    videoPath: 'assets/videos/yoga_voice/2.mp4',
+    clipHeightFactor: 1.0,
+  ),
+  YogaExercise(
+    name: "Ko'z osti",
+    duration: '1 daqiqa',
+    target: "Ko'z osti",
+    description:
+        "Ko'z osti shishini va to'q doiralarini kamaytiradi, terisini yoritadi.",
+    color: const Color(0xFF14B8A6),
+    icon: Icons.remove_red_eye_outlined,
+    videoPath: 'assets/videos/yoga_voice/3.mp4',
+    clipHeightFactor: 0.88,
+    clipAlignmentY: 1.0,
+  ),
+  YogaExercise(
+    name: 'V-line',
+    duration: '2 daqiqa',
+    target: 'Baqbaqa & Iyak',
+    description:
+        "Ikkinchi iyakni kamaytiradi, baqbaqa mushaklarini mustahkamlaydi va jag' chizig'ini aniqlashtiradi.",
+    color: const Color(0xFF06B6D4),
+    icon: Icons.auto_awesome_outlined,
+    videoPath: 'assets/videos/yoga_voice/4.mp4',
+    clipHeightFactor: 1.0,
+  ),
+];

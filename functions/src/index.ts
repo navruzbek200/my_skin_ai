@@ -3,6 +3,8 @@ import { defineSecret } from 'firebase-functions/params';
 import axios from 'axios';
 import FormData from 'form-data';
 
+export { sendOtp, register, login, forgotPassword, resetPassword, deleteAccount } from './auth';
+
 const FACEPP_API_KEY = defineSecret('FACEPP_API_KEY');
 const FACEPP_API_SECRET = defineSecret('FACEPP_API_SECRET');
 

@@ -55,7 +55,10 @@ class LocalStore {
 
   // ── History: derive streaks and progress from stored routine data ──────────
 
-  // A day is "completed" if every task slot in [totalTasks] was marked done.
+  // A day counts as a streak if ≥70% of tasks are done.
+  static bool isStreakDay(int done, int total) =>
+      total > 0 && done >= (total * 0.7).ceil();
+
   Map<String, bool> getStreaks(int totalTasks) {
     final result = <String, bool>{};
     try {
@@ -64,7 +67,7 @@ class LocalStore {
         final day = key.substring(_routinePrefix.length);
         final routine = getRoutine(day);
         final doneCount = routine.values.where((v) => v).length;
-        result[day] = totalTasks > 0 && doneCount >= totalTasks;
+        result[day] = LocalStore.isStreakDay(doneCount, totalTasks);
       }
     } catch (_) {}
     return result;
@@ -110,6 +113,33 @@ class LocalStore {
     } catch (_) {}
   }
 
+  // ── Account deletion ──────────────────────────────────────────
+  //
+  // Wipes everything tied to the person, not just the skin profile: scan
+  // history and per-day routine progress are personal data too, and the phone
+  // may be handed to someone else who signs up next. Deliberately *not* called
+  // on logout — that data lives only on the device, so clearing it there would
+  // destroy the history of someone who is coming right back.
+  //
+  // Privacy consent is left alone: it is a device-level acknowledgement, not
+  // account data.
+
+  Future<void> clearAllUserData() async {
+    try {
+      final keys = _prefs
+          .getKeys()
+          .where((k) =>
+              k == _skinKey ||
+              k == _historyKey ||
+              k == _needsNameKey ||
+              k.startsWith(_routinePrefix))
+          .toList();
+      for (final key in keys) {
+        await _prefs.remove(key);
+      }
+    } catch (_) {}
+  }
+
   // ── Privacy consent ───────────────────────────────────────────
 
   bool get privacyAccepted => _prefs.getBool(_privacyKey) ?? false;
@@ -135,6 +165,25 @@ class LocalStore {
   Future<void> setLoggedOut() async {
     try {
       await _prefs.setBool(_loginKey, false);
+    } catch (_) {}
+  }
+
+  // ── Post phone-signup name prompt ───────────────────────────────
+  //
+  // Set right after a brand-new phone account is created; the home shell
+  // checks this on launch and asks for a name once, then clears it. Kept
+  // outside the auth flow itself because Firebase reports the user as
+  // logged in the instant sign-in succeeds, and the router immediately
+  // navigates away from the auth screen — there's no window left there to
+  // show a prompt.
+
+  static const _needsNameKey = 'needs_name_prompt_v1';
+
+  bool get needsNamePrompt => _prefs.getBool(_needsNameKey) ?? false;
+
+  Future<void> setNeedsNamePrompt(bool value) async {
+    try {
+      await _prefs.setBool(_needsNameKey, value);
     } catch (_) {}
   }
 
@@ -171,17 +220,4 @@ class LocalStore {
     }
   }
 
-  // ── Cloud analysis consent ────────────────────────────────────
-  //
-  // Separate from general privacy_accepted — this gates the camera→cloud path.
-
-  static const _cloudConsentKey = 'cloud_analysis_consent_v1';
-
-  bool get cloudAnalysisAccepted => _prefs.getBool(_cloudConsentKey) ?? false;
-
-  Future<void> acceptCloudAnalysis() async {
-    try {
-      await _prefs.setBool(_cloudConsentKey, true);
-    } catch (_) {}
-  }
 }

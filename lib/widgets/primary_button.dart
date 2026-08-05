@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../core/colors.dart';
-import '../core/typography.dart';
+import '../core/theme/colors.dart';
+import '../core/theme/typography.dart';
 
 class PrimaryButton extends StatefulWidget {
   final String label;
