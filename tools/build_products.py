@@ -34,10 +34,20 @@ SEED_PATH = ROOT / "tools" / "products_seed.json"
 # rather than a warning.
 CATEGORIES = {"SPF", "Tozalovchi", "Niqob", "Peeling", "Remover"}
 
-# Grid cells are under 200dp and the detail view decodes at 900px, so 900 is
-# the widest size any screen can actually use.
-MAX_WIDTH = 900
-QUALITY = 80
+# The detail view fills the screen minus 32dp of padding. On a 3.5x-density
+# phone that is ~1330 physical pixels, and 4x phones exist — so anything under
+# ~1400 gets upscaled and looks soft. Images are never enlarged past their own
+# source: upscaling adds bytes and no detail.
+MAX_WIDTH = 1400
+
+# 92 is where WebP stops showing artefacts on the fine print that product
+# packaging is covered in. 80 visibly softens it, and above 92 the file grows
+# much faster than the picture improves.
+QUALITY = 92
+
+# Below this the source itself is the limit on sharpness, so warn rather than
+# silently ship a soft picture.
+MIN_GOOD_WIDTH = 1200
 
 REQUIRED = ["id", "image", "brand", "name", "subtitle", "price", "category"]
 
@@ -80,10 +90,14 @@ def validate(rows: list[dict]) -> list[str]:
     return problems
 
 
-def convert(src: Path, dest: Path) -> tuple[int, int]:
-    """Downscale to MAX_WIDTH and re-encode as WebP. Returns (before, after)."""
+def convert(src: Path, dest: Path) -> tuple[int, int, int, bool]:
+    """Re-encode as WebP, capped at MAX_WIDTH and never enlarged.
+
+    Returns (bytes before, bytes after, output width, source was too small).
+    """
     before = src.stat().st_size
     with Image.open(src) as im:
+        source_width = im.width
         # Flatten transparency onto white: cards sit on white, and keeping an
         # alpha channel roughly doubles the encoded size for no visible gain.
         if im.mode in ("RGBA", "LA", "P"):
@@ -100,8 +114,9 @@ def convert(src: Path, dest: Path) -> tuple[int, int]:
 
         dest.parent.mkdir(parents=True, exist_ok=True)
         im.save(dest, "WEBP", quality=QUALITY, method=6)
+        out_width = im.width
 
-    return before, dest.stat().st_size
+    return before, dest.stat().st_size, out_width, source_width < MIN_GOOD_WIDTH
 
 
 def main() -> None:
@@ -128,15 +143,18 @@ def main() -> None:
 
     seed = []
     total_before = total_after = 0
+    soft: list[tuple[str, int]] = []
 
     for order, row in enumerate(rows):
         pid = row["id"].strip()
         src = RAW_DIR / row["image"].strip()
         dest = OUT_DIR / f"{pid}.webp"
 
-        before, after = convert(src, dest)
+        before, after, width, too_small = convert(src, dest)
         total_before += before
         total_after += after
+        if too_small:
+            soft.append((pid, width))
 
         benefits = [
             b.strip()
@@ -161,7 +179,11 @@ def main() -> None:
             }
         )
 
-        print(f"  {pid:<14} {before // 1024:>5} KB → {after // 1024:>4} KB")
+        flag = "  ← manba kichik" if too_small else ""
+        print(
+            f"  {pid:<14} {before // 1024:>5} KB → {after // 1024:>4} KB"
+            f"  {width}px{flag}"
+        )
 
     SEED_PATH.write_text(
         json.dumps(seed, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
@@ -171,6 +193,17 @@ def main() -> None:
     print(f"Rasmlar : {OUT_DIR.relative_to(ROOT)}  ({len(seed)} ta)")
     print(f"Hajm    : {total_before // 1024} KB → {total_after // 1024} KB")
     print(f"Seed    : {SEED_PATH.relative_to(ROOT)}")
+
+    if soft:
+        print()
+        print(
+            f"DIQQAT — {len(soft)} ta rasmning manbasi {MIN_GOOD_WIDTH}px dan tor. "
+            "Skript ularni kattalashtirmaydi (kattalashtirish tiniqlik qo'shmaydi, "
+            "faqat xiralashtiradi). Yuqori aniqlikdagi asl nusxa bo'lsa almashtir:"
+        )
+        for pid, width in soft:
+            print(f"  - {pid}: {width}px")
+
     print()
     print("Keyingi qadam:")
     print("  firebase deploy --only hosting")

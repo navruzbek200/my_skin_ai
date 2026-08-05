@@ -281,40 +281,50 @@ class _ProductsBodyState extends State<_ProductsBody> {
 
 // ── Product image helper ──────────────────────────────────────
 
-/// [decodeWidth] caps the resolution the bitmap is decoded at. Product art is
-/// ~1000-1450px wide at source, while a grid cell is under 200dp — decoding at
-/// full size costs ~6MB of RAM per image, so a scroll through 60 products
-/// thrashes Flutter's image cache and drops frames. Decoding at the size we
-/// actually draw keeps each image around 640KB.
-Widget _productImage(
-  Product product, {
-  BoxFit fit = BoxFit.contain,
-  int decodeWidth = 400,
-}) {
-  if (product.imageUrl != null && product.imageUrl!.isNotEmpty) {
-    return CachedNetworkImage(
-      imageUrl: product.imageUrl!,
-      fit: fit,
-      memCacheWidth: decodeWidth,
-      // Disk copy is capped too, so a poorly exported source image cannot
-      // bloat the on-device cache.
-      maxWidthDiskCache: 1000,
-      placeholder: (_, _) => const Center(
-        child: CircularProgressIndicator(
-            strokeWidth: 1.5, color: AppColors.primary),
-      ),
-      errorWidget: (_, _, _) => const Icon(
-          Icons.image_outlined,
-          size: 40,
-          color: Color(0xFFCCC8E0)),
-    );
-  }
-  return Image.asset(
-    product.imagePath,
-    fit: fit,
-    cacheWidth: decodeWidth,
-    errorBuilder: (_, _, _) =>
-        const Icon(Icons.image_outlined, size: 40, color: Color(0xFFCCC8E0)),
+/// Widest bitmap we ever decode. Matches the width the build pipeline caps
+/// stored images at, so asking for more would only upscale.
+const _maxDecodeWidth = 1400;
+
+/// Decodes at exactly the number of physical pixels the widget will occupy —
+/// box width in logical pixels times the device pixel ratio.
+///
+/// A fixed number cannot work here: the same 180dp grid cell is 360 real
+/// pixels on a cheap 2x phone and 720 on a 4x flagship. Guessing low makes a
+/// blurry picture on good screens; guessing high wastes memory on cheap ones,
+/// and product packaging is covered in fine print that shows both mistakes
+/// immediately.
+Widget _productImage(Product product, {BoxFit fit = BoxFit.contain}) {
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      final dpr = MediaQuery.devicePixelRatioOf(context);
+      final logical = constraints.hasBoundedWidth
+          ? constraints.maxWidth
+          : MediaQuery.sizeOf(context).width;
+      final decodeWidth = (logical * dpr).round().clamp(1, _maxDecodeWidth);
+
+      if (product.imageUrl != null && product.imageUrl!.isNotEmpty) {
+        return CachedNetworkImage(
+          imageUrl: product.imageUrl!,
+          fit: fit,
+          memCacheWidth: decodeWidth,
+          placeholder: (_, _) => const Center(
+            child: CircularProgressIndicator(
+                strokeWidth: 1.5, color: AppColors.primary),
+          ),
+          errorWidget: (_, _, _) => const Icon(
+              Icons.image_outlined,
+              size: 40,
+              color: Color(0xFFCCC8E0)),
+        );
+      }
+      return Image.asset(
+        product.imagePath,
+        fit: fit,
+        cacheWidth: decodeWidth,
+        errorBuilder: (_, _, _) =>
+            const Icon(Icons.image_outlined, size: 40, color: Color(0xFFCCC8E0)),
+      );
+    },
   );
 }
 
@@ -485,8 +495,7 @@ class _ProductDetailPage extends StatelessWidget {
               color: Colors.white,
               child: Padding(
                 padding: EdgeInsets.fromLTRB(16, topPad + 48, 16, 0),
-                // Detail view fills the screen width, so it earns the larger decode.
-                child: _productImage(product, decodeWidth: 900),
+                child: _productImage(product),
               ),
             ),
           ),
