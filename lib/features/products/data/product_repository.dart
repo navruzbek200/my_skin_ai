@@ -2,15 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:real_beauty_ai/data/products_data.dart';
 
 /// Concern name (matches SkinConcern.name) → relevant product categories.
+/// Categories are the brand's product lines; see the chips in products_page.
 const _concernToCategories = <String, List<String>>{
-  'acne':        ['Tozalovchi', 'Niqob'],
-  'darkSpots':   ['Peeling', 'Tozalovchi'],
-  'pores':       ['Niqob', 'Peeling'],
-  'wrinkles':    ['SPF'],
-  'darkCircles': ['Tozalovchi', 'Remover'],
-  'eyeBags':     ['Remover'],
-  'blackheads':  ['Niqob', 'Peeling'],
-  'oiliness':    ['Tozalovchi', 'SPF'],
+  'acne':        ['Tinchlantiruvchi', 'Tozalovchi'],
+  'darkSpots':   ['Oqartiruvchi', 'Ampula'],
+  'pores':       ['Tozalovchi', 'Niqob'],
+  'wrinkles':    ['Stem Cell', 'Ampula'],
+  'darkCircles': ['Ampula', 'Namlantiruvchi'],
+  'eyeBags':     ['Ampula', 'Stem Cell'],
+  'blackheads':  ['Tozalovchi', 'Niqob'],
+  'oiliness':    ['Tozalovchi', 'Himoya'],
 };
 
 class ProductRepository {

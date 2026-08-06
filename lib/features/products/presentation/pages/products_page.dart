@@ -40,7 +40,22 @@ class _ProductsBody extends StatefulWidget {
 
 class _ProductsBodyState extends State<_ProductsBody> {
   int _selectedChip = 0;
-  final _chips = ['Barchasi', 'SPF', 'Tozalovchi', 'Niqob', 'Peeling', 'Remover'];
+  // Mirrors the brand's own product lines, which is how the catalogue is
+  // organised and how customers ask for it. Must stay in step with CATEGORIES
+  // in tools/build_products.py — a product filed under anything else is
+  // reachable from "Barchasi" only.
+  final _chips = [
+    'Barchasi',
+    'Tozalovchi',
+    'Himoya',
+    'Oqartiruvchi',
+    'Tinchlantiruvchi',
+    'Ampula',
+    'Namlantiruvchi',
+    'Stem Cell',
+    'Niqob',
+    'Tana',
+  ];
 
   List<Product> _filtered(List<Product> all) {
     if (_selectedChip == 0) return all;

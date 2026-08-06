@@ -32,7 +32,17 @@ SEED_PATH = ROOT / "tools" / "products_seed.json"
 # Matches the filter chips in products_page.dart. A category outside this set
 # would leave the product unreachable behind every chip, so it is an error
 # rather than a warning.
-CATEGORIES = {"SPF", "Tozalovchi", "Niqob", "Peeling", "Remover"}
+CATEGORIES = {
+    "Tozalovchi",
+    "Himoya",
+    "Oqartiruvchi",
+    "Tinchlantiruvchi",
+    "Ampula",
+    "Namlantiruvchi",
+    "Stem Cell",
+    "Niqob",
+    "Tana",
+}
 
 # The detail view fills the screen minus 32dp of padding. On a 3.5x-density
 # phone that is ~1330 physical pixels, and 4x phones exist — so anything under
@@ -48,6 +58,12 @@ QUALITY = 92
 # Below this the source itself is the limit on sharpness, so warn rather than
 # silently ship a soft picture.
 MIN_GOOD_WIDTH = 1200
+
+# The studio shots come on a light grey sweep (around 239) rather than pure
+# white, which reads as a grey rectangle on the white product cards. Stretching
+# the white point clips that field to 255 while leaving the product and its
+# drop shadow — both well below this — untouched.
+WHITE_POINT = 236.0
 
 # `price` is deliberately absent: nothing in the UI draws it yet, so demanding
 # it would block the catalogue on data that changes nothing on screen. The
@@ -94,6 +110,19 @@ def validate(rows: list[dict]) -> list[str]:
     return problems
 
 
+def _whiten_background(im: Image.Image) -> Image.Image:
+    """Clip the studio sweep to pure white, leaving the product untouched.
+
+    A plain threshold would eat the drop shadow and leave a hard edge; scaling
+    every channel toward the white point keeps the shadow's gradient and simply
+    lifts the background off the card.
+    """
+    import numpy as np
+
+    a = np.asarray(im).astype(np.float32) * (255.0 / WHITE_POINT)
+    return Image.fromarray(np.clip(a, 0, 255).astype("uint8"), "RGB")
+
+
 def convert(src: Path, dest: Path) -> tuple[int, int, int, bool]:
     """Re-encode as WebP, capped at MAX_WIDTH and never enlarged.
 
@@ -115,6 +144,8 @@ def convert(src: Path, dest: Path) -> tuple[int, int, int, bool]:
         if im.width > MAX_WIDTH:
             height = round(im.height * MAX_WIDTH / im.width)
             im = im.resize((MAX_WIDTH, height), Image.LANCZOS)
+
+        im = _whiten_background(im)
 
         dest.parent.mkdir(parents=True, exist_ok=True)
         im.save(dest, "WEBP", quality=QUALITY, method=6)
