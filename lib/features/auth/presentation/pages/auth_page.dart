@@ -13,7 +13,7 @@ void _openPrivacyPolicy() {
   launchUrl(Uri.parse(privacyPolicyUrl), mode: LaunchMode.externalApplication);
 }
 
-// Real email format check — used by both login and register email fields.
+// Real email format check.
 final _emailPattern = RegExp(r'^[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}$');
 String? _validateEmail(String? v) {
   final value = v?.trim() ?? '';
@@ -22,6 +22,11 @@ String? _validateEmail(String? v) {
   return null;
 }
 
+/// One screen, one form, no sign-in/sign-up choice.
+///
+/// Asking someone whether they already have an account is a question about our
+/// database, not about them, and this audience should not have to answer it —
+/// [AuthCubit.continueWithEmail] works it out from the address.
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
 
@@ -30,34 +35,35 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  final PageController _page = PageController();
-
-  void _toRegister() => _page.animateToPage(
-        1,
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeInOut,
-      );
-
-  void _toLogin() => _page.animateToPage(
-        0,
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeInOut,
-      );
+  bool _obscure = true;
+  final _formKey = GlobalKey<FormState>();
+  final _emailCtrl = TextEditingController();
+  final _passwordCtrl = TextEditingController();
+  final _passwordFocus = FocusNode();
+  bool _submitted = false;
 
   @override
   void dispose() {
-    _page.dispose();
+    _emailCtrl.dispose();
+    _passwordCtrl.dispose();
+    _passwordFocus.dispose();
     super.dispose();
+  }
+
+  void _submit() {
+    setState(() => _submitted = true);
+    if (!_formKey.currentState!.validate()) return;
+    FocusScope.of(context).unfocus();
+    context
+        .read<AuthCubit>()
+        .continueWithEmail(_emailCtrl.text, _passwordCtrl.text);
   }
 
   void _showError(BuildContext context, String message) {
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          message,
-          style: GoogleFonts.nunito(color: Colors.white),
-        ),
+        content: Text(message, style: GoogleFonts.nunito(color: Colors.white)),
         backgroundColor: const Color(0xFF7060AA),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -68,6 +74,9 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bottom = MediaQuery.of(context).padding.bottom;
+    final top = MediaQuery.of(context).padding.top;
+
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state is AuthAuthenticated) {
@@ -79,292 +88,104 @@ class _AuthScreenState extends State<AuthScreen> {
       },
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: PageView(
-          controller: _page,
-          physics: const NeverScrollableScrollPhysics(),
-          children: [
-            _LoginPage(
-              onSignUp: _toRegister,
-              onForgotPassword: () => context.push('/forgot'),
-            ),
-            _RegisterPage(onLogin: _toLogin),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Shared header ────────────────────────────────────────────
-
-class _AuthHeader extends StatelessWidget {
-  final String title;
-  const _AuthHeader({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Center(child: Image.asset('assets/splash.png', height: 104)),
-        const SizedBox(height: 14),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: GoogleFonts.nunito(
-            fontSize: 26,
-            fontWeight: FontWeight.w800,
-            color: const Color(0xFF3D2F8A),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ── Login Page ───────────────────────────────────────────────
-
-class _LoginPage extends StatefulWidget {
-  final VoidCallback onSignUp;
-  final VoidCallback onForgotPassword;
-  const _LoginPage({required this.onSignUp, required this.onForgotPassword});
-
-  @override
-  State<_LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<_LoginPage> {
-  bool _obscure = true;
-  final _formKey = GlobalKey<FormState>();
-  final _emailCtrl = TextEditingController();
-  final _passwordCtrl = TextEditingController();
-  final _passwordFocus = FocusNode();
-  bool _submitted = false;
-
-  @override
-  void dispose() {
-    _emailCtrl.dispose();
-    _passwordCtrl.dispose();
-    _passwordFocus.dispose();
-    super.dispose();
-  }
-
-  void _submit(BuildContext context) {
-    setState(() => _submitted = true);
-    if (!_formKey.currentState!.validate()) return;
-    FocusScope.of(context).unfocus();
-    context.read<AuthCubit>().login(_emailCtrl.text, _passwordCtrl.text);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final bottom = MediaQuery.of(context).padding.bottom;
-    final top = MediaQuery.of(context).padding.top;
-
-    return Form(
-      key: _formKey,
-      autovalidateMode:
-          _submitted ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
-      child: AutofillGroup(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(28, top + 20, 28, bottom + 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const _AuthHeader(title: 'Xush kelibsiz'),
-              const SizedBox(height: 24),
-              _AuthField(
-                label: 'Email',
-                icon: Icons.mail_outline_rounded,
-                keyboardType: TextInputType.emailAddress,
-                controller: _emailCtrl,
-                validator: _validateEmail,
-                textInputAction: TextInputAction.next,
-                autofillHints: const [AutofillHints.email],
-                onFieldSubmitted: (_) => _passwordFocus.requestFocus(),
-              ),
-              const SizedBox(height: 12),
-              _AuthField(
-                label: 'Parol',
-                icon: Icons.lock_outline_rounded,
-                obscure: _obscure,
-                controller: _passwordCtrl,
-                focusNode: _passwordFocus,
-                validator: (v) {
-                  if (v == null || v.isEmpty) return 'Parol kiriting';
-                  return null;
-                },
-                textInputAction: TextInputAction.done,
-                autofillHints: const [AutofillHints.password],
-                onFieldSubmitted: (_) => _submit(context),
-                suffixIcon: GestureDetector(
-                  onTap: () => setState(() => _obscure = !_obscure),
-                  child: Icon(
-                    _obscure
-                        ? Icons.visibility_off_outlined
-                        : Icons.visibility_outlined,
-                    color: AppColors.muted,
-                    size: 20,
+        body: Form(
+          key: _formKey,
+          autovalidateMode: _submitted
+              ? AutovalidateMode.onUserInteraction
+              : AutovalidateMode.disabled,
+          child: AutofillGroup(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(28, top + 24, 28, bottom + 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(child: Image.asset('assets/splash.png', height: 104)),
+                  const SizedBox(height: 14),
+                  Text(
+                    'Xush kelibsiz',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.nunito(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF3D2F8A),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Align(
-                alignment: Alignment.centerRight,
-                child: GestureDetector(
-                  onTap: widget.onForgotPassword,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: Text(
-                      'Parolni unutdingizmi?',
-                      style: GoogleFonts.nunito(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF7060AA),
+                  const SizedBox(height: 28),
+                  _AuthField(
+                    label: 'Email',
+                    icon: Icons.mail_outline_rounded,
+                    keyboardType: TextInputType.emailAddress,
+                    controller: _emailCtrl,
+                    validator: _validateEmail,
+                    textInputAction: TextInputAction.next,
+                    autofillHints: const [AutofillHints.email],
+                    onFieldSubmitted: (_) => _passwordFocus.requestFocus(),
+                  ),
+                  const SizedBox(height: 12),
+                  _AuthField(
+                    label: 'Parol',
+                    helperText: 'Kamida 6 belgi',
+                    icon: Icons.lock_outline_rounded,
+                    obscure: _obscure,
+                    controller: _passwordCtrl,
+                    focusNode: _passwordFocus,
+                    validator: (v) {
+                      if (v == null || v.isEmpty) return 'Parol kiriting';
+                      if (v.length < 6) {
+                        return "Parol kamida 6 belgidan iborat bo'lishi kerak";
+                      }
+                      return null;
+                    },
+                    textInputAction: TextInputAction.done,
+                    autofillHints: const [AutofillHints.password],
+                    onFieldSubmitted: (_) => _submit(),
+                    suffixIcon: GestureDetector(
+                      onTap: () => setState(() => _obscure = !_obscure),
+                      child: Icon(
+                        _obscure
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
+                        color: AppColors.muted,
+                        size: 20,
                       ),
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              BlocBuilder<AuthCubit, AuthState>(
-                builder: (context, state) {
-                  return _AuthButton(
-                    label: 'Kirish',
-                    isLoading: state is AuthLoading,
-                    onTap: () => _submit(context),
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
-              const _OrDivider(),
-              const SizedBox(height: 16),
-              const GoogleSignInButton(),
-              const SizedBox(height: 20),
-              _SwitchRow(
-                text: "Hisobingiz yo'qmi?",
-                actionText: "Ro'yxatdan o'tish",
-                onTap: widget.onSignUp,
-              ),
-              const SizedBox(height: 12),
-              const _PrivacyLink(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ── Register Page ────────────────────────────────────────────
-
-class _RegisterPage extends StatefulWidget {
-  final VoidCallback onLogin;
-  const _RegisterPage({required this.onLogin});
-
-  @override
-  State<_RegisterPage> createState() => _RegisterPageState();
-}
-
-class _RegisterPageState extends State<_RegisterPage> {
-  bool _obscure = true;
-  final _formKey = GlobalKey<FormState>();
-  final _emailCtrl = TextEditingController();
-  final _passwordCtrl = TextEditingController();
-  final _passwordFocus = FocusNode();
-  bool _submitted = false;
-
-  @override
-  void dispose() {
-    _emailCtrl.dispose();
-    _passwordCtrl.dispose();
-    _passwordFocus.dispose();
-    super.dispose();
-  }
-
-  void _submit(BuildContext context) {
-    setState(() => _submitted = true);
-    if (!_formKey.currentState!.validate()) return;
-    FocusScope.of(context).unfocus();
-    context.read<AuthCubit>().register(_emailCtrl.text, _passwordCtrl.text);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final bottom = MediaQuery.of(context).padding.bottom;
-    final top = MediaQuery.of(context).padding.top;
-
-    return Form(
-      key: _formKey,
-      autovalidateMode:
-          _submitted ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
-      child: AutofillGroup(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(28, top + 20, 28, bottom + 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const _AuthHeader(title: 'Hisob yaratish'),
-              const SizedBox(height: 24),
-              _AuthField(
-                label: 'Email',
-                icon: Icons.mail_outline_rounded,
-                keyboardType: TextInputType.emailAddress,
-                controller: _emailCtrl,
-                validator: _validateEmail,
-                textInputAction: TextInputAction.next,
-                autofillHints: const [AutofillHints.email],
-                onFieldSubmitted: (_) => _passwordFocus.requestFocus(),
-              ),
-              const SizedBox(height: 12),
-              _AuthField(
-                label: 'Parol',
-                helperText: 'Kamida 6 belgi',
-                icon: Icons.lock_outline_rounded,
-                obscure: _obscure,
-                controller: _passwordCtrl,
-                focusNode: _passwordFocus,
-                validator: (v) {
-                  if (v == null || v.isEmpty) return 'Parol kiriting';
-                  if (v.length < 6) return "Parol kamida 6 belgidan iborat bo'lishi kerak";
-                  return null;
-                },
-                textInputAction: TextInputAction.done,
-                autofillHints: const [AutofillHints.newPassword],
-                onFieldSubmitted: (_) => _submit(context),
-                suffixIcon: GestureDetector(
-                  onTap: () => setState(() => _obscure = !_obscure),
-                  child: Icon(
-                    _obscure
-                        ? Icons.visibility_off_outlined
-                        : Icons.visibility_outlined,
-                    color: AppColors.muted,
-                    size: 20,
+                  const SizedBox(height: 20),
+                  BlocBuilder<AuthCubit, AuthState>(
+                    builder: (context, state) {
+                      return _AuthButton(
+                        label: 'Davom etish',
+                        isLoading: state is AuthLoading,
+                        onTap: _submit,
+                      );
+                    },
                   ),
-                ),
+                  const SizedBox(height: 10),
+                  Center(
+                    child: GestureDetector(
+                      onTap: () => context.push('/forgot'),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          'Parolni unutdingizmi?',
+                          style: GoogleFonts.nunito(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF7060AA),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const _OrDivider(),
+                  const SizedBox(height: 18),
+                  const GoogleSignInButton(),
+                  const SizedBox(height: 20),
+                  const _PrivacyLink(),
+                ],
               ),
-              const SizedBox(height: 20),
-              BlocBuilder<AuthCubit, AuthState>(
-                builder: (context, state) {
-                  return _AuthButton(
-                    label: "Ro'yxatdan o'tish",
-                    isLoading: state is AuthLoading,
-                    onTap: () => _submit(context),
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
-              const _OrDivider(),
-              const SizedBox(height: 16),
-              const GoogleSignInButton(),
-              const SizedBox(height: 20),
-              _SwitchRow(
-                text: 'Hisobingiz bormi?',
-                actionText: 'Kirish',
-                onTap: widget.onLogin,
-              ),
-              const SizedBox(height: 12),
-              const _PrivacyLink(),
-            ],
+            ),
           ),
         ),
       ),
@@ -513,48 +334,6 @@ class _AuthButton extends StatelessWidget {
                 ),
               ),
       ),
-    );
-  }
-}
-
-class _SwitchRow extends StatelessWidget {
-  final String text;
-  final String actionText;
-  final VoidCallback onTap;
-  const _SwitchRow({
-    required this.text,
-    required this.actionText,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          text,
-          style: GoogleFonts.nunito(
-            fontSize: 14,
-            color: const Color(0xFF9490B0),
-          ),
-        ),
-        const SizedBox(width: 4),
-        GestureDetector(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
-            child: Text(
-              actionText,
-              style: GoogleFonts.nunito(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF4A3A9A),
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

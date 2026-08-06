@@ -21,73 +21,76 @@ void main() {
     when(() => ds.sendEmailVerification()).thenAnswer((_) async {});
   });
 
-  // ── Email login ──────────────────────────────────────────────────────
+  // ── One form for both sign-up and sign-in ────────────────────────────
 
   blocTest<AuthCubit, AuthState>(
-    'login success → [Loading, Authenticated]',
+    'unknown address → account created and verification mailed',
     build: () {
-      when(() => ds.signIn(any(), any())).thenAnswer((_) async {});
+      when(() => ds.register(any(), any(), any())).thenAnswer((_) async {});
       return AuthCubit(ds);
     },
-    act: (c) => c.login('a@b.com', 'secret123'),
+    act: (c) => c.continueWithEmail('a@b.com', 'secret123'),
     expect: () => [isA<AuthLoading>(), isA<AuthAuthenticated>()],
+    verify: (_) {
+      verify(() => ds.sendEmailVerification()).called(1);
+      // Creating succeeded, so there was nothing to sign in to.
+      verifyNever(() => ds.signIn(any(), any()));
+    },
   );
 
   blocTest<AuthCubit, AuthState>(
-    'login wrong password → [Loading, Error]',
+    'known address with the right password → signed in, no second account',
     build: () {
-      when(() => ds.signIn(any(), any()))
-          .thenThrow(FirebaseAuthException(code: 'wrong-password'));
+      when(() => ds.register(any(), any(), any()))
+          .thenThrow(FirebaseAuthException(code: 'email-already-in-use'));
+      when(() => ds.signIn(any(), any())).thenAnswer((_) async {});
       return AuthCubit(ds);
     },
-    act: (c) => c.login('a@b.com', 'nope'),
+    act: (c) => c.continueWithEmail('a@b.com', 'secret123'),
+    expect: () => [isA<AuthLoading>(), isA<AuthAuthenticated>()],
+    verify: (_) {
+      verify(() => ds.signIn('a@b.com', 'secret123')).called(1);
+      // The address was already verified by whoever registered it.
+      verifyNever(() => ds.sendEmailVerification());
+    },
+  );
+
+  blocTest<AuthCubit, AuthState>(
+    'known address with the wrong password → error, not a new account',
+    build: () {
+      when(() => ds.register(any(), any(), any()))
+          .thenThrow(FirebaseAuthException(code: 'email-already-in-use'));
+      when(() => ds.signIn(any(), any()))
+          .thenThrow(FirebaseAuthException(code: 'invalid-credential'));
+      return AuthCubit(ds);
+    },
+    act: (c) => c.continueWithEmail('a@b.com', 'nope123'),
     expect: () => [
       isA<AuthLoading>(),
       isA<AuthError>().having((e) => e.message, 'msg', "Parol noto'g'ri"),
     ],
   );
 
-  // ── Register ─────────────────────────────────────────────────────────
-
   blocTest<AuthCubit, AuthState>(
-    'register success → [Loading, Authenticated]',
-    build: () {
-      when(() => ds.register(any(), any(), any())).thenAnswer((_) async {});
-      return AuthCubit(ds);
-    },
-    act: (c) => c.register('a@b.com', 'secret123'),
-    expect: () => [isA<AuthLoading>(), isA<AuthAuthenticated>()],
-    verify: (_) => verify(() => ds.sendEmailVerification()).called(1),
-  );
-
-  blocTest<AuthCubit, AuthState>(
-    'failed register does not mail a verification link',
+    'a real sign-up failure surfaces instead of falling through to sign-in',
     build: () {
       when(() => ds.register(any(), any(), any()))
           .thenThrow(FirebaseAuthException(code: 'weak-password'));
       return AuthCubit(ds);
     },
-    act: (c) => c.register('a@b.com', '123'),
-    expect: () => [isA<AuthLoading>(), isA<AuthError>()],
-    verify: (_) => verifyNever(() => ds.sendEmailVerification()),
-  );
-
-  blocTest<AuthCubit, AuthState>(
-    'register email already in use → [Loading, Error]',
-    build: () {
-      when(() => ds.register(any(), any(), any()))
-          .thenThrow(FirebaseAuthException(code: 'email-already-in-use'));
-      return AuthCubit(ds);
-    },
-    act: (c) => c.register('a@b.com', 'secret123'),
+    act: (c) => c.continueWithEmail('a@b.com', '123'),
     expect: () => [
       isA<AuthLoading>(),
       isA<AuthError>().having(
         (e) => e.message,
         'msg',
-        "Bu email allaqachon ro'yxatdan o'tgan",
+        "Parol kamida 6 belgidan iborat bo'lishi kerak",
       ),
     ],
+    verify: (_) {
+      verifyNever(() => ds.signIn(any(), any()));
+      verifyNever(() => ds.sendEmailVerification());
+    },
   );
 
   // ── Google ───────────────────────────────────────────────────────────

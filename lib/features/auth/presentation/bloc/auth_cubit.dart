@@ -13,35 +13,47 @@ class AuthCubit extends Cubit<AuthState> {
 
   final AuthDataSource _ds;
 
-  Future<void> login(String email, String password) async {
+  /// Signs in or signs up from the same pair of fields, so the user never has
+  /// to answer "do you already have an account".
+  ///
+  /// Creating comes first because its failure is unambiguous:
+  /// `email-already-in-use` means the address is taken and the password should
+  /// be checked against it. The reverse order cannot work — with email
+  /// enumeration protection a failed sign-in returns `invalid-credential`
+  /// whether the account is missing or the password is simply wrong, so there
+  /// would be no way to tell "sign me up" from "you typed it wrong".
+  Future<void> continueWithEmail(String email, String password) async {
     emit(AuthLoading());
-    try {
-      await _ds.signIn(email.trim(), password);
-      await LocalStore.instance.setLoggedIn();
-      emit(AuthAuthenticated());
-    } on FirebaseAuthException catch (e) {
-      emit(AuthError(_mapError(e.code)));
-    } catch (_) {
-      emit(AuthError("Kutilmagan xato. Qaytadan urinib ko'ring"));
-    }
-  }
+    final address = email.trim();
 
-  Future<void> register(String email, String password) async {
-    emit(AuthLoading());
     try {
-      // No display name is collected at sign-up — the account screen falls
-      // back to the email address for the avatar initial and contact label.
-      await _ds.register(email.trim(), password, null);
-      // The address is unproven until the link is clicked. Firebase signs the
-      // user in regardless, so the router — not this cubit — is what holds
-      // them at the verify screen.
+      // No display name is collected — the account screen falls back to the
+      // email address for the avatar initial and contact label.
+      await _ds.register(address, password, null);
+      // Sent quietly: nothing blocks on it, but a verified address is what
+      // makes a forgotten password recoverable later.
       await _ds.sendEmailVerification();
       await LocalStore.instance.setLoggedIn();
       emit(AuthAuthenticated());
+      return;
+    } on FirebaseAuthException catch (e) {
+      if (e.code != 'email-already-in-use') {
+        emit(AuthError(_mapError(e.code)));
+        return;
+      }
+    } catch (_) {
+      emit(AuthError("Xato yuz berdi. Qaytadan urinib ko'ring"));
+      return;
+    }
+
+    try {
+      await _ds.signIn(address, password);
+      await LocalStore.instance.setLoggedIn();
+      emit(AuthAuthenticated());
     } on FirebaseAuthException catch (e) {
       emit(AuthError(_mapError(e.code)));
     } catch (_) {
-      emit(AuthError("Ro'yxatdan o'tishda xato. Qaytadan urinib ko'ring"));
+      emit(AuthError("Xato yuz berdi. Qaytadan urinib ko'ring"));
     }
   }
 
