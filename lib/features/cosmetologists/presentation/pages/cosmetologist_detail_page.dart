@@ -87,6 +87,7 @@ class _KosmetologDetailScreenState extends State<KosmetologDetailScreen> {
       body: Stack(
         children: [
           CustomScrollView(
+            physics: const BouncingScrollPhysics(),
             controller: _scrollCtrl,
             slivers: [
 

@@ -74,6 +74,7 @@ class _ProductsBodyState extends State<_ProductsBody> {
         return Scaffold(
           backgroundColor: AppColors.background,
           body: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
             slivers: [
               SliverToBoxAdapter(
                 child: SafeArea(
@@ -552,6 +553,7 @@ class _ProductDetailPage extends StatelessWidget {
                 ],
               ),
               child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
                 padding:
                     EdgeInsets.fromLTRB(24, 16, 24, bottomPad + 32),
                 child: Column(

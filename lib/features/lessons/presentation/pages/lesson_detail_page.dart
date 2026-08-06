@@ -236,6 +236,7 @@ class _StepContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
       child: switch (step.type) {
         LessonStepType.intro => IntroStep(step: step, color: color),

@@ -1,0 +1,9 @@
+{
+  "name": "real-beauty-tools",
+  "private": true,
+  "type": "module",
+  "description": "One-off catalogue tooling. Separate from functions/ because these scripts run on a laptop against the Admin SDK and must never be deployed.",
+  "dependencies": {
+    "firebase-admin": "^13.0.0"
+  }
+}

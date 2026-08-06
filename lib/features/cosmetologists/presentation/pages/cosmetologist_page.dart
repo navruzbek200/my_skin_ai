@@ -64,6 +64,7 @@ class _KonnikmaBodyState extends State<_KonnikmaBody> {
               return false;
             },
             child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
             slivers: [
               SliverToBoxAdapter(
                 child: SafeArea(

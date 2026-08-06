@@ -48,6 +48,7 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
           ),
           Expanded(
             child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
               controller: _scrollCtrl,
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 48),
               child: Column(
