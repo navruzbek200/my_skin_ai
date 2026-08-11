@@ -1,6 +1,11 @@
 class Product {
   final String imagePath;
   final String? imageUrl;
+
+  /// Half-width copy used by the grid. A 1400px file is four times the pixels
+  /// a 2-column cell can show, so fetching and decoding it 54 times is what
+  /// made fast scrolling stall.
+  final String? thumbUrl;
   final String brand;
   final String name;
   final String subtitle;
@@ -11,6 +16,7 @@ class Product {
   const Product({
     required this.imagePath,
     this.imageUrl,
+    this.thumbUrl,
     required this.brand,
     required this.name,
     required this.subtitle,
@@ -20,6 +26,13 @@ class Product {
   });
 }
 
+/// Offline fallback for the products screen — shown when Firestore is
+/// unreachable and has nothing cached, i.e. a first launch with no network.
+///
+/// Categories must be drawn from the same set as CATEGORIES in
+/// tools/build_products.py, because the filter chips are built from that list.
+/// A product filed under anything else is reachable from "Barchasi" only, and
+/// on this list that meant every other chip came up empty offline.
 final List<Product> products = [
   Product(
     imagePath: 'assets/products/product_1.jpg',
@@ -27,7 +40,7 @@ final List<Product> products = [
     name: 'Cica Perfect Sun Cream',
     subtitle: 'SPF 50+ / PA++++',
     price: '189 000 so\'m',
-    category: 'SPF',
+    category: 'Himoya',
     benefits: [
       'SPF 50+ / PA++++ kuchli quyosh himoyasi',
       'CICA kompleks bilan teri tinchlanadi',
@@ -41,7 +54,7 @@ final List<Product> products = [
     name: 'Multi Protection Balm',
     subtitle: 'SPF 37 / PA++',
     price: '159 000 so\'m',
-    category: 'SPF',
+    category: 'Himoya',
     benefits: [
       'SPF 37 / PA++ quyosh himoyasi',
       'Ko\'p maqsadli ishlatish imkoni',
@@ -97,7 +110,7 @@ final List<Product> products = [
     name: 'Double Peeling Gel',
     subtitle: 'AHA + BHA formula',
     price: '165 000 so\'m',
-    category: 'Peeling',
+    category: 'Tozalovchi',
     benefits: [
       'AHA — o\'lik teri hujayralarini olib tashlaydi',
       'BHA — g\'ovaklarni chuqur tozalaydi',
@@ -153,7 +166,7 @@ final List<Product> products = [
     name: 'Rose Waterproof Lip & Eye Remover',
     subtitle: 'Gentle biphasic remover',
     price: '155 000 so\'m',
-    category: 'Remover',
+    category: 'Tozalovchi',
     benefits: [
       'Ko\'z va lab makiyajini to\'liq olib tashlaydi',
       'Ikki fazali formula — aralashtirib ishlatiladi',

@@ -44,31 +44,35 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
             ),
           ),
           RepaintBoundary(
-            child: _ReadingProgressBar(controller: _scrollCtrl),
+            child: _ReadingProgressBar(
+              controller: _scrollCtrl,
+              color: widget.article.iconColor,
+            ),
           ),
           Expanded(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               controller: _scrollCtrl,
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 48),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _HeroBanner(article: widget.article),
-                  const SizedBox(height: 20),
-                  _SummaryCard(text: widget.article.summary),
-                  const SizedBox(height: 24),
-                  ...widget.article.sections.map(
-                    (s) => _SectionBlock(section: s),
-                  ),
-                ],
-              )
-                  .animate()
-                  .fadeIn(duration: const Duration(milliseconds: 260))
-                  .slideY(
-                    begin: 0.03,
-                    duration: const Duration(milliseconds: 290),
-                  ),
+              child:
+                  Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _HeroBanner(article: widget.article),
+                          const SizedBox(height: 20),
+                          _SummaryCard(text: widget.article.summary),
+                          const SizedBox(height: 24),
+                          ...widget.article.sections.map(
+                            (s) => _SectionBlock(section: s),
+                          ),
+                        ],
+                      )
+                      .animate()
+                      .fadeIn(duration: const Duration(milliseconds: 260))
+                      .slideY(
+                        begin: 0.03,
+                        duration: const Duration(milliseconds: 290),
+                      ),
             ),
           ),
         ],
@@ -138,7 +142,8 @@ class _ArticleAppBar extends StatelessWidget {
 
 class _ReadingProgressBar extends StatefulWidget {
   final ScrollController controller;
-  const _ReadingProgressBar({required this.controller});
+  final Color color;
+  const _ReadingProgressBar({required this.controller, required this.color});
 
   @override
   State<_ReadingProgressBar> createState() => _ReadingProgressBarState();
@@ -177,7 +182,7 @@ class _ReadingProgressBarState extends State<_ReadingProgressBar> {
       minHeight: 2,
       backgroundColor: Colors.transparent,
       valueColor: AlwaysStoppedAnimation<Color>(
-        AppColors.primary.withValues(alpha: 0.45),
+        widget.color.withValues(alpha: 0.55),
       ),
     );
   }
@@ -211,10 +216,10 @@ class _HeroBanner extends StatelessWidget {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.10),
+              color: article.iconColor.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
-            child: Icon(article.icon, color: AppColors.primary, size: 28),
+            child: Icon(article.icon, color: article.iconColor, size: 28),
           ),
           const SizedBox(height: 16),
           Text(
@@ -239,10 +244,7 @@ class _HeroBanner extends StatelessWidget {
               const SizedBox(width: 4),
               Text(
                 article.duration,
-                style: GoogleFonts.nunito(
-                  fontSize: 12,
-                  color: AppColors.muted,
-                ),
+                style: GoogleFonts.nunito(fontSize: 12, color: AppColors.muted),
               ),
               const SizedBox(width: 12),
               Container(
@@ -285,9 +287,7 @@ class _SummaryCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.primary.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.12),
-        ),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.12)),
       ),
       child: Text(
         text,

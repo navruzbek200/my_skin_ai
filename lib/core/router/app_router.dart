@@ -6,7 +6,6 @@ import 'package:real_beauty_ai/features/account/presentation/pages/account_page.
 import 'package:real_beauty_ai/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:real_beauty_ai/features/auth/presentation/pages/auth_page.dart';
 import 'package:real_beauty_ai/features/auth/presentation/pages/forgot_password_page.dart';
-import 'package:real_beauty_ai/features/auth/presentation/pages/verify_email_page.dart';
 import 'package:real_beauty_ai/features/cosmetologists/presentation/pages/cosmetologist_detail_page.dart';
 import 'package:real_beauty_ai/features/lessons/presentation/pages/article_detail_page.dart';
 import 'package:real_beauty_ai/features/lessons/presentation/pages/lesson_detail_page.dart';
@@ -40,12 +39,6 @@ final GoRouter appRouter = GoRouter(
     final loggedIn = session.isAuthenticated;
     final path = state.matchedLocation;
     if (!loggedIn && _protectedPaths.contains(path)) return '/auth';
-    // Verification is not a gate. Most of this audience does not use email
-    // day to day, and holding them at a screen that asks them to go find a
-    // link loses them at the door. The link is still mailed at sign-up and
-    // the verify screen is still reachable from the account page — it just
-    // never blocks anyone.
-    if (!loggedIn && path == '/verify-email') return '/auth';
     if (loggedIn && _authOnlyPaths.contains(path)) return '/home';
     if (const {'/scan-instructions', '/face-scan'}.contains(path) &&
         state.extra is! List) {
@@ -70,10 +63,6 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/auth',
       pageBuilder: (context, state) => _fade(state, const AuthScreen()),
-    ),
-    GoRoute(
-      path: '/verify-email',
-      pageBuilder: (context, state) => _fade(state, const VerifyEmailScreen()),
     ),
     GoRoute(
       path: '/forgot',

@@ -3,19 +3,15 @@ import 'package:real_beauty_ai/data/products_data.dart';
 
 /// Concern name (matches SkinConcern.name) → relevant product categories.
 /// Categories are the brand's product lines; see the chips in products_page.
-const _concernToCategories = <String, List<String>>{
-  'acne':        ['Tinchlantiruvchi', 'Tozalovchi'],
-  'darkSpots':   ['Oqartiruvchi', 'Ampula'],
-  'pores':       ['Tozalovchi', 'Niqob'],
-  'wrinkles':    ['Stem Cell', 'Ampula'],
-  'darkCircles': ['Ampula', 'Namlantiruvchi'],
-  'eyeBags':     ['Ampula', 'Stem Cell'],
-  'blackheads':  ['Tozalovchi', 'Niqob'],
-  'oiliness':    ['Tozalovchi', 'Himoya'],
-};
-
 class ProductRepository {
-  final _col = FirebaseFirestore.instance.collection('products');
+  /// Resolved on use, not in the constructor. `FirebaseFirestore.instance`
+  /// throws when no Firebase app exists, and as a field initialiser that made
+  /// merely *constructing* a repository fatal — which meant any screen holding
+  /// one could not be widget-tested, and a degraded launch (Firebase init
+  /// failed, see main.dart) crashed instead of falling back to the bundled
+  /// list. Inside the getter the throw lands in the callers' catch.
+  CollectionReference<Map<String, dynamic>> get _col =>
+      FirebaseFirestore.instance.collection('products');
 
   Future<List<Product>> getProducts() async {
     try {
@@ -27,42 +23,12 @@ class ProductRepository {
     }
   }
 
-  /// Returns up to [limit] products most relevant to the given concern keys.
-  /// Falls back gracefully — never throws.
-  Future<List<Product>> getRecommendedForConcerns(
-    Set<String> concerns, {
-    int limit = 4,
-  }) async {
-    if (concerns.isEmpty) return [];
-    try {
-      final all = await getProducts();
-
-      // Collect relevant categories preserving priority order
-      final relevantCats = <String>{};
-      for (final c in concerns) {
-        relevantCats.addAll(_concernToCategories[c] ?? []);
-      }
-
-      final matched = all.where((p) => relevantCats.contains(p.category)).toList();
-
-      // Score each product by how many relevant categories it satisfies
-      matched.sort((a, b) {
-        final aScore = relevantCats.contains(a.category) ? 1 : 0;
-        final bScore = relevantCats.contains(b.category) ? 1 : 0;
-        return bScore - aScore;
-      });
-
-      return matched.take(limit).toList();
-    } catch (_) {
-      return [];
-    }
-  }
-
   Product _fromDoc(QueryDocumentSnapshot doc) {
     final d = doc.data() as Map<String, dynamic>;
     return Product(
       imagePath: d['imagePath'] as String? ?? '',
       imageUrl: d['imageUrl'] as String?,
+      thumbUrl: d['thumbUrl'] as String?,
       brand: d['brand'] as String? ?? '',
       name: d['name'] as String? ?? '',
       subtitle: d['subtitle'] as String? ?? '',

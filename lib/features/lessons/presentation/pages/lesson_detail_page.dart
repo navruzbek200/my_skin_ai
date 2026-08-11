@@ -10,6 +10,10 @@ import 'package:real_beauty_ai/widgets/lessons/steps/list_step.dart';
 import 'package:real_beauty_ai/widgets/lessons/steps/tip_step.dart';
 import 'package:real_beauty_ai/widgets/primary_button.dart';
 
+/// Width of the strip along the left edge reserved for the system back
+/// gesture. Matches Cupertino's own `_kBackGestureWidth`.
+const double _kEdgeGestureWidth = 20.0;
+
 class LessonDetailScreen extends StatefulWidget {
   final Lesson lesson;
   const LessonDetailScreen({super.key, required this.lesson});
@@ -47,7 +51,21 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
     });
   }
 
+  /// Where the current horizontal drag began, in screen coordinates.
+  double _dragStartX = 0;
+
+  void _onSwipeStart(DragStartDetails details) {
+    _dragStartX = details.globalPosition.dx;
+  }
+
   void _onSwipe(DragEndDetails details) {
+    // A drag that starts against the left edge is the platform's "go back"
+    // gesture, and this detector sits on top of the whole step area, so it
+    // was swallowing it: an edge swipe stepped the lesson backwards instead
+    // of closing it, and on the first step it did nothing at all because
+    // _prevStep returns early there. Leave that strip to the navigator.
+    if (_dragStartX < _kEdgeGestureWidth) return;
+
     final v = details.primaryVelocity ?? 0;
     if (v < -300 && !_isLast) _next();
     if (v > 300) _prevStep();
@@ -71,16 +89,18 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
             _ProgressDots(lesson: _lesson, stepIndex: _stepIndex),
             Expanded(
               child: GestureDetector(
+                onHorizontalDragStart: _onSwipeStart,
                 onHorizontalDragEnd: _onSwipe,
                 child: AnimatedSwitcher(
                   duration: 300.ms,
                   transitionBuilder: (child, anim) {
-                    final slide = Tween<Offset>(
-                      begin: Offset(_direction * 0.3, 0),
-                      end: Offset.zero,
-                    ).animate(
-                      CurvedAnimation(parent: anim, curve: Curves.easeOut),
-                    );
+                    final slide =
+                        Tween<Offset>(
+                          begin: Offset(_direction * 0.3, 0),
+                          end: Offset.zero,
+                        ).animate(
+                          CurvedAnimation(parent: anim, curve: Curves.easeOut),
+                        );
                     return SlideTransition(
                       position: slide,
                       child: FadeTransition(opacity: anim, child: child),
@@ -166,7 +186,9 @@ class _Header extends StatelessWidget {
                     Text(
                       '${stepIndex + 1} / ${lesson.steps.length} qadam',
                       style: GoogleFonts.nunito(
-                          fontSize: 12, color: AppColors.muted),
+                        fontSize: 12,
+                        color: AppColors.muted,
+                      ),
                     ),
                   ],
                 ),
@@ -240,9 +262,9 @@ class _StepContent extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
       child: switch (step.type) {
         LessonStepType.intro => IntroStep(step: step, color: color),
-        LessonStepType.fact  => FactStep(step: step, color: color),
-        LessonStepType.list  => ListStep(step: step, color: color),
-        LessonStepType.tip   => TipStep(step: step, color: color),
+        LessonStepType.fact => FactStep(step: step, color: color),
+        LessonStepType.list => ListStep(step: step, color: color),
+        LessonStepType.tip => TipStep(step: step, color: color),
       },
     );
   }

@@ -1,6 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:real_beauty_ai/core/di/injection.dart';
+import 'package:real_beauty_ai/features/auth/presentation/bloc/auth_bloc.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,16 +19,21 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1400),
+      duration: const Duration(milliseconds: 2000),
     )..forward();
 
-    // Long enough for the animation to land, short enough that a returning
-    // user is not made to watch a logo. The old 3.5s ran well past the point
-    // the screen had anything left to show.
-    Future.delayed(const Duration(milliseconds: 1600), () {
+    // 2.2s is a product decision, not a budget: the user reads this as a brand
+    // moment and has asked for it back after it was shortened. Leave it.
+    //
+    // It used to be load-bearing as well. The destination was read from
+    // `FirebaseAuth.currentUser` while the guards on '/auth' and '/intro' read
+    // AuthBloc, so a logout routed through here could be bounced straight back
+    // to '/home' unless the wait outlasted the bloc catching up. Reading the
+    // same source the guards read removes that race outright — the length now
+    // only has to be what looks right.
+    Future.delayed(const Duration(milliseconds: 2200), () {
       if (!mounted) return;
-      final dest = FirebaseAuth.instance.currentUser != null ? '/home' : '/intro';
-      context.go(dest);
+      context.go(sl<AuthBloc>().state.isAuthenticated ? '/home' : '/intro');
     });
   }
 
@@ -70,10 +76,13 @@ class _SplashScreenState extends State<SplashScreen>
                   gradient: RadialGradient(
                     center: Alignment.center,
                     radius: radius,
+                    // Baby blue, taken off the brand's packaging: a bright
+                    // tiffany core fading through teal to a deep sea green,
+                    // the same ramp the bags print.
                     colors: [
-                      const Color(0xFF9B7DD4).withValues(alpha: _lerp(0.0, 0.55, v)),
-                      const Color(0xFF7060AA).withValues(alpha: _lerp(0.0, 0.22, v)),
-                      const Color(0xFF4A3A9A).withValues(alpha: _lerp(0.0, 0.06, v)),
+                      const Color(0xFF7FD8D4).withValues(alpha: _lerp(0.0, 0.55, v)),
+                      const Color(0xFF45B8B5).withValues(alpha: _lerp(0.0, 0.22, v)),
+                      const Color(0xFF1E7F86).withValues(alpha: _lerp(0.0, 0.06, v)),
                       Colors.white.withValues(alpha: 0.0),
                     ],
                     stops: const [0.0, 0.42, 0.72, 1.0],

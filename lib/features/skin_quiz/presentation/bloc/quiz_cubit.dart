@@ -25,14 +25,38 @@ class QuizCubit extends Cubit<QuizState> {
     );
   }
 
+  /// The in-progress state, or null once the quiz is finished.
+  ///
+  /// Every mutator used to open with `state as QuizInProgress`. That holds for
+  /// as long as the only caller is a live question screen — and stops holding
+  /// the moment the finished quiz is still on the navigator underneath the scan
+  /// screen, because the back button there lands on it and calls straight in.
+  /// A cast throws where a null check simply declines.
+  QuizInProgress? get _inProgress {
+    final s = state;
+    return s is QuizInProgress ? s : null;
+  }
+
+  /// Whether the person has picked anything at all.
+  ///
+  /// It cannot be read back out of [answers]: a scale question starts at 0,
+  /// which is also a legitimate choice, so "untouched" and "picked the first
+  /// option" are the same value there. Every question in the current set is a
+  /// scale, which made [hasAnyAnswer] permanently false — and that is what
+  /// decides whether leaving the quiz asks before throwing the answers away.
+  bool _interacted = false;
+
   void setAnswer(dynamic value) {
-    final s = state as QuizInProgress;
+    final s = _inProgress;
+    if (s == null) return;
+    _interacted = true;
     final updated = List<dynamic>.from(s.answers)..[s.currentIndex] = value;
     emit(s.copyWith(answers: updated));
   }
 
   void next() {
-    final s = state as QuizInProgress;
+    final s = _inProgress;
+    if (s == null) return;
     if (s.currentIndex < quizQuestions.length - 1) {
       emit(s.copyWith(
         currentIndex: s.currentIndex + 1,
@@ -44,17 +68,19 @@ class QuizCubit extends Cubit<QuizState> {
   }
 
   void previous() {
-    final s = state as QuizInProgress;
-    if (s.currentIndex > 0) {
-      emit(s.copyWith(
-        currentIndex: s.currentIndex - 1,
-        isMovingForward: false,
-      ));
-    }
+    final s = _inProgress;
+    if (s == null || s.currentIndex == 0) return;
+    emit(s.copyWith(
+      currentIndex: s.currentIndex - 1,
+      isMovingForward: false,
+    ));
   }
 
   bool isCurrentAnswered() {
-    final s = state as QuizInProgress;
+    final s = _inProgress;
+    // A finished quiz answered everything it was going to; saying otherwise
+    // would make the caller re-run validation on a question nobody is on.
+    if (s == null) return true;
     if (quizQuestions[s.currentIndex].type == QuestionType.choice) {
       return s.answers[s.currentIndex] is int &&
           (s.answers[s.currentIndex] as int) >= 0;
@@ -62,11 +88,20 @@ class QuizCubit extends Cubit<QuizState> {
     return true;
   }
 
+  /// Answers as they stand, whether the quiz is mid-flight or finished.
+  List<dynamic> get answers => switch (state) {
+        QuizInProgress(:final answers) => answers,
+        QuizCompleted(:final answers) => answers,
+        _ => const [],
+      };
+
+  /// True when leaving now would throw away work the person actually did.
   bool get hasAnyAnswer {
-    final s = state as QuizInProgress;
-    for (int i = 0; i < s.answers.length; i++) {
+    if (_interacted) return true;
+    final current = answers;
+    for (var i = 0; i < current.length && i < quizQuestions.length; i++) {
       final q = quizQuestions[i];
-      final a = s.answers[i];
+      final a = current[i];
       if (q.type == QuestionType.choice && a is int && a >= 0) return true;
       if (q.type == QuestionType.textarea && a is String && a.isNotEmpty) {
         return true;

@@ -2,7 +2,7 @@ import 'routine_step.dart';
 
 /// Generates a personalized daily routine from the user's skin profile.
 /// FIXED shape: 4 morning + 5 evening steps so the Bugun UI and streak math
-/// stay identical. Only the *labels* of each slot adapt to skin type, concerns
+/// stay identical. Only the *labels* of each step adapt to skin type, concerns
 /// and weekday. Dermatologically safe: SPF only AM, actives only PM and only on
 /// scheduled nights (3x/week), no harsh actives for sensitive skin.
 class RoutineEngine {
@@ -55,7 +55,10 @@ class RoutineEngine {
       RoutineStep(id: 'am_cleanse', title: amCleanse),
       RoutineStep(id: 'am_toner',   title: amToner),
       RoutineStep(id: 'am_serum',   title: amSerum),
-      const RoutineStep(id: 'am_spf', title: 'Quyosh kremini surting — tashqariga chiqishdan oldin'),
+      const RoutineStep(
+        id: 'am_spf',
+        title: 'Quyosh kremini surting — tashqariga chiqishdan oldin',
+      ),
     ];
 
     // ── Evening (5 fixed slots) ──

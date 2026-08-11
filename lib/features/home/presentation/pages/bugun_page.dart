@@ -1,82 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:real_beauty_ai/features/routine/domain/routine_engine.dart';
-import 'package:real_beauty_ai/features/routine/domain/routine_step.dart';
+import 'package:real_beauty_ai/features/routine/presentation/bloc/routine_cubit.dart';
 import 'package:real_beauty_ai/services/local_store.dart';
 
-class BugunScreen extends StatefulWidget {
-  const BugunScreen({super.key});
+/// The day's skincare plan.
+///
+/// Holds no routine state of its own: which steps exist, which product goes
+/// with each, what is ticked off and how the streak stands all live in
+/// [RoutineCubit]. This widget renders whatever it is handed.
+class BugunScreen extends StatelessWidget {
+  /// Test seam. Production always builds its own; a test passes one with a
+  /// pinned clock, since the plan changes with the weekday.
+  final RoutineCubit? cubit;
+
+  const BugunScreen({super.key, this.cubit});
 
   @override
-  State<BugunScreen> createState() => _BugunScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider<RoutineCubit>(
+      create: (_) => (cubit ?? RoutineCubit())..load(),
+      child: const _BugunView(),
+    );
+  }
 }
 
-class _BugunScreenState extends State<BugunScreen>
-    with WidgetsBindingObserver {
-  final Set<String> _done = {};
+class _BugunView extends StatefulWidget {
+  const _BugunView();
 
-  // Derived from stored history — no mock generators.
-  late Map<String, bool> _streaks;
-  late Map<String, double> _dailyProgress;
+  @override
+  State<_BugunView> createState() => _BugunViewState();
+}
 
-  // Tracks which day's tasks are loaded into _done to detect midnight rollover.
-  String _loadedForDay = '';
-
-  late List<RoutineStep> _morning;
-  late List<RoutineStep> _evening;
-
-  int get _total => _morning.length + _evening.length;
-  int get _doneCount => _done.length;
-
-  void _buildRoutine() {
-    final profile = LocalStore.instance.getSkinProfile();
-    if (profile == null) {
-      _morning = [];
-      _evening = [];
-      return;
-    }
-    final concerns = profile.additionalBlocks
-        .map((b) => b['code'] ?? '')
-        .where((c) => c.isNotEmpty)
-        .toSet();
-    final routine = RoutineEngine.generate(
-      skinType: profile.skinType,
-      concerns: concerns,
-      date: DateTime.now(),
-    );
-    _morning = routine.morning;
-    _evening = routine.evening;
-  }
-
-  String get _todayKey => LocalStore.dateKey(DateTime.now());
-
-  int get _currentStreak {
-    final today = DateTime.now();
-    int streak = 0;
-    if (_streaks[_todayKey] == true) streak++;
-    for (int i = 1; i <= 365; i++) {
-      final d = today.subtract(Duration(days: i));
-      if (_streaks[LocalStore.dateKey(d)] == true) {
-        streak++;
-      } else {
-        break;
-      }
-    }
-    return streak;
-  }
-
-  // ── Lifecycle ─────────────────────────────────────────────────
-
+class _BugunViewState extends State<_BugunView> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _loadToday();
-    _loadHistory();
   }
 
   @override
@@ -85,75 +49,24 @@ class _BugunScreenState extends State<BugunScreen>
     super.dispose();
   }
 
-  // Detect midnight rollover: if user keeps app open past midnight, refresh.
+  /// Someone who opens the app the next morning left it on yesterday's plan.
+  /// The cubit no-ops unless the calendar day actually moved.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && _loadedForDay != _todayKey) {
-      setState(() {
-        _loadToday();
-        _loadHistory();
-      });
+    if (state == AppLifecycleState.resumed) {
+      context.read<RoutineCubit>().refreshIfDayChanged();
     }
   }
 
-  // ── Storage reads ─────────────────────────────────────────────
-
-  void _loadToday() {
-    _buildRoutine();
-    _loadedForDay = _todayKey;
-    final saved = LocalStore.instance.getRoutine(_todayKey);
-    _done.clear();
-    for (final e in saved.entries) {
-      if (e.value) _done.add(e.key);
-    }
-  }
-
-  void _loadHistory() {
-    _streaks = LocalStore.instance.getStreaks(_total);
-    _dailyProgress = LocalStore.instance.getDailyProgress(_total);
-    // Reflect today's in-progress state in the maps.
-    final ratio = _total > 0 ? _doneCount / _total : 0.0;
-    _streaks[_todayKey] = LocalStore.isStreakDay(_doneCount, _total);
-    _dailyProgress[_todayKey] = ratio;
-  }
-
-  // ── Task toggle ───────────────────────────────────────────────
-
-  void _toggleTask(String k) {
-    // Day may have rolled over while the app stayed foregrounded (e.g. on
-    // another tab) — reload instead of writing stale state to the new day.
-    if (_loadedForDay != _todayKey) {
-      setState(() {
-        _loadToday();
-        _loadHistory();
-      });
-      return;
-    }
-    HapticFeedback.selectionClick();
-    final nowDone = !_done.contains(k);
-    if (nowDone) {
-      _done.add(k);
-    } else {
-      _done.remove(k);
-    }
-    // Write to disk off the build path — fire and forget.
-    LocalStore.instance.setTaskDone(_todayKey, k, nowDone);
-    // Update streak/progress maps for today.
-    final ratio = _total > 0 ? _doneCount / _total : 0.0;
-    _streaks[_todayKey] = LocalStore.isStreakDay(_doneCount, _total);
-    _dailyProgress[_todayKey] = ratio;
-    setState(() {});
-  }
-
-  void _showStreakCalendar() {
+  void _showStreakCalendar(RoutineReady state) {
     HapticFeedback.mediumImpact();
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _StreakCalendarSheet(
-        streaks: Map.unmodifiable(_streaks),
-        currentStreak: _currentStreak,
+        streaks: Map.unmodifiable(state.streaks),
+        currentStreak: state.currentStreak,
         dateKeyFn: LocalStore.dateKey,
       ),
     );
@@ -161,185 +74,33 @@ class _BugunScreenState extends State<BugunScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Catch midnight rollover on rebuilds that don't come through the
-    // lifecycle observer (e.g. returning to this tab in the IndexedStack).
-    if (_loadedForDay != _todayKey) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        setState(() {
-          _loadToday();
-          _loadHistory();
-        });
-      });
-    }
     final topPad = MediaQuery.of(context).padding.top;
-    final now = DateTime.now();
-    final todayProgress = _total > 0 ? _doneCount / _total : 0.0;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F2FC),
       body: Stack(
         children: [
-          // Static background — const avoids rebuild cost on task toggles.
+          // Static background — const keeps it out of task-toggle rebuilds.
           const _BugunBackground(),
           _BugunSunGlow(screenWidth: MediaQuery.of(context).size.width),
-          CustomScrollView(
-            physics: const BouncingScrollPhysics(
-              parent: AlwaysScrollableScrollPhysics(),
-            ),
-            slivers: [
-              SliverToBoxAdapter(child: SizedBox(height: topPad + 14)),
-              // ── Header ──
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Bugun',
-                                style: GoogleFonts.nunito(
-                                  fontSize: 36,
-                                  fontWeight: FontWeight.w700,
-                                  color: const Color(0xFF4A3C90),
-                                  letterSpacing: -0.5,
-                                ),
-                              ).animate(key: const ValueKey('hdr_title'))
-                                  .fadeIn(duration: 350.ms),
-                              Text(
-                                '$_doneCount / $_total vazifa',
-                                style: GoogleFonts.nunito(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: const Color(0xFF7060AA),
-                                ),
-                              ).animate(key: const ValueKey('hdr_sub'))
-                                  .fadeIn(duration: 300.ms),
-                            ],
-                          ),
-                          const Spacer(),
-                          _GoalBadge(done: _doneCount, total: _total),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      // Progress bar
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TweenAnimationBuilder<double>(
-                              duration: const Duration(milliseconds: 600),
-                              curve: Curves.easeOut,
-                              tween: Tween(begin: 0.0, end: todayProgress),
-                              builder: (_, v, _) => ClipRRect(
-                                borderRadius: BorderRadius.circular(999),
-                                child: LinearProgressIndicator(
-                                  value: v,
-                                  backgroundColor: const Color(0xFFDDD9F0),
-                                  valueColor: AlwaysStoppedAnimation(
-                                    todayProgress >= 1.0
-                                        ? const Color(0xFF4CAF50)
-                                        : const Color(0xFF7060AA),
-                                  ),
-                                  minHeight: 6,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            '${(todayProgress * 100).round()}%',
-                            style: GoogleFonts.nunito(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: todayProgress >= 1.0
-                                  ? const Color(0xFF4CAF50)
-                                  : const Color(0xFF7060AA),
-                            ),
-                          ),
-                        ],
-                      ).animate(key: const ValueKey('hdr_progress'))
-                          .fadeIn(delay: 80.ms),
-                    ],
-                  ),
-                ),
+          BlocBuilder<RoutineCubit, RoutineState>(
+            builder: (context, state) => switch (state) {
+              RoutineLoading() => const _CenteredSpinner(),
+              RoutineNoProfile() => _NoProfileMessage(topPad: topPad),
+              RoutineFailure(:final message) => _FailureMessage(
+                message: message,
+                onRetry: () => context.read<RoutineCubit>().load(),
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: 12)),
-              // ── Week strip ──
-              SliverToBoxAdapter(
-                child: GestureDetector(
-                  onTap: _showStreakCalendar,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: _WeekStrip(
-                      today: now,
-                      streaks: _streaks,
-                      dailyProgress: _dailyProgress,
-                      todayProgress: todayProgress,
-                      dateKeyFn: LocalStore.dateKey,
-                    ),
-                  ),
-                ),
+              RoutineReady() => _ReadyBody(
+                state: state,
+                topPad: topPad,
+                onToggle: (id) {
+                  HapticFeedback.selectionClick();
+                  context.read<RoutineCubit>().toggle(id);
+                },
+                onStreakTap: () => _showStreakCalendar(state),
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: 14)),
-              // ── Task sheet ──
-              SliverToBoxAdapter(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF5F2FC),
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(28)),
-                  ),
-                  child: LocalStore.instance.getSkinProfile() == null
-                      ? _NoProfileCta(onTap: () => context.push('/quiz'))
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 8),
-                            _SectionHeader(
-                              svgAsset: 'assets/icons/sun.svg',
-                              iconColor: const Color(0xFFE8A040),
-                              text: 'Ertalab',
-                              doneCount: _morning
-                                  .where((s) => _done.contains(s.id))
-                                  .length,
-                              total: _morning.length,
-                            ),
-                            ..._morning.asMap().entries.map((e) => _TaskCard(
-                                  key: ValueKey('task_m_${e.key}'),
-                                  label: e.value.title,
-                                  globalIndex: e.key,
-                                  done: _done.contains(e.value.id),
-                                  onTap: () => _toggleTask(e.value.id),
-                                )),
-                            const SizedBox(height: 12),
-                            _SectionHeader(
-                              svgAsset: 'assets/icons/moon.svg',
-                              iconColor: const Color(0xFF5848B0),
-                              text: 'Kechqurun',
-                              doneCount: _evening
-                                  .where((s) => _done.contains(s.id))
-                                  .length,
-                              total: _evening.length,
-                            ),
-                            ..._evening.asMap().entries.map((e) => _TaskCard(
-                                  key: ValueKey('task_e_${e.key}'),
-                                  label: e.value.title,
-                                  globalIndex: _morning.length + e.key,
-                                  done: _done.contains(e.value.id),
-                                  onTap: () => _toggleTask(e.value.id),
-                                )),
-                            const SizedBox(height: 100),
-                          ],
-                        ),
-                ),
-              ),
-            ],
+            },
           ),
         ],
       ),
@@ -347,8 +108,307 @@ class _BugunScreenState extends State<BugunScreen>
   }
 }
 
+// ── Ready state ───────────────────────────────────────────────
+
+class _ReadyBody extends StatelessWidget {
+  final RoutineReady state;
+  final double topPad;
+  final void Function(String taskId) onToggle;
+  final VoidCallback onStreakTap;
+
+  const _ReadyBody({
+    required this.state,
+    required this.topPad,
+    required this.onToggle,
+    required this.onStreakTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = state.progress;
+
+    return CustomScrollView(
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
+      slivers: [
+        SliverToBoxAdapter(child: SizedBox(height: topPad + 14)),
+        SliverToBoxAdapter(
+          child: _Header(
+            doneCount: state.doneCount,
+            total: state.total,
+            progress: progress,
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 12)),
+        SliverToBoxAdapter(
+          child: GestureDetector(
+            onTap: onStreakTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: _WeekStrip(
+                today: DateTime.now(),
+                streaks: state.streaks,
+                dailyProgress: state.dailyProgress,
+                todayProgress: progress,
+                dateKeyFn: LocalStore.dateKey,
+              ),
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 14)),
+        SliverToBoxAdapter(
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Color(0xFFF5F2FC),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 8),
+                _SectionHeader(
+                  svgAsset: 'assets/icons/sun.svg',
+                  iconColor: const Color(0xFFE8A040),
+                  text: 'Ertalab',
+                  doneCount: state.morningDone,
+                  total: state.morning.length,
+                ),
+                ..._cards(state.morning, 0),
+                const SizedBox(height: 12),
+                _SectionHeader(
+                  svgAsset: 'assets/icons/moon.svg',
+                  iconColor: const Color(0xFF5848B0),
+                  text: 'Kechqurun',
+                  doneCount: state.eveningDone,
+                  total: state.evening.length,
+                ),
+                ..._cards(state.evening, state.morning.length),
+                const SizedBox(height: 100),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Iterable<Widget> _cards(List<RoutineTask> tasks, int indexOffset) {
+    return tasks.asMap().entries.map(
+      (e) => _TaskCard(
+        // Keyed on the step, not the position: the id is stable across a
+        // rebuild that swaps products in, so the entrance animation does
+        // not replay when the catalogue lands.
+        key: ValueKey(e.value.id),
+        task: e.value,
+        globalIndex: indexOffset + e.key,
+        onTap: () => onToggle(e.value.id),
+      ),
+    );
+  }
+}
+
+// ── Header ────────────────────────────────────────────────────
+
+class _Header extends StatelessWidget {
+  final int doneCount;
+  final int total;
+  final double progress;
+
+  const _Header({
+    required this.doneCount,
+    required this.total,
+    required this.progress,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final complete = progress >= 1.0;
+    final accent = complete ? const Color(0xFF4CAF50) : const Color(0xFF7060AA);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Expanded, not Flexible-plus-Spacer: those two split the free
+              // space between them, which squeezed the title column to about
+              // half the row and broke "Bugun" across two lines.
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                          'Bugun',
+                          // A one-word title has no business wrapping; if the
+                          // largest allowed text scale ever squeezes it, clip
+                          // rather than stack a single word over two lines.
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.nunito(
+                            fontSize: 36,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF4A3C90),
+                            letterSpacing: -0.5,
+                          ),
+                        )
+                        .animate(key: const ValueKey('hdr_title'))
+                        .fadeIn(duration: 350.ms),
+                    Text(
+                          '$doneCount / $total vazifa',
+                          style: GoogleFonts.nunito(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF7060AA),
+                          ),
+                        )
+                        .animate(key: const ValueKey('hdr_sub'))
+                        .fadeIn(duration: 300.ms),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              _GoalBadge(done: doneCount, total: total),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TweenAnimationBuilder<double>(
+                  duration: const Duration(milliseconds: 600),
+                  curve: Curves.easeOut,
+                  tween: Tween(begin: 0.0, end: progress),
+                  builder: (_, v, _) => ClipRRect(
+                    borderRadius: BorderRadius.circular(999),
+                    child: LinearProgressIndicator(
+                      value: v,
+                      backgroundColor: const Color(0xFFDDD9F0),
+                      valueColor: AlwaysStoppedAnimation(accent),
+                      minHeight: 6,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                '${(progress * 100).round()}%',
+                style: GoogleFonts.nunito(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: accent,
+                ),
+              ),
+            ],
+          ).animate(key: const ValueKey('hdr_progress')).fadeIn(delay: 80.ms),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Non-ready states ──────────────────────────────────────────
+
+class _CenteredSpinner extends StatelessWidget {
+  const _CenteredSpinner();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: SizedBox(
+        width: 26,
+        height: 26,
+        child: CircularProgressIndicator(
+          strokeWidth: 2.5,
+          valueColor: AlwaysStoppedAnimation(Color(0xFF7060AA)),
+        ),
+      ),
+    );
+  }
+}
+
+class _NoProfileMessage extends StatelessWidget {
+  final double topPad;
+  const _NoProfileMessage({required this.topPad});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
+      padding: EdgeInsets.only(top: topPad + 14),
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+          child: Text(
+            'Bugun',
+            style: GoogleFonts.nunito(
+              fontSize: 36,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF4A3C90),
+              letterSpacing: -0.5,
+            ),
+          ),
+        ),
+        _NoProfileCta(onTap: () => context.push('/quiz')),
+      ],
+    );
+  }
+}
+
+class _FailureMessage extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _FailureMessage({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.cloud_off_rounded,
+              size: 40,
+              color: Color(0xFF9490B0),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.nunito(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF4A3C90),
+              ),
+            ),
+            const SizedBox(height: 18),
+            TextButton(
+              onPressed: onRetry,
+              child: Text(
+                'Qayta urinish',
+                style: GoogleFonts.nunito(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF6050B0),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // ── Static background widgets ─────────────────────────────────
-// Extracted so they don't participate in task-toggle rebuilds.
 
 class _BugunBackground extends StatelessWidget {
   const _BugunBackground();
@@ -360,11 +420,7 @@ class _BugunBackground extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFD4CDF0),
-            Color(0xFFE8E4F8),
-            Color(0xFFF5F2FC),
-          ],
+          colors: [Color(0xFFD4CDF0), Color(0xFFE8E4F8), Color(0xFFF5F2FC)],
           stops: [0.0, 0.35, 1.0],
         ),
       ),
@@ -517,8 +573,18 @@ class _StreakCalendarSheetState extends State<_StreakCalendarSheet> {
 
   static const _dayLabels = ['Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh', 'Ya'];
   static const _monthNames = [
-    'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun',
-    'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr',
+    'Yanvar',
+    'Fevral',
+    'Mart',
+    'Aprel',
+    'May',
+    'Iyun',
+    'Iyul',
+    'Avgust',
+    'Sentabr',
+    'Oktabr',
+    'Noyabr',
+    'Dekabr',
   ];
 
   @override
@@ -557,11 +623,11 @@ class _StreakCalendarSheetState extends State<_StreakCalendarSheet> {
         final day = i + 1;
         final date = DateTime(_month.year, _month.month, day);
         final key = widget.dateKeyFn(date);
-        final isToday = date.year == now.year &&
+        final isToday =
+            date.year == now.year &&
             date.month == now.month &&
             date.day == now.day;
-        final isFuture =
-            date.isAfter(DateTime(now.year, now.month, now.day));
+        final isFuture = date.isAfter(DateTime(now.year, now.month, now.day));
         final isCompleted = widget.streaks[key] == true;
 
         return _CalendarDay(
@@ -582,44 +648,45 @@ class _StreakCalendarSheetState extends State<_StreakCalendarSheet> {
       // Scrollable so 6-row months + streak card fit on small screens.
       child: SingleChildScrollView(
         child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(height: 12),
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: const Color(0xFFE0DCF0),
-              borderRadius: BorderRadius.circular(999),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE0DCF0),
+                borderRadius: BorderRadius.circular(999),
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              _NavButton(icon: Icons.chevron_left_rounded, onTap: _prevMonth),
-              Expanded(
-                child: Text(
-                  '${_monthNames[_month.month - 1]} ${_month.year}',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.nunito(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF4A3C90),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                _NavButton(icon: Icons.chevron_left_rounded, onTap: _prevMonth),
+                Expanded(
+                  child: Text(
+                    '${_monthNames[_month.month - 1]} ${_month.year}',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.nunito(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF4A3C90),
+                    ),
                   ),
                 ),
-              ),
-              _NavButton(
-                icon: Icons.chevron_right_rounded,
-                onTap: _isNextDisabled() ? null : _nextMonth,
-                disabled: _isNextDisabled(),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: _dayLabels
-                .map((l) => SizedBox(
+                _NavButton(
+                  icon: Icons.chevron_right_rounded,
+                  onTap: _isNextDisabled() ? null : _nextMonth,
+                  disabled: _isNextDisabled(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: _dayLabels
+                  .map(
+                    (l) => SizedBox(
                       width: 40,
                       child: Text(
                         l,
@@ -630,61 +697,62 @@ class _StreakCalendarSheetState extends State<_StreakCalendarSheet> {
                           color: const Color(0xFF9490B0),
                         ),
                       ),
-                    ))
-                .toList(),
-          ),
-          const SizedBox(height: 8),
-          GridView.count(
-            crossAxisCount: 7,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 4,
-            crossAxisSpacing: 0,
-            childAspectRatio: 1.0,
-            children: cells,
-          ),
-          const SizedBox(height: 24),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF6050B0), Color(0xFF9B7DD4)],
+                    ),
+                  )
+                  .toList(),
+            ),
+            const SizedBox(height: 8),
+            GridView.count(
+              crossAxisCount: 7,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 4,
+              crossAxisSpacing: 0,
+              childAspectRatio: 1.0,
+              children: cells,
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF6050B0), Color(0xFF9B7DD4)],
+                ),
+                borderRadius: BorderRadius.circular(18),
               ),
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.local_fire_department_rounded,
-                  color: Color(0xFFFFD166),
-                  size: 28,
-                ),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${widget.currentStreak} kun',
-                      style: GoogleFonts.nunito(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.local_fire_department_rounded,
+                    color: Color(0xFFFFD166),
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${widget.currentStreak} kun',
+                        style: GoogleFonts.nunito(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                    Text(
-                      'Ketma-ket parvarish',
-                      style: GoogleFonts.nunito(
-                        fontSize: 13,
-                        color: Colors.white.withValues(alpha: 0.75),
+                      Text(
+                        'Ketma-ket parvarish',
+                        style: GoogleFonts.nunito(
+                          fontSize: 13,
+                          color: Colors.white.withValues(alpha: 0.75),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
         ),
       ),
     );
@@ -711,9 +779,7 @@ class _NavButton extends StatelessWidget {
         ),
         child: Icon(
           icon,
-          color: disabled
-              ? const Color(0xFFCCC8E0)
-              : const Color(0xFF6050B0),
+          color: disabled ? const Color(0xFFCCC8E0) : const Color(0xFF6050B0),
           size: 22,
         ),
       ),
@@ -779,9 +845,7 @@ class _CalendarDay extends StatelessWidget {
       );
     }
 
-    final color = isFuture
-        ? const Color(0xFFDDD9F0)
-        : const Color(0xFFBBB7D5);
+    final color = isFuture ? const Color(0xFFDDD9F0) : const Color(0xFFBBB7D5);
 
     return Center(
       child: SizedBox(
@@ -823,17 +887,15 @@ class _GoalBadge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            allDone
-                ? Icons.check_circle_rounded
-                : Icons.track_changes_rounded,
+            allDone ? Icons.check_circle_rounded : Icons.track_changes_rounded,
             size: 14,
-            color: allDone
-                ? const Color(0xFF4CAF50)
-                : const Color(0xFF5040A0),
+            color: allDone ? const Color(0xFF4CAF50) : const Color(0xFF5040A0),
           ),
           const SizedBox(width: 6),
           Text(
             allDone ? 'Hammasi bajarildi!' : 'Parvarish maqsadi',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.nunito(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -876,7 +938,8 @@ class _WeekStrip extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: List.generate(7, (i) {
         final day = monday.add(Duration(days: i));
-        final isToday = day.day == today.day &&
+        final isToday =
+            day.day == today.day &&
             day.month == today.month &&
             day.year == today.year;
         final isFuture = day.isAfter(today);
@@ -885,14 +948,14 @@ class _WeekStrip extends StatelessWidget {
         final double dayPct = isToday
             ? todayProgress
             : isFuture
-                ? 0.0
-                : dailyProgress[dateKeyFn(day)] ?? 0.0;
+            ? 0.0
+            : dailyProgress[dateKeyFn(day)] ?? 0.0;
 
         final barColor = isToday
             ? Colors.white
             : dayPct >= 1.0
-                ? const Color(0xFF7060AA)
-                : const Color(0xFFB0A8D8);
+            ? const Color(0xFF7060AA)
+            : const Color(0xFFB0A8D8);
 
         return Container(
           width: 44,
@@ -928,29 +991,32 @@ class _WeekStrip extends StatelessWidget {
                     : null,
                 child: Center(
                   child: isCompleted && !isToday
-                      ? const Icon(Icons.check_rounded,
-                          size: 15, color: Color(0xFF6050B0))
+                      ? const Icon(
+                          Icons.check_rounded,
+                          size: 15,
+                          color: Color(0xFF6050B0),
+                        )
                       : !isToday && !isFuture && dayPct > 0 && dayPct < 1.0
-                          ? Text(
-                              '${(dayPct * 100).round()}%',
-                              style: GoogleFonts.nunito(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF6050B0),
-                              ),
-                            )
-                          : Text(
-                              '${day.day}',
-                              style: GoogleFonts.nunito(
-                                fontSize: isToday ? 15 : 13,
-                                fontWeight: FontWeight.w700,
-                                color: isToday
-                                    ? Colors.white
-                                    : isFuture
-                                        ? const Color(0xFFCCC8E0)
-                                        : const Color(0xFF4A3C90),
-                              ),
-                            ),
+                      ? Text(
+                          '${(dayPct * 100).round()}%',
+                          style: GoogleFonts.nunito(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF6050B0),
+                          ),
+                        )
+                      : Text(
+                          '${day.day}',
+                          style: GoogleFonts.nunito(
+                            fontSize: isToday ? 15 : 13,
+                            fontWeight: FontWeight.w700,
+                            color: isToday
+                                ? Colors.white
+                                : isFuture
+                                ? const Color(0xFFCCC8E0)
+                                : const Color(0xFF4A3C90),
+                          ),
+                        ),
                 ),
               ),
               const Spacer(),
@@ -1047,19 +1113,17 @@ class _SectionHeader extends StatelessWidget {
 // ── Task card ─────────────────────────────────────────────────
 //
 // StatefulWidget so the entrance animation controller lives in State and
-// plays exactly once — it survives parent setState calls without replaying.
+// plays exactly once — it survives parent rebuilds without replaying.
 
 class _TaskCard extends StatefulWidget {
-  final String label;
+  final RoutineTask task;
   final int globalIndex;
-  final bool done;
-  final VoidCallback? onTap;
+  final VoidCallback onTap;
 
   const _TaskCard({
     super.key,
-    required this.label,
+    required this.task,
     required this.globalIndex,
-    required this.done,
     required this.onTap,
   });
 
@@ -1082,16 +1146,15 @@ class _TaskCardState extends State<_TaskCard>
       duration: const Duration(milliseconds: 300),
     );
     _fade = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
-    _slideY = Tween<double>(begin: 0.8, end: 0.0)
-        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+    _slideY = Tween<double>(
+      begin: 0.8,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
 
     // Stagger entrance delay per card index.
-    Future.delayed(
-      Duration(milliseconds: widget.globalIndex * 50),
-      () {
-        if (mounted) _ctrl.forward();
-      },
-    );
+    Future.delayed(Duration(milliseconds: widget.globalIndex * 50), () {
+      if (mounted) _ctrl.forward();
+    });
   }
 
   @override
@@ -1102,11 +1165,18 @@ class _TaskCardState extends State<_TaskCard>
 
   @override
   Widget build(BuildContext context) {
-    final done = widget.done;
+    final task = widget.task;
+    final done = task.done;
+
     return AnimatedBuilder(
       animation: _ctrl,
       builder: (_, child) => Opacity(
         opacity: _fade.value.clamp(0.0, 1.0),
+        // A fully transparent Opacity drops its subtree from the semantics
+        // tree. The last card's entrance is staggered ~700ms behind the first,
+        // and for that whole window a screen reader would find nothing below
+        // the section header — the list would read as empty and then fill in.
+        alwaysIncludeSemantics: true,
         child: Transform.translate(
           offset: Offset(0, _slideY.value),
           child: child,
@@ -1114,65 +1184,95 @@ class _TaskCardState extends State<_TaskCard>
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-        child: GestureDetector(
+        // Announced as a checkbox rather than a button: the state a screen
+        // reader has to convey is "done / not done", which `button` cannot say.
+        child: Semantics(
+          container: true,
+          checked: done,
+          label: task.step.title,
           onTap: widget.onTap,
-          onTapDown: (_) => setState(() => _pressed = true),
-          onTapUp: (_) => setState(() => _pressed = false),
-          onTapCancel: () => setState(() => _pressed = false),
-          child: AnimatedOpacity(
-            opacity: _pressed ? 0.72 : 1.0,
-            duration: const Duration(milliseconds: 80),
-            child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-            decoration: BoxDecoration(
-              color: done
-                  ? const Color(0xFFE8E4F5)
-                  : Colors.white.withValues(alpha: 0.95),
-              borderRadius: BorderRadius.circular(22),
-            ),
-            child: Row(
-              children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: done
-                        ? const Color(0xFF6050B0)
-                        : Colors.transparent,
-                    border: Border.all(
-                      color: done
-                          ? const Color(0xFF6050B0)
-                          : const Color(0xFFCCC8E0),
-                      width: 1.8,
-                    ),
-                  ),
-                  child: done
-                      ? const Icon(Icons.check_rounded,
-                          size: 16, color: Colors.white)
-                      : null,
+          child: GestureDetector(
+            onTap: widget.onTap,
+            onTapDown: (_) => setState(() => _pressed = true),
+            onTapUp: (_) => setState(() => _pressed = false),
+            onTapCancel: () => setState(() => _pressed = false),
+            child: AnimatedOpacity(
+              opacity: _pressed ? 0.72 : 1.0,
+              duration: const Duration(milliseconds: 80),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+                decoration: BoxDecoration(
+                  color: done
+                      ? const Color(0xFFE8E4F5)
+                      : Colors.white.withValues(alpha: 0.95),
+                  borderRadius: BorderRadius.circular(22),
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Text(
-                    widget.label,
-                    style: GoogleFonts.nunito(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      color: done
-                          ? const Color(0xFFB8B5D0)
-                          : const Color(0xFF332C60),
-                      decoration: done ? TextDecoration.lineThrough : null,
-                      decorationColor: const Color(0xFFB8B5D0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: done
+                              ? const Color(0xFF6050B0)
+                              : Colors.transparent,
+                          border: Border.all(
+                            color: done
+                                ? const Color(0xFF6050B0)
+                                : const Color(0xFFCCC8E0),
+                            width: 1.8,
+                          ),
+                        ),
+                        child: done
+                            ? const Icon(
+                                Icons.check_rounded,
+                                size: 16,
+                                color: Colors.white,
+                              )
+                            : null,
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 5),
+                        // The title is already the card's semantic label;
+                        // leaving it in would read it twice.
+                        child: ExcludeSemantics(
+                          child: Text(
+                            task.step.title,
+                            style: GoogleFonts.nunito(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              height: 1.35,
+                              // #B8B5D0 on the done card's #E8E4F5 was about
+                              // 1.3:1, which left the strike-through carrying
+                              // the entire "finished" signal because the words
+                              // under it had all but vanished. #6E6991 clears
+                              // 4.5:1 and lets the line mean what it is
+                              // supposed to mean.
+                              color: done
+                                  ? const Color(0xFF6E6991)
+                                  : const Color(0xFF332C60),
+                              decoration: done
+                                  ? TextDecoration.lineThrough
+                                  : null,
+                              decorationColor: const Color(0xFF9490B0),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
           ),
         ),
       ),

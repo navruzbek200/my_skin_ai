@@ -86,4 +86,50 @@ void main() {
     expect(find.text('9 / 9 vazifa'), findsOneWidget);
     expect(find.text('Hammasi bajarildi!'), findsOneWidget);
   });
+
+  testWidgets('the plan is on screen from the first frame', (tester) async {
+    await tester.pumpWidget(wrap());
+    // One frame: every input the plan needs is on the device, so the screen
+    // must never sit on a spinner waiting for anything.
+    await tester.pump();
+
+    expect(find.text('0 / 9 vazifa'), findsOneWidget);
+
+    await tester.pump(_settle);
+  });
+
+  testWidgets('a task card announces itself as checkable to a screen reader',
+      (tester) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(wrap());
+    // Two frames: the first starts the entrance animations, the second runs
+    // them out. Without the second the cards are still mid-fade.
+    await tester.pump();
+    await tester.pump(_settle);
+
+    expect(
+      tester.getSemantics(
+        find.bySemanticsLabel('Quyosh kremini surting — tashqariga chiqishdan oldin'),
+      ),
+      matchesSemantics(
+        label: 'Quyosh kremini surting — tashqariga chiqishdan oldin',
+        hasCheckedState: true,
+        isChecked: false,
+        hasTapAction: true,
+      ),
+    );
+    handle.dispose();
+  });
+
+  testWidgets('no skin profile → the analysis CTA, not an empty plan',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    await LocalStore.instance.init();
+
+    await tester.pumpWidget(wrap());
+    await tester.pump(_settle);
+
+    expect(find.text('Teri tahlilini boshlang'), findsOneWidget);
+    expect(find.text('0 / 0 vazifa'), findsNothing);
+  });
 }

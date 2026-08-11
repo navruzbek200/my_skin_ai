@@ -50,6 +50,12 @@ CATEGORIES = {
 # source: upscaling adds bytes and no detail.
 MAX_WIDTH = 1400
 
+# Grid cells are ~180dp, i.e. under 720 physical pixels even on a 4x screen.
+# Serving the 1400px file there means downloading and decoding four times the
+# pixels the cell can draw, 54 times over — the thing that made a fast scroll
+# stall. The detail page still gets the full-size file.
+THUMB_WIDTH = 700
+
 # 92 is where WebP stops showing artefacts on the fine print that product
 # packaging is covered in. 80 visibly softens it, and above 92 the file grows
 # much faster than the picture improves.
@@ -110,6 +116,10 @@ def validate(rows: list[dict]) -> list[str]:
     return problems
 
 
+def _thumb_path(dest: Path) -> Path:
+    return dest.with_name(dest.stem + "_thumb.webp")
+
+
 def _whiten_background(im: Image.Image) -> Image.Image:
     """Clip the studio sweep to pure white, leaving the product untouched.
 
@@ -151,7 +161,16 @@ def convert(src: Path, dest: Path) -> tuple[int, int, int, bool]:
         im.save(dest, "WEBP", quality=QUALITY, method=6)
         out_width = im.width
 
-    return before, dest.stat().st_size, out_width, source_width < MIN_GOOD_WIDTH
+        thumb = im
+        if im.width > THUMB_WIDTH:
+            thumb = im.resize(
+                (THUMB_WIDTH, round(im.height * THUMB_WIDTH / im.width)),
+                Image.LANCZOS,
+            )
+        thumb.save(_thumb_path(dest), "WEBP", quality=QUALITY, method=6)
+
+    total_after = dest.stat().st_size + _thumb_path(dest).stat().st_size
+    return before, total_after, out_width, source_width < MIN_GOOD_WIDTH
 
 
 def main() -> None:
@@ -201,6 +220,7 @@ def main() -> None:
             {
                 "id": pid,
                 "imageUrl": f"{args.base_url}/products/{pid}.webp",
+                "thumbUrl": f"{args.base_url}/products/{pid}_thumb.webp",
                 # Kept so an old build that predates this catalogue still finds
                 # a bundled picture instead of an empty card.
                 "imagePath": (row.get("assetFallback") or "").strip(),

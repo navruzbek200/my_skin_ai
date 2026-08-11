@@ -131,7 +131,6 @@ class LocalStore {
           .where((k) =>
               k == _skinKey ||
               k == _historyKey ||
-              k == _needsNameKey ||
               k.startsWith(_routinePrefix))
           .toList();
       for (final key in keys) {
@@ -150,42 +149,13 @@ class LocalStore {
     } catch (_) {}
   }
 
-  // ── Auth state ────────────────────────────────────────────────
-
-  static const _loginKey = 'is_logged_in_v1';
-
-  bool get isLoggedIn => _prefs.getBool(_loginKey) ?? false;
-
-  Future<void> setLoggedIn() async {
-    try {
-      await _prefs.setBool(_loginKey, true);
-    } catch (_) {}
-  }
-
-  Future<void> setLoggedOut() async {
-    try {
-      await _prefs.setBool(_loginKey, false);
-    } catch (_) {}
-  }
-
-  // ── Post phone-signup name prompt ───────────────────────────────
-  //
-  // Set right after a brand-new phone account is created; the home shell
-  // checks this on launch and asks for a name once, then clears it. Kept
-  // outside the auth flow itself because Firebase reports the user as
-  // logged in the instant sign-in succeeds, and the router immediately
-  // navigates away from the auth screen — there's no window left there to
-  // show a prompt.
-
-  static const _needsNameKey = 'needs_name_prompt_v1';
-
-  bool get needsNamePrompt => _prefs.getBool(_needsNameKey) ?? false;
-
-  Future<void> setNeedsNamePrompt(bool value) async {
-    try {
-      await _prefs.setBool(_needsNameKey, value);
-    } catch (_) {}
-  }
+  // Nothing here mirrors the session any more. There used to be an
+  // `is_logged_in_v1` flag written on every sign-in and sign-out, and a
+  // `needs_name_prompt_v1` left over from phone sign-up; neither was ever
+  // read back — the router, the splash and the guards all read AuthBloc,
+  // which mirrors `authStateChanges()`. Two sources of truth for "is someone
+  // signed in" is one too many, and the one that could go was the one that
+  // nobody consulted. Old installs keep the orphaned keys; they are ignored.
 
   // ── Scan history ──────────────────────────────────────────────
   //

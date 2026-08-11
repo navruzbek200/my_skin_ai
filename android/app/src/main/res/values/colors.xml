@@ -3,4 +3,5 @@
     <!-- Matches the white Scaffold the Flutter splash draws on, so the two
          screens hand over without a flash of a different colour. -->
     <color name="splash_background">#FFFFFFFF</color>
+	<color name="ic_launcher_background">#FFFFFF</color>
 </resources>

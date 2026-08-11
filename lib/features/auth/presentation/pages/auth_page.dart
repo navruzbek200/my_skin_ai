@@ -67,7 +67,9 @@ class _AuthScreenState extends State<AuthScreen> {
         backgroundColor: const Color(0xFF7060AA),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(seconds: 3),
+        // Long enough to read the two-sentence wrong-password message, which
+        // is the one that tells a Google user which button to press instead.
+        duration: const Duration(seconds: 5),
       ),
     );
   }
@@ -81,6 +83,12 @@ class _AuthScreenState extends State<AuthScreen> {
       listener: (context, state) {
         if (state is AuthAuthenticated) {
           HapticFeedback.mediumImpact();
+          // Tells the platform the autofill session ended well, which is what
+          // makes iOS and Android offer to save the credentials to the
+          // keychain. Without it the AutofillGroup above only ever *fills* —
+          // nobody's password ever gets stored, so the next sign-in is typed
+          // out by hand again.
+          TextInput.finishAutofillContext();
           context.go('/home');
         } else if (state is AuthError) {
           _showError(context, state.message);
@@ -139,14 +147,21 @@ class _AuthScreenState extends State<AuthScreen> {
                     textInputAction: TextInputAction.done,
                     autofillHints: const [AutofillHints.password],
                     onFieldSubmitted: (_) => _submit(),
-                    suffixIcon: GestureDetector(
-                      onTap: () => setState(() => _obscure = !_obscure),
-                      child: Icon(
-                        _obscure
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined,
-                        color: AppColors.muted,
-                        size: 20,
+                    suffixIcon: Semantics(
+                      button: true,
+                      label: _obscure ? 'Parolni ko\'rsatish' : 'Parolni yashirish',
+                      child: GestureDetector(
+                        onTap: () => setState(() => _obscure = !_obscure),
+                        // Without this the 20px icon is the only hit target;
+                        // the transparent padding around it swallowed taps.
+                        behavior: HitTestBehavior.opaque,
+                        child: Icon(
+                          _obscure
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: AppColors.muted,
+                          size: 20,
+                        ),
                       ),
                     ),
                   ),

@@ -14,9 +14,7 @@ void main() {
         'scan_history_v1': '[]',
         'routine:2026-08-04': '{"am_0":true}',
         'routine:2026-08-05': '{"pm_1":true}',
-        'needs_name_prompt_v1': true,
         'privacy_accepted_v1': true,
-        'is_logged_in_v1': true,
       });
       await LocalStore.instance.init();
     });
@@ -29,7 +27,6 @@ void main() {
       expect(store.getAnalysisHistory(), isEmpty);
       expect(store.getRoutine('2026-08-04'), isEmpty);
       expect(store.getRoutine('2026-08-05'), isEmpty);
-      expect(store.needsNamePrompt, isFalse);
     });
 
     test('keeps device-level privacy consent', () async {

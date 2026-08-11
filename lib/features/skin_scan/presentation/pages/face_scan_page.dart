@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:real_beauty_ai/core/permissions/camera_permission_service.dart';
 import 'package:real_beauty_ai/core/router/route_args.dart';
 import 'package:real_beauty_ai/core/utils/logger.dart';
+import 'package:real_beauty_ai/features/skin_scan/domain/nv21_converter.dart';
 
 enum _ScanPhase { idle, scanning, analyzing, complete }
 
@@ -701,24 +702,20 @@ class _FaceScanScreenState extends State<FaceScanScreen>
     final yPlane = image.planes[0];
     final uPlane = image.planes[1];
     final vPlane = image.planes[2];
-    final int ySize = image.width * image.height;
-    final nv21 = Uint8List(ySize + ySize ~/ 2);
-    int idx = 0;
-    for (int row = 0; row < image.height; row++) {
-      nv21.setRange(
-          idx, idx + image.width, yPlane.bytes, row * yPlane.bytesPerRow);
-      idx += image.width;
-    }
-    final vRS = vPlane.bytesPerRow, vPS = vPlane.bytesPerPixel ?? 1;
-    final uRS = uPlane.bytesPerRow, uPS = uPlane.bytesPerPixel ?? 1;
-    for (int row = 0; row < image.height ~/ 2; row++) {
-      for (int col = 0; col < image.width ~/ 2; col++) {
-        final vi = row * vRS + col * vPS;
-        final ui = row * uRS + col * uPS;
-        nv21[idx++] = vi < vPlane.bytes.length ? vPlane.bytes[vi] : 128;
-        nv21[idx++] = ui < uPlane.bytes.length ? uPlane.bytes[ui] : 128;
-      }
-    }
+    // The repacking itself lives in a pure function so it can be tested
+    // against the plane layouts real phones produce; see nv21_converter.dart.
+    final nv21 = yuv420ToNv21(
+      width: image.width,
+      height: image.height,
+      yBytes: yPlane.bytes,
+      uBytes: uPlane.bytes,
+      vBytes: vPlane.bytes,
+      yRowStride: yPlane.bytesPerRow,
+      uRowStride: uPlane.bytesPerRow,
+      vRowStride: vPlane.bytesPerRow,
+      uPixelStride: uPlane.bytesPerPixel ?? 1,
+      vPixelStride: vPlane.bytesPerPixel ?? 1,
+    );
     return InputImage.fromBytes(
       bytes: nv21,
       metadata: InputImageMetadata(

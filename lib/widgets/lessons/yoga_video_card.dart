@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -37,6 +36,12 @@ class _YogaVideoCardState extends State<YogaVideoCard> {
   _VideoState _state = _VideoState.idle;
   bool _isVisible = false;
   int _generation = 0;
+
+  /// Set only by a tap on the card. Scrolling a paused clip out of view and
+  /// back must not start it playing again — the person stopped it on purpose,
+  /// and autoplay overriding that is the whole reason muted autoplay feels
+  /// like something you cannot control.
+  bool _pausedByUser = false;
 
   String get _id =>
       widget.withAudio ? 'yoga_voice_${widget.index}' : 'yoga_${widget.index}';
@@ -95,6 +100,9 @@ class _YogaVideoCardState extends State<YogaVideoCard> {
     _generation++;
     _ctrl?.dispose();
     _ctrl = null;
+    // The controller is gone, so "paused" no longer means anything: a card
+    // that comes back is starting over, not resuming.
+    _pausedByUser = false;
     VideoPlaybackManager.instance.notifyHidden(_id);
     if (mounted) setState(() => _state = _VideoState.idle);
   }
@@ -105,6 +113,7 @@ class _YogaVideoCardState extends State<YogaVideoCard> {
     _isVisible = nowVisible;
 
     if (nowVisible) {
+      if (_pausedByUser) return;
       if (_state == _VideoState.idle || _state == _VideoState.error) {
         _initialize();
       } else if (_state == _VideoState.ready) {
@@ -118,6 +127,36 @@ class _YogaVideoCardState extends State<YogaVideoCard> {
     }
   }
 
+  /// Tapping the card starts or stops its clip.
+  ///
+  /// The tap used to fire a haptic and nothing else, which is worse than not
+  /// being tappable at all: the card answered the touch, so it read as a
+  /// button, and then no screen opened and no video reacted.
+  void _togglePlayback() {
+    HapticFeedback.selectionClick();
+
+    final ctrl = _ctrl;
+    if (_state != _VideoState.ready || ctrl == null) {
+      // Nothing to toggle yet — treat the tap as "load this one now" so a
+      // clip that failed or has not started is one tap away either way.
+      _pausedByUser = false;
+      if (_state == _VideoState.idle || _state == _VideoState.error) {
+        _initialize();
+      }
+      return;
+    }
+
+    if (ctrl.value.isPlaying) {
+      _pausedByUser = true;
+      VideoPlaybackManager.instance.notifyHidden(_id);
+      ctrl.pause();
+    } else {
+      _pausedByUser = false;
+      VideoPlaybackManager.instance.requestPlay(_id);
+      ctrl.play();
+    }
+  }
+
   // ── Build ────────────────────────────────────────────────────────────────────
 
   @override
@@ -126,40 +165,49 @@ class _YogaVideoCardState extends State<YogaVideoCard> {
     return VisibilityDetector(
       key: Key(_id),
       onVisibilityChanged: _onVisibilityChanged,
-      child: GestureDetector(
-        onTap: () => HapticFeedback.selectionClick(),
-        child: Container(
-          margin: const EdgeInsets.symmetric(vertical: 6),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius:
-                BorderRadius.circular(LessonStyles.yogaCardRadius),
-            border: Border.all(color: ex.color.withValues(alpha: 0.20)),
-            boxShadow: LessonStyles.cardShadow,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _VideoRegion(
-                exercise: ex,
-                index: widget.index,
-                state: _state,
-                ctrl: _ctrl,
-                onRetry: () {
-                  if (!mounted) return;
-                  setState(() => _state = _VideoState.idle);
-                  if (_isVisible) _initialize();
-                },
-              ),
-              _InfoPanel(exercise: ex),
-            ],
-          ),
+      child: Semantics(
+        button: true,
+        label:
+            '${widget.index + 1}. ${ex.name}. ${ex.target}, ${ex.duration}. '
+            '${ex.description}',
+        hint: 'Videoni ijro etish yoki toxtatish',
+        onTap: _togglePlayback,
+        child: ExcludeSemantics(child: _buildCard(ex)),
+      ),
+    );
+  }
+
+  Widget _buildCard(YogaExercise ex) {
+    return GestureDetector(
+      onTap: _togglePlayback,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(LessonStyles.yogaCardRadius),
+          border: Border.all(color: ex.color.withValues(alpha: 0.20)),
+          boxShadow: LessonStyles.cardShadow,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _VideoRegion(
+              exercise: ex,
+              index: widget.index,
+              state: _state,
+              ctrl: _ctrl,
+              onRetry: () {
+                if (!mounted) return;
+                _pausedByUser = false;
+                setState(() => _state = _VideoState.idle);
+                if (_isVisible) _initialize();
+              },
+            ),
+            _InfoPanel(exercise: ex),
+          ],
         ),
       ),
-    )
-        .animate(delay: Duration(milliseconds: 40 + widget.index * 70))
-        .fadeIn(duration: const Duration(milliseconds: 300))
-        .slideY(begin: 0.04);
+    );
   }
 }
 
@@ -189,22 +237,25 @@ class _VideoRegion extends StatelessWidget {
         : _kSourceAspect;
 
     // Clip only for portrait source; landscape means file was re-encoded.
-    final bool doClip =
-        aspect < 1.0 && exercise.clipHeightFactor < 1.0;
+    final bool doClip = aspect < 1.0 && exercise.clipHeightFactor < 1.0;
 
     Widget videoCore = AspectRatio(
       aspectRatio: aspect,
       child: switch (state) {
-        _VideoState.ready   => VideoPlayer(ctrl!),
-        _VideoState.loading =>
-          VideoPlaceholder(color: exercise.color, icon: exercise.icon),
-        _VideoState.error   => VideoErrorView(
-            color: exercise.color,
-            icon: exercise.icon,
-            onRetry: onRetry,
-          ),
-        _VideoState.idle    =>
-          VideoPlaceholder(color: exercise.color, icon: exercise.icon),
+        _VideoState.ready => VideoPlayer(ctrl!),
+        _VideoState.loading => VideoPlaceholder(
+          color: exercise.color,
+          icon: exercise.icon,
+        ),
+        _VideoState.error => VideoErrorView(
+          color: exercise.color,
+          icon: exercise.icon,
+          onRetry: onRetry,
+        ),
+        _VideoState.idle => VideoPlaceholder(
+          color: exercise.color,
+          icon: exercise.icon,
+        ),
       },
     );
 
@@ -230,7 +281,44 @@ class _VideoRegion extends StatelessWidget {
             left: 12,
             child: _NumberBadge(number: index + 1, color: exercise.color),
           ),
+          // A paused clip and a clip that simply has not started look
+          // identical without this — both are a frozen frame. The badge is the
+          // only thing telling someone the card is waiting on them.
+          if (state == _VideoState.ready && ctrl != null)
+            Positioned.fill(
+              child: ValueListenableBuilder<VideoPlayerValue>(
+                valueListenable: ctrl!,
+                builder: (_, value, _) => AnimatedOpacity(
+                  opacity: value.isPlaying ? 0.0 : 1.0,
+                  duration: const Duration(milliseconds: 150),
+                  child: const IgnorePointer(child: _PlayBadge()),
+                ),
+              ),
+            ),
         ],
+      ),
+    );
+  }
+}
+
+class _PlayBadge extends StatelessWidget {
+  const _PlayBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        width: 52,
+        height: 52,
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.42),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(
+          Icons.play_arrow_rounded,
+          color: Colors.white,
+          size: 30,
+        ),
       ),
     );
   }
@@ -274,7 +362,11 @@ class _InfoPanel extends StatelessWidget {
           // Row 2: duration meta
           Row(
             children: [
-              const Icon(Icons.timer_outlined, size: 13, color: AppColors.primary),
+              const Icon(
+                Icons.timer_outlined,
+                size: 13,
+                color: AppColors.primary,
+              ),
               const SizedBox(width: 4),
               Text(
                 exercise.duration,

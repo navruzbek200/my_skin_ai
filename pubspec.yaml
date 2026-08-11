@@ -29,6 +29,7 @@ dependencies:
   get_it: ^7.7.0
   google_sign_in: ^7.2.0
   equatable: ^2.0.8
+  firebase_crashlytics: ^4.3.10
 
 dev_dependencies:
   flutter_test:
@@ -60,8 +61,20 @@ flutter:
     - assets/data/
     - assets/cosmetologists/
 
+# Sources here are build-time only — deliberately absent from the asset list
+# above, so they are never shipped inside the app.
+#
+# assets/icon.png is the raw artwork: the mark sits off-centre in it with a wide
+# empty margin, which the generator scaled down as-is and produced a smudge in
+# the corner of a launcher tile. app_icon.png is that same mark cropped and
+# recentred; app_icon_foreground.png is it again, smaller, for the adaptive
+# icon — Android crops the foreground to the inner 66%, so a full-bleed mark
+# would lose the butterfly to the mask.
 flutter_launcher_icons:
   android: true
   ios: true
   remove_alpha_ios: true # iOS uchun shaffoflikni olib tashlaydi
-  image_path: "assets/icon.png"
+  image_path: "assets/app_icon.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/app_icon_foreground.png"
+  min_sdk_android: 21

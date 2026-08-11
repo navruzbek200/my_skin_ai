@@ -24,10 +24,21 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     super.dispose();
   }
 
+  // Same shape the sign-in screen enforces. Checked here too because a typo
+  // otherwise costs a network round-trip to come back as "invalid-email", and
+  // an address that is merely *wrong* (not malformed) comes back as success —
+  // Firebase will not confirm whether an account exists, so the screen would
+  // cheerfully report a link sent to nobody.
+  static final _emailPattern = RegExp(r'^[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}$');
+
   void _send() {
     final email = _emailCtrl.text.trim();
     if (email.isEmpty) {
       setState(() => _error = "Email kiriting");
+      return;
+    }
+    if (!_emailPattern.hasMatch(email)) {
+      setState(() => _error = 'Haqiqiy email kiriting');
       return;
     }
     HapticFeedback.mediumImpact();
@@ -111,6 +122,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               TextField(
                 controller: _emailCtrl,
                 keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.done,
+                autofillHints: const [AutofillHints.email],
+                onSubmitted: (_) => _loading ? null : _send(),
+                // The error is about what was typed, so it has to go the
+                // moment that changes — otherwise a corrected address still
+                // sits under a red "Haqiqiy email kiriting".
+                onChanged: (_) {
+                  if (_error != null) setState(() => _error = null);
+                },
                 style: GoogleFonts.nunito(
                   fontSize: 15,
                   color: AppColors.text,

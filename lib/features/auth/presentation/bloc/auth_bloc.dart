@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:real_beauty_ai/core/utils/crash_reporter.dart';
 
 part 'auth_bloc_event.dart';
 part 'auth_bloc_state.dart';
@@ -39,6 +40,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthSessionState> {
 
   void _onUserChanged(AuthUserChanged event, Emitter<AuthSessionState> emit) {
     final user = event.user;
+    // This is the one place that sees every session change, so it is also the
+    // one place that has to keep crash reports attributed to the right person.
+    CrashReporter.setUser(user?.uid);
     emit(user == null
         ? const AuthUnauthenticated()
         : AuthAuthenticatedSession(user));

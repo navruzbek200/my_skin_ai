@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/article.dart';
 
-// iconColor is set to the brand primary (0xFF7060AA) for all articles.
-// Per-item colors are kept in the field for model compat but not used in UI.
+// iconColor is each article's accent: it tints the icon and the "Maqola"
+// label, and paints the bar down the left edge of the card. Pick something
+// that belongs to the subject — sun amber for SPF, night indigo for sleep —
+// so a list of eight white cards is scannable by colour before it is read.
+// LessonStyles.readableAccent darkens the hue where it has to carry text, so
+// a light pick here stays legible.
 const List<Article> articles = [
   Article(
     icon: Icons.spa_outlined,
@@ -41,7 +45,7 @@ const List<Article> articles = [
   ),
   Article(
     icon: Icons.eco_outlined,
-    iconColor: Color(0xFF7060AA),
+    iconColor: Color(0xFF2E9E6B),
     title: 'Tabiiy ingrediyentlar qanday ishlaydi?',
     duration: '7 daqiqa',
     summary:
@@ -76,7 +80,7 @@ const List<Article> articles = [
   ),
   Article(
     icon: Icons.wb_sunny_outlined,
-    iconColor: Color(0xFF7060AA),
+    iconColor: Color(0xFFE08A1E),
     title: 'SPF haqida bilishingiz kerak bo\'lgan hamma narsa',
     duration: '4 daqiqa',
     summary:
@@ -111,7 +115,7 @@ const List<Article> articles = [
   ),
   Article(
     icon: Icons.bedtime_outlined,
-    iconColor: Color(0xFF7060AA),
+    iconColor: Color(0xFF4C4B9E),
     title: 'Uyqu va teri sog\'ligi orasidagi bog\'liqlik',
     duration: '6 daqiqa',
     summary:
@@ -146,7 +150,7 @@ const List<Article> articles = [
   ),
   Article(
     icon: Icons.restaurant_outlined,
-    iconColor: Color(0xFF7060AA),
+    iconColor: Color(0xFFD2553F),
     title: 'Ovqatlanish va akne: ilmiy aloqa',
     duration: '8 daqiqa',
     summary:
@@ -181,7 +185,7 @@ const List<Article> articles = [
   ),
   Article(
     icon: Icons.ac_unit_outlined,
-    iconColor: Color(0xFF7060AA),
+    iconColor: Color(0xFF2196A5),
     title: 'Yuzga muz surish: foyda yoki zarar?',
     duration: '4 daqiqa',
     summary:
@@ -211,7 +215,7 @@ const List<Article> articles = [
   ),
   Article(
     icon: Icons.phone_android_outlined,
-    iconColor: Color(0xFF7060AA),
+    iconColor: Color(0xFF3A6FE0),
     title: 'Telefon ko\'k nuri va teri: haqiqat nimada?',
     duration: '5 daqiqa',
     summary:
@@ -241,7 +245,7 @@ const List<Article> articles = [
   ),
   Article(
     icon: Icons.self_improvement_outlined,
-    iconColor: Color(0xFF7060AA),
+    iconColor: Color(0xFFA8478F),
     title: 'Teri qarishi haqida 6 afsona va haqiqat',
     duration: '6 daqiqa',
     summary:

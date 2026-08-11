@@ -75,6 +75,10 @@ class _ProductsBodyState extends State<_ProductsBody> {
           backgroundColor: AppColors.background,
           body: CustomScrollView(
             physics: const BouncingScrollPhysics(),
+            // Build and start fetching roughly a screen ahead of the viewport,
+            // so a fast flick lands on cards whose images are already in
+            // flight rather than on empty ones.
+            cacheExtent: 1200,
             slivers: [
               SliverToBoxAdapter(
                 child: SafeArea(
@@ -111,25 +115,6 @@ class _ProductsBodyState extends State<_ProductsBody> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 8, vertical: 3),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFF5A7A52)
-                                                .withValues(alpha: 0.15),
-                                            borderRadius:
-                                                BorderRadius.circular(999),
-                                          ),
-                                          child: Text(
-                                            'Maxsus taklif',
-                                            style: GoogleFonts.nunito(
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w700,
-                                              color: const Color(0xFF3D5C36),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
                                         Text(
                                           'Koreya brend\nmahsulotlar',
                                           style: GoogleFonts.nunito(
@@ -137,15 +122,6 @@ class _ProductsBodyState extends State<_ProductsBody> {
                                             fontWeight: FontWeight.w800,
                                             color: const Color(0xFF2A3D27),
                                             height: 1.25,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 6),
-                                        Text(
-                                          'Tabiat kuchi bilan — −20%',
-                                          style: GoogleFonts.nunito(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w500,
-                                            color: const Color(0xFF5A7A52),
                                           ),
                                         ),
                                       ],
@@ -281,9 +257,16 @@ class _ProductsBodyState extends State<_ProductsBody> {
                       childAspectRatio: 0.65,
                     ),
                     delegate: SliverChildBuilderDelegate(
-                      (_, i) => _ProductCard(
-                          product: filtered[i], index: i),
+                      (_, i) => _ProductCard(product: filtered[i]),
                       childCount: filtered.length,
+                      // Deliberately no keep-alives: the cards are stateless,
+                      // so there is nothing to keep, and holding 54 elements
+                      // alive would only cost memory. What actually stops a
+                      // scrolled-past card from re-fetching is the raised
+                      // image cache in main.dart, which holds the decoded
+                      // thumbnails for the whole grid.
+                      addAutomaticKeepAlives: false,
+                      addRepaintBoundaries: true,
                     ),
                   ),
                 ),
@@ -293,6 +276,34 @@ class _ProductsBodyState extends State<_ProductsBody> {
       },
     );
   }
+}
+
+/// Opens the product detail sheet from anywhere in the app.
+///
+/// The page itself stays private: it is an implementation detail of this
+/// screen, and exporting the widget would invite other features to build it
+/// with their own transition. Exporting the *action* keeps one entry point, so
+/// a product opened from the Bugun routine animates exactly like one opened
+/// from the catalogue.
+void openProductDetail(BuildContext context, Product product) {
+  HapticFeedback.selectionClick();
+  Navigator.push(
+    context,
+    PageRouteBuilder(
+      pageBuilder: (_, _, _) => _ProductDetailPage(product: product),
+      transitionsBuilder: (_, anim, _, child) => FadeTransition(
+        opacity: CurvedAnimation(parent: anim, curve: Curves.easeOut),
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 0.06),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(parent: anim, curve: Curves.easeOut)),
+          child: child,
+        ),
+      ),
+      transitionDuration: const Duration(milliseconds: 280),
+    ),
+  );
 }
 
 // ── Product image helper ──────────────────────────────────────
@@ -309,7 +320,11 @@ const _maxDecodeWidth = 1400;
 /// blurry picture on good screens; guessing high wastes memory on cheap ones,
 /// and product packaging is covered in fine print that shows both mistakes
 /// immediately.
-Widget _productImage(Product product, {BoxFit fit = BoxFit.contain}) {
+Widget _productImage(
+  Product product, {
+  BoxFit fit = BoxFit.contain,
+  bool thumb = false,
+}) {
   return LayoutBuilder(
     builder: (context, constraints) {
       final dpr = MediaQuery.devicePixelRatioOf(context);
@@ -318,15 +333,22 @@ Widget _productImage(Product product, {BoxFit fit = BoxFit.contain}) {
           : MediaQuery.sizeOf(context).width;
       final decodeWidth = (logical * dpr).round().clamp(1, _maxDecodeWidth);
 
-      if (product.imageUrl != null && product.imageUrl!.isNotEmpty) {
+      final url = thumb && (product.thumbUrl?.isNotEmpty ?? false)
+          ? product.thumbUrl!
+          : product.imageUrl;
+
+      if (url != null && url.isNotEmpty) {
         return CachedNetworkImage(
-          imageUrl: product.imageUrl!,
+          imageUrl: url,
           fit: fit,
           memCacheWidth: decodeWidth,
-          placeholder: (_, _) => const Center(
-            child: CircularProgressIndicator(
-                strokeWidth: 1.5, color: AppColors.primary),
-          ),
+          // The default half-second cross-fade runs even for an image already
+          // on disk, which on a grid reads as everything arriving late.
+          fadeInDuration: Duration.zero,
+          fadeOutDuration: Duration.zero,
+          // A spinner per cell turns an ordinary load into visible waiting.
+          // An empty card is quieter and the picture simply appears.
+          placeholder: (_, _) => const ColoredBox(color: Colors.white),
           errorWidget: (_, _, _) => const Icon(
               Icons.image_outlined,
               size: 40,
@@ -348,35 +370,13 @@ Widget _productImage(Product product, {BoxFit fit = BoxFit.contain}) {
 
 class _ProductCard extends StatelessWidget {
   final Product product;
-  final int index;
 
-  const _ProductCard({required this.product, required this.index});
-
-  void _openDetail(BuildContext context) {
-    HapticFeedback.selectionClick();
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (_, _, _) => _ProductDetailPage(product: product),
-        transitionsBuilder: (_, anim, _, child) => FadeTransition(
-          opacity: CurvedAnimation(parent: anim, curve: Curves.easeOut),
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, 0.06),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(parent: anim, curve: Curves.easeOut)),
-            child: child,
-          ),
-        ),
-        transitionDuration: const Duration(milliseconds: 280),
-      ),
-    );
-  }
+  const _ProductCard({required this.product});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => _openDetail(context),
+      onTap: () => openProductDetail(context, product),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -401,7 +401,7 @@ class _ProductCard extends StatelessWidget {
                   color: Colors.white,
                   child: Padding(
                     padding: const EdgeInsets.all(8),
-                    child: _productImage(product),
+                    child: _productImage(product, thumb: true),
                   ),
                 ),
               ),
@@ -479,10 +479,7 @@ class _ProductCard extends StatelessWidget {
           ],
         ),
       ),
-    )
-        .animate(delay: Duration(milliseconds: index * 60))
-        .fadeIn()
-        .scale(begin: const Offset(0.96, 0.96));
+    );
   }
 }
 

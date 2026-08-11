@@ -37,6 +37,10 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
   int _prevIndex = 0;
   bool _exiting = false;
 
+  /// Last question actually rendered. Held so the screen has something to draw
+  /// during the frame between completing the quiz and the route being replaced.
+  QuizInProgress? _lastInProgress;
+
   static const _bg = Color(0xFFF0ECF8);
   static const _cardBg = Color(0xFFFFFFFF);
   static const _textDark = Color(0xFF2D2050);
@@ -154,6 +158,35 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
 
   // ── Navigation ────────────────────────────────────────────────
 
+  /// The one place that decides what "back" means, so the X button, the system
+  /// back gesture and the predictive-back callback cannot drift apart: step to
+  /// the previous question if there is one, otherwise leave the quiz.
+  void _handleBack() {
+    final cubit = context.read<QuizCubit>();
+    final s = cubit.state;
+    // Finished: the replacement route is already on its way in, and anything
+    // done here would be undoing a quiz nobody is looking at any more.
+    if (s is! QuizInProgress) return;
+    // Only "Keyingi" used to commit what was typed, so leaving a free-text
+    // question backwards dropped it from the answers. The text stayed in the
+    // field, which hid the loss until the exit prompt decided there was
+    // nothing worth warning about and closed the quiz on it.
+    _syncTextarea(s.currentIndex);
+    if (s.currentIndex > 0) {
+      HapticFeedback.lightImpact();
+      cubit.previous();
+      return;
+    }
+    _tryExit();
+  }
+
+  /// Commits the text field for [index] to the cubit, if that question has one.
+  void _syncTextarea(int index) {
+    if (quizQuestions[index].type != QuestionType.textarea) return;
+    final ctrl = _textControllers[index];
+    if (ctrl != null) context.read<QuizCubit>().setAnswer(ctrl.text);
+  }
+
   void _tryExit() {
     if (context.read<QuizCubit>().hasAnyAnswer) {
       _showExitConfirm();
@@ -168,7 +201,9 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
     if (_exiting) return;
     _exiting = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
       if (context.canPop()) {
         context.pop();
       } else {
@@ -176,16 +211,32 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
         // popping into a black screen.
         context.go('/home');
       }
+      // Still here a frame later means the route did not actually go away.
+      // Leaving the latch set would silently swallow every later attempt to
+      // close the quiz, so clear it and let the next tap try again.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _exiting = false;
+      });
+      WidgetsBinding.instance.ensureVisualUpdate();
     });
+    // A post-frame callback only runs after a frame, and a frame only happens
+    // if something asked for one. Tapping X on the first question with nothing
+    // answered marks no widget dirty, so the pop above sat queued until some
+    // unrelated repaint — a "Keyingi" tap — finally produced a frame, and the
+    // quiz closed then instead. Ask for the frame the callback is waiting on.
+    WidgetsBinding.instance.ensureVisualUpdate();
   }
 
-  void _goNext(QuizInProgress state) {
+  void _goNext() {
     final cubit = context.read<QuizCubit>();
-    // Sync textarea text to cubit before validation.
-    if (quizQuestions[state.currentIndex].type == QuestionType.textarea) {
-      final ctrl = _textControllers[state.currentIndex];
-      if (ctrl != null) cubit.setAnswer(ctrl.text);
-    }
+    // Read the index from the cubit, never from the state captured when this
+    // button was built: a tap can be delivered after `previous()` has already
+    // moved on, and acting on the stale index writes the answer to the wrong
+    // question and advances from the wrong place.
+    final state = cubit.state;
+    if (state is! QuizInProgress) return;
+
+    _syncTextarea(state.currentIndex);
     if (!cubit.isCurrentAnswered()) {
       _showValidationHint();
       return;
@@ -213,27 +264,29 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
           _slideCtrl.reset();
           _slideCtrl.forward();
         } else if (state is QuizCompleted) {
-          context.push('/scan-instructions',
+          // Replacing, not pushing. A pushed quiz stays on the stack under the
+          // scan screen, and closing that lands back on a finished quiz: there
+          // is no question left to draw, so the screen came up blank, and the
+          // next back press ran the exit path against a completed state. The
+          // quiz is done — it should not be somewhere "back" can return to.
+          context.pushReplacement('/scan-instructions',
               extra: List<dynamic>.from(state.answers));
         }
       },
       builder: (context, state) {
-        if (state is! QuizInProgress) return const SizedBox.shrink();
-        final s = state;
+        // Completion and the route swap are a frame apart, and for that frame
+        // this route is still mounted with nothing left to show. Redrawing the
+        // question it just finished keeps the handover silent; returning an
+        // empty box flashed a blank screen instead.
+        if (state is QuizInProgress) _lastInProgress = state;
+        final s = state is QuizInProgress ? state : _lastInProgress;
+        if (s == null) return const SizedBox.shrink();
         final question = quizQuestions[s.currentIndex];
         final progress = (s.currentIndex + 1) / quizQuestions.length;
 
         return PopScope(
           canPop: false,
-          onPopInvokedWithResult: (_, _) {
-            final cs = context.read<QuizCubit>().state;
-            if (cs is QuizInProgress && cs.currentIndex > 0) {
-              HapticFeedback.lightImpact();
-              context.read<QuizCubit>().previous();
-            } else {
-              _tryExit();
-            }
-          },
+          onPopInvokedWithResult: (_, _) => _handleBack(),
           child: Scaffold(
             backgroundColor: _bg,
             body: SafeArea(
@@ -281,15 +334,7 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
           Row(
             children: [
               GestureDetector(
-                onTap: () {
-                  final cs = context.read<QuizCubit>().state;
-                  if (cs is QuizInProgress && cs.currentIndex > 0) {
-                    HapticFeedback.lightImpact();
-                    context.read<QuizCubit>().previous();
-                  } else {
-                    _tryExit();
-                  }
-                },
+                onTap: _handleBack,
                 child: Container(
                   width: 38,
                   height: 38,
@@ -529,7 +574,7 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
       padding: EdgeInsets.fromLTRB(
           20, 8, 20, MediaQuery.of(context).padding.bottom + 16),
       child: _PressButton(
-        onTap: () => _goNext(state),
+        onTap: _goNext,
         color: _accent,
         child: Text(
           isLast ? 'Yakunlash' : 'Keyingi',

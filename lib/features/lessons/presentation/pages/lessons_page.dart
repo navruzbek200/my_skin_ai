@@ -26,26 +26,40 @@ class _LessonsScreenState extends State<LessonsScreen> {
   void _toggleYogaVoice() =>
       setState(() => _yogaVoiceExpanded = !_yogaVoiceExpanded);
 
-  // ClipRect + Align(heightFactor) — cheaper than AnimatedSize (no child rebuild)
+  /// A collapsible block that holds nothing at all while it is shut.
+  ///
+  /// [buildCards] is called from inside the builder rather than passed as a
+  /// prebuilt `child`, and that is the whole point. As a `child` the cards
+  /// were constructed once and kept mounted no matter what the accordion was
+  /// doing, so opening Darslar mounted all ten YogaVideoCards — ten
+  /// VisibilityDetectors and ten registrations with VideoPlaybackManager —
+  /// for two closed sections. The shell keeps every tab alive in an
+  /// IndexedStack, so that cost was paid from launch and never given back.
+  /// Collapsed now means an empty box; the cards are created on the way open
+  /// and disposed on the way shut, which also releases their controllers.
   Widget _yogaAccordion({
     required bool expanded,
-    required List<Widget> cards,
+    required List<Widget> Function() buildCards,
   }) {
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: expanded ? 1.0 : 0.0),
       duration: const Duration(milliseconds: 350),
       curve: Curves.easeInOut,
-      builder: (context, value, child) => ClipRect(
-        child: Align(
-          alignment: Alignment.topCenter,
-          heightFactor: value,
-          child: child,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-        child: Column(children: cards),
-      ),
+      builder: (context, value, _) {
+        if (value == 0) return const SizedBox.shrink();
+        // ClipRect + Align(heightFactor) — cheaper than AnimatedSize, which
+        // would measure the subtree on every frame of the reveal.
+        return ClipRect(
+          child: Align(
+            alignment: Alignment.topCenter,
+            heightFactor: value,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+              child: Column(children: buildCards()),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -63,18 +77,32 @@ class _LessonsScreenState extends State<LessonsScreen> {
             child: SafeArea(
               bottom: false,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-                child: Text(
-                  'Darslar',
-                  style: GoogleFonts.nunito(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.text,
-                  ),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Darslar',
+                      style: GoogleFonts.nunito(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.text,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      "Yuz yogasi, ingrediyentlar va maqolalar",
+                      style: GoogleFonts.nunito(
+                        fontSize: 13,
+                        color: AppColors.muted,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
+          const SliverToBoxAdapter(child: SizedBox(height: 14)),
 
           // ── Yuz Yoga accordion ─────────────────────────────
           SliverToBoxAdapter(
@@ -82,82 +110,79 @@ class _LessonsScreenState extends State<LessonsScreen> {
               isExpanded: _yogaExpanded,
               onTap: _toggleYoga,
               title: 'Yuz Yoga',
+              count: yogaExercises.length,
             ),
           ),
           SliverToBoxAdapter(
             child: _yogaAccordion(
               expanded: _yogaExpanded,
-              cards: yogaExercises
-                  .asMap()
-                  .entries
-                  .map((e) => YogaVideoCard(exercise: e.value, index: e.key))
-                  .toList(),
+              buildCards: () => [
+                for (var i = 0; i < yogaExercises.length; i++)
+                  YogaVideoCard(exercise: yogaExercises[i], index: i),
+              ],
             ),
           ),
 
-          const SliverToBoxAdapter(child: SizedBox(height: 20)),
+          const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
-          // ──  ──────────────────────────
+          // ── Yoga mashqlari (with narration) ────────────────
           SliverToBoxAdapter(
             child: YogaSectionHeader(
               isExpanded: _yogaVoiceExpanded,
               onTap: _toggleYogaVoice,
               title: 'Yoga mashqlari',
               avatarPath: 'assets/yoga avatar 2.jpg',
+              count: yogaVoiceExercises.length,
             ),
           ),
           SliverToBoxAdapter(
             child: _yogaAccordion(
               expanded: _yogaVoiceExpanded,
-              cards: yogaVoiceExercises
-                  .asMap()
-                  .entries
-                  .map(
-                    (e) => YogaVideoCard(
-                      exercise: e.value,
-                      index: e.key,
-                      withAudio: true,
-                    ),
-                  )
-                  .toList(),
+              buildCards: () => [
+                for (var i = 0; i < yogaVoiceExercises.length; i++)
+                  YogaVideoCard(
+                    exercise: yogaVoiceExercises[i],
+                    index: i,
+                    withAudio: true,
+                  ),
+              ],
             ),
           ),
 
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
+          const SliverToBoxAdapter(child: SizedBox(height: 26)),
 
           // ── Ingrediyentlar ────────────────────────────────
-          const SliverToBoxAdapter(
+          SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(20, 0, 20, 12),
-              child: SectionHeader(title: 'Ingrediyentlar'),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+              child: SectionHeader(
+                title: 'Ingrediyentlar',
+                count: lessons.length,
+              ),
             ),
           ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (_, i) => LessonCard(lesson: lessons[i], index: i),
-                childCount: lessons.length,
-              ),
+            sliver: SliverList.builder(
+              itemCount: lessons.length,
+              itemBuilder: (_, i) => LessonCard(lesson: lessons[i]),
             ),
           ),
 
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
+          const SliverToBoxAdapter(child: SizedBox(height: 26)),
 
           // ── Maqolalar ─────────────────────────────────────
-          const SliverToBoxAdapter(
+          SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(20, 0, 20, 12),
-              child: SectionHeader(title: 'Maqolalar'),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+              child: SectionHeader(title: 'Maqolalar', count: articles.length),
             ),
           ),
           SliverPadding(
             padding: EdgeInsets.fromLTRB(16, 0, 16, bottomPad),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (_, i) => ArticleCard(article: articles[i], index: i),
-                childCount: articles.length,
-              ),
+            sliver: SliverList.builder(
+              itemCount: articles.length,
+              itemBuilder: (_, i) => ArticleCard(article: articles[i]),
             ),
           ),
         ],

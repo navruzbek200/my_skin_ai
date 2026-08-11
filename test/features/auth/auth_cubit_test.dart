@@ -19,6 +19,9 @@ void main() {
     // Every successful sign-up mails the verification link; stubbed here so
     // individual tests only declare the call they are actually about.
     when(() => ds.sendEmailVerification()).thenAnswer((_) async {});
+    // The signed-in address. The delete flow reads it up front so it can fall
+    // back to a sign-in when the session turns out to be stale.
+    when(() => ds.currentEmail).thenReturn('a@b.com');
   });
 
   // ── One form for both sign-up and sign-in ────────────────────────────
@@ -67,7 +70,16 @@ void main() {
     act: (c) => c.continueWithEmail('a@b.com', 'nope123'),
     expect: () => [
       isA<AuthLoading>(),
-      isA<AuthError>().having((e) => e.message, 'msg', "Parol noto'g'ri"),
+      // The message also has to cover a Google-only account, which produces
+      // this exact code and cannot be told apart from a mistyped password.
+      isA<AuthError>().having(
+        (e) => e.message,
+        'msg',
+        allOf(
+          startsWith("Parol noto'g'ri"),
+          contains('Google'),
+        ),
+      ),
     ],
   );
 
@@ -153,6 +165,70 @@ void main() {
       isA<AuthLoading>(),
       isA<AuthError>().having((e) => e.message, 'msg', "Parol noto'g'ri"),
     ],
+    verify: (_) => verifyNever(() => ds.deleteAccount()),
+  );
+
+  // ── Delete after a forgotten password ────────────────────────────────
+  //
+  // Completing a reset link revokes the refresh token, so by the time the
+  // user comes back with their new password the session we would have
+  // re-authenticated is gone. These pin the recovery path.
+
+  blocTest<AuthCubit, AuthState>(
+    'stale session → signs in with the new password, then deletes',
+    build: () {
+      when(() => ds.reauthenticate(any()))
+          .thenThrow(FirebaseAuthException(code: 'no-current-user'));
+      when(() => ds.signIn(any(), any())).thenAnswer((_) async {});
+      when(() => ds.deleteAccount()).thenAnswer((_) async {});
+      return AuthCubit(ds);
+    },
+    act: (c) => c.reauthenticateAndDelete('brandNew123'),
+    expect: () => [isA<AuthLoading>(), isA<AuthDeleted>()],
+    verify: (_) {
+      // The new password proved ownership through a fresh sign-in instead of
+      // through a re-auth on a session that no longer exists.
+      verify(() => ds.signIn('a@b.com', 'brandNew123')).called(1);
+      verify(() => ds.deleteAccount()).called(1);
+    },
+  );
+
+  blocTest<AuthCubit, AuthState>(
+    'a stale session never reports a deletion that did not happen',
+    build: () {
+      // The regression this guards: reauthenticate() and deleteAccount() both
+      // used to return quietly when there was no signed-in user, so the cubit
+      // emitted AuthDeleted, the app wiped local data and told the user their
+      // account was gone — while the Auth record sat untouched on the server.
+      when(() => ds.currentEmail).thenReturn(null); // session already gone
+      when(() => ds.reauthenticate(any()))
+          .thenThrow(FirebaseAuthException(code: 'no-current-user'));
+      when(() => ds.deleteAccount())
+          .thenThrow(FirebaseAuthException(code: 'no-current-user'));
+      return AuthCubit(ds);
+    },
+    act: (c) => c.reauthenticateAndDelete('whatever'),
+    expect: () => [
+      isA<AuthLoading>(),
+      isA<AuthError>().having(
+        (e) => e.message,
+        'msg',
+        contains('Sessiya tugadi'),
+      ),
+    ],
+  );
+
+  blocTest<AuthCubit, AuthState>(
+    'delete still fails loudly when the fallback sign-in is refused',
+    build: () {
+      when(() => ds.reauthenticate(any()))
+          .thenThrow(FirebaseAuthException(code: 'user-token-expired'));
+      when(() => ds.signIn(any(), any()))
+          .thenThrow(FirebaseAuthException(code: 'invalid-credential'));
+      return AuthCubit(ds);
+    },
+    act: (c) => c.reauthenticateAndDelete('stillWrong'),
+    expect: () => [isA<AuthLoading>(), isA<AuthError>()],
     verify: (_) => verifyNever(() => ds.deleteAccount()),
   );
 

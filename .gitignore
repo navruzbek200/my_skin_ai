@@ -55,3 +55,10 @@ tools/raw_images/
 tools/products_seed.json
 tools/*service*.json
 tools/*-key.json
+
+# Android release signing — the upload key is the only thing that can publish
+# an update to this listing. Losing it means a new listing; leaking it means
+# someone else can sign one. Neither file ever belongs in the repo.
+android/key.properties
+*.jks
+*.keystore

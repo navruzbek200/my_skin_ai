@@ -19,51 +19,62 @@ class ListStep extends StatelessWidget {
         Text(
           step.title,
           style: GoogleFonts.nunito(
-            fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.text,
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            color: AppColors.text,
           ),
         ).animate().fadeIn(),
         const SizedBox(height: 16),
         ...items.indexed.map((entry) {
           final (i, item) = entry;
           return Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 26,
-                  height: 26,
-                  margin: const EdgeInsets.only(top: 1),
-                  decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-                  child: Center(
-                    child: Text(
-                      '${i + 1}',
-                      style: GoogleFonts.nunito(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 26,
+                      height: 26,
+                      margin: const EdgeInsets.only(top: 1),
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${i + 1}',
+                          style: GoogleFonts.nunito(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    item,
-                    style: GoogleFonts.nunito(
-                      fontSize: 14, color: AppColors.text, height: 1.4,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        item,
+                        style: GoogleFonts.nunito(
+                          fontSize: 14,
+                          color: AppColors.text,
+                          height: 1.4,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          )
-              .animate(delay: Duration(milliseconds: i * 260))
+              )
+              // 70ms, not 260ms: at the old spacing a five-item list took
+              // over a second to finish arriving, so the last two benefits of
+              // an ingredient were still sliding in while the step was being
+              // read. Capped so a longer list never runs past ~half a second.
+              .animate(delay: Duration(milliseconds: (i * 70).clamp(0, 500)))
               .slideY(begin: 0.3)
               .fadeIn();
         }),

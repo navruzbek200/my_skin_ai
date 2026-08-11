@@ -7,6 +7,7 @@ plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
     id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
     // END: FlutterFire Configuration
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -66,6 +67,25 @@ android {
                 signingConfigs.getByName("release")
             else
                 signingConfigs.getByName("debug")
+
+            // Off by default in a Flutter project, which ships every unused
+            // class and resource of Firebase, ML Kit and Play Services to a
+            // market where download size is a real cost. The keep rules the
+            // shrinker cannot infer live in proguard-rules.pro.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+
+            // Crashlytics can only symbolicate a native crash if the unstripped
+            // libraries were uploaded at build time. Release-only: doing it for
+            // debug builds would slow every local run for no benefit.
+            configure<com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension> {
+                nativeSymbolUploadEnabled = true
+                unstrippedNativeLibsDir = "build/app/intermediates/merged_native_libs/release/out/lib"
+            }
         }
     }
 }

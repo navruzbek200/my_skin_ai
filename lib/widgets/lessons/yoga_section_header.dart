@@ -10,12 +10,17 @@ class YogaSectionHeader extends StatefulWidget {
   final String title;
   final String avatarPath;
 
+  /// How many clips are inside. Shown under the title so a shut section says
+  /// what opening it is worth — the chevron alone promised nothing.
+  final int? count;
+
   const YogaSectionHeader({
     super.key,
     required this.isExpanded,
     required this.onTap,
     this.title = 'Yoga mashqlari',
     this.avatarPath = 'assets/yoga_avatar.jpg',
+    this.count,
   });
 
   @override
@@ -27,6 +32,17 @@ class _YogaSectionHeaderState extends State<YogaSectionHeader> {
 
   @override
   Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      expanded: widget.isExpanded,
+      label: widget.count == null
+          ? widget.title
+          : '${widget.title}, ${widget.count} ta mashq',
+      child: ExcludeSemantics(child: _buildCard()),
+    );
+  }
+
+  Widget _buildCard() {
     return GestureDetector(
       onTap: () {
         HapticFeedback.selectionClick();
@@ -43,13 +59,9 @@ class _YogaSectionHeaderState extends State<YogaSectionHeader> {
           padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius:
-                BorderRadius.circular(LessonStyles.yogaSectionRadius),
+            borderRadius: BorderRadius.circular(LessonStyles.yogaSectionRadius),
             boxShadow: LessonStyles.cardShadow,
-            border: Border.all(
-              color: LessonStyles.cardBorderColor,
-              width: 0.5,
-            ),
+            border: Border.all(color: LessonStyles.cardBorderColor, width: 0.5),
           ),
           child: Row(
             children: [
@@ -92,13 +104,28 @@ class _YogaSectionHeaderState extends State<YogaSectionHeader> {
               ),
               const SizedBox(width: 14),
               Expanded(
-                child: Text(
-                  widget.title,
-                  style: GoogleFonts.nunito(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.text,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      widget.title,
+                      style: GoogleFonts.nunito(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.text,
+                      ),
+                    ),
+                    if (widget.count != null)
+                      Text(
+                        '${widget.count} ta mashq',
+                        style: GoogleFonts.nunito(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.muted,
+                        ),
+                      ),
+                  ],
                 ),
               ),
               const SizedBox(width: 8),

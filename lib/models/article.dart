@@ -8,8 +8,9 @@ class ArticleSection {
 
 class Article {
   final IconData icon;
-  // Kept for model compatibility; card UI uses AppColors.primary instead of
-  // per-item iconColor to avoid a rainbow palette.
+
+  /// Accent for this article: the icon, the "Maqola" label and the bar on the
+  /// left edge of its card all take their colour from here.
   final Color iconColor;
   final String title;
   final String duration;

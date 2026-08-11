@@ -1,6 +1,7 @@
 class RoutineStep {
   final String id;
   final String title;
+
   const RoutineStep({required this.id, required this.title});
 }
 
