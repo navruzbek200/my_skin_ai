@@ -6,7 +6,6 @@ import 'package:real_beauty_ai/features/account/presentation/pages/account_page.
 import 'package:real_beauty_ai/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:real_beauty_ai/features/auth/presentation/pages/auth_page.dart';
 import 'package:real_beauty_ai/features/auth/presentation/pages/forgot_password_page.dart';
-import 'package:real_beauty_ai/features/auth/presentation/pages/verify_email_page.dart';
 import 'package:real_beauty_ai/features/cosmetologists/presentation/pages/cosmetologist_detail_page.dart';
 import 'package:real_beauty_ai/features/lessons/presentation/pages/article_detail_page.dart';
 import 'package:real_beauty_ai/features/lessons/presentation/pages/lesson_detail_page.dart';
@@ -38,19 +37,9 @@ final GoRouter appRouter = GoRouter(
   redirect: (context, state) {
     final session = sl<AuthBloc>().state;
     final loggedIn = session.isAuthenticated;
-    // Google accounts arrive already verified, and accounts that predate the
-    // cut-off are grandfathered, so this only ever gates new password sign-ups
-    // that have not clicked the emailed link yet.
-    final gated = session.needsVerificationGate;
     final path = state.matchedLocation;
-    if (!loggedIn && (_protectedPaths.contains(path) || path == '/verify-email')) {
-      return '/auth';
-    }
-    if (gated && _protectedPaths.contains(path)) return '/verify-email';
-    if (loggedIn && !gated && path == '/verify-email') return '/home';
-    if (loggedIn && _authOnlyPaths.contains(path)) {
-      return gated ? '/verify-email' : '/home';
-    }
+    if (!loggedIn && _protectedPaths.contains(path)) return '/auth';
+    if (loggedIn && _authOnlyPaths.contains(path)) return '/home';
     if (const {'/scan-instructions', '/face-scan'}.contains(path) &&
         state.extra is! List) {
       return '/home';
@@ -79,10 +68,6 @@ final GoRouter appRouter = GoRouter(
       path: '/forgot',
       pageBuilder: (context, state) =>
           _fade(state, const ForgotPasswordScreen()),
-    ),
-    GoRoute(
-      path: '/verify-email',
-      pageBuilder: (context, state) => _fade(state, const VerifyEmailScreen()),
     ),
     GoRoute(
       path: '/home',

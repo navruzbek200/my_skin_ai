@@ -288,12 +288,11 @@ class _AccountScreenState extends State<AccountScreen>
 
             // ── Email tasdiqlanmagan ───────────────────────────
             //
-            // A notice, not a gate. Anyone reaching this screen is either a
-            // sign-up from before AuthSessionState.verificationRequiredFrom —
-            // grandfathered in, because gating an address its owner cannot
-            // read would lock them out for good — or already verified. The one
-            // thing confirming buys them is a working password reset, and this
-            // is where someone thinking about their account will look.
+            // A notice, not a gate — nothing in the app waits on a confirmed
+            // address. It is here because the confirmation mail is sent at
+            // sign-up and, until now, went nowhere anyone could see: the one
+            // thing it buys is a working password reset, and this is where
+            // someone thinking about their account will look.
             SliverToBoxAdapter(
               child: BlocBuilder<AuthBloc, AuthSessionState>(
                 bloc: sl<AuthBloc>(),
