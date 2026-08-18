@@ -96,6 +96,28 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthInitial());
   }
 
+  /// Throws away a sign-up whose address was mistyped, from the verify screen.
+  ///
+  /// Deleting rather than signing out matters: the record holds the wrong
+  /// address, and left behind it both blocks that address forever and adds an
+  /// account nobody can ever reach. The session is minutes old here, so
+  /// `delete()` needs no re-authentication — but if it fails for any reason,
+  /// sign out anyway. Stranding someone on a screen they cannot pass is worse
+  /// than leaving one stale record on the server.
+  Future<void> abandonUnverifiedAccount() async {
+    try {
+      await _ds.deleteAccount();
+    } catch (e, st) {
+      AppLogger.error('Could not delete unverified account', e, st);
+      try {
+        await _ds.signOut();
+      } catch (e, st) {
+        AppLogger.error('signOut after failed delete', e, st);
+      }
+    }
+    emit(AuthInitial());
+  }
+
   Future<void> deleteAccount() async {
     try {
       await _ds.deleteAccount();
@@ -165,7 +187,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   /// Google users re-authenticate through the picker instead of a password.
   Future<void> reauthenticateWithGoogleAndDelete() async {
-    emit(AuthLoading());
+    emit(AuthLoading(AuthMethod.google));
     try {
       final confirmed = await _ds.reauthenticateWithGoogle();
       if (!confirmed) {
@@ -188,7 +210,7 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> signInWithGoogle() async {
     // Same reason as continueWithEmail: two pickers racing each other.
     if (state is AuthLoading) return;
-    emit(AuthLoading());
+    emit(AuthLoading(AuthMethod.google));
     try {
       final success = await _ds.signInWithGoogle();
       if (!success) {
@@ -207,12 +229,14 @@ class AuthCubit extends Cubit<AuthState> {
   /// True when the account screen should offer to confirm the address.
   bool get needsEmailVerification => _ds.needsEmailVerification;
 
-  /// Re-sends the confirmation link from the account screen.
+  /// Re-sends the confirmation link, from the verify screen or the account
+  /// screen.
   ///
-  /// Nothing in the app is gated on a confirmed address — people are let
-  /// straight in — but the link is what makes a forgotten password
-  /// recoverable, so the one place it is worth surfacing is where someone is
-  /// already looking at their account.
+  /// Both callers exist because the gate only covers sign-ups made after
+  /// [AuthSessionState.verificationRequiredFrom]. Older accounts are let
+  /// straight in and reach this through the account-screen card, which is
+  /// where someone thinking about their account will look — and a confirmed
+  /// address is what makes a forgotten password recoverable at all.
   Future<void> sendEmailVerification() async {
     try {
       await _ds.sendEmailVerification();

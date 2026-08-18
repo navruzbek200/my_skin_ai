@@ -168,9 +168,15 @@ class _AuthScreenState extends State<AuthScreen> {
                   const SizedBox(height: 20),
                   BlocBuilder<AuthCubit, AuthState>(
                     builder: (context, state) {
+                      // Spins only for its own request, but stays disabled
+                      // while the Google path runs too — two sign-ins racing
+                      // each other is the one thing neither button should be
+                      // able to start.
+                      final loading = state is AuthLoading;
                       return _AuthButton(
                         label: 'Davom etish',
-                        isLoading: state is AuthLoading,
+                        isLoading: loading && state.method == AuthMethod.email,
+                        enabled: !loading,
                         onTap: _submit,
                       );
                     },
@@ -311,10 +317,16 @@ class _AuthButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
   final bool isLoading;
+
+  /// Separate from [isLoading]: a button can be blocked by the *other* sign-in
+  /// path without being the one that should show a spinner.
+  final bool enabled;
+
   const _AuthButton({
     required this.label,
     required this.onTap,
     this.isLoading = false,
+    this.enabled = true,
   });
 
   @override
@@ -322,7 +334,7 @@ class _AuthButton extends StatelessWidget {
     return SizedBox(
       height: 56,
       child: ElevatedButton(
-        onPressed: isLoading ? null : onTap,
+        onPressed: enabled ? onTap : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF4A3A9A),
           foregroundColor: Colors.white,

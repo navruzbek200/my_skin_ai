@@ -13,7 +13,10 @@ class GoogleSignInButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) {
-        final isLoading = state is AuthLoading;
+        // Same split as the email button: show a spinner only for the tap
+        // that started here, but refuse taps while either path is in flight.
+        final loading = state is AuthLoading;
+        final isLoading = loading && state.method == AuthMethod.google;
         return SizedBox(
           height: 56,
           child: Material(
@@ -21,7 +24,7 @@ class GoogleSignInButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(999),
             child: InkWell(
               borderRadius: BorderRadius.circular(999),
-              onTap: isLoading
+              onTap: loading
                   ? null
                   : () => context.read<AuthCubit>().signInWithGoogle(),
               child: Container(

@@ -1,7 +1,7 @@
 name: real_beauty_ai
 description: "Real Beauty — Korean-style skincare app"
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.2+3
 
 environment:
   sdk: ^3.11.1
@@ -58,7 +58,6 @@ flutter:
     - assets/yoga avatar 2.jpg
     - assets/face tahlil.jpg
     - assets/skin_problems/
-    - assets/data/
     - assets/cosmetologists/
 
 # Sources here are build-time only — deliberately absent from the asset list
