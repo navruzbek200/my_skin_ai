@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.CAMERA"/>
     <!-- Skan ixtiyoriy — kamerasiz qurilmalarda ham o'rnatiladi -->
@@ -7,6 +8,13 @@
 
     <!-- INTERNET uchun ruxsat (Yangi qo'shildi) -->
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- camera_android_camerax pulls in RECORD_AUDIO for CameraX video capture,
+         which this app never uses — the face scan only takes stills. Left in, it
+         shows a Microphone permission on the Play listing that nothing explains.
+         Audio playback (yoga_voice/*.mp4 via video_player) needs no permission
+         and is unaffected. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" tools:node="remove"/>
 
     <application
         android:label="My Skin AI"

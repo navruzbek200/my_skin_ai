@@ -137,6 +137,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
       context: context,
       isDismissible: false,
       enableDrag: false,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => PopScope(
         canPop: false,
@@ -1004,6 +1005,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
   void _showHelpSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _GlassSheet(
         child: Column(

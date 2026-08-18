@@ -63,6 +63,7 @@ class _BugunViewState extends State<_BugunView> with WidgetsBindingObserver {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _StreakCalendarSheet(
         streaks: Map.unmodifiable(state.streaks),
