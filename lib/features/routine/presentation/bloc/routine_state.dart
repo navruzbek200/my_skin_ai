@@ -98,10 +98,9 @@ class RoutineReady extends RoutineState {
 
 /// The profile exists but the plan could not be built. Rare — the engine is
 /// pure — but a corrupt stored profile lands here rather than on a blank page.
+/// Carries no message. There is exactly one thing that can be said about this
+/// state, and only the widget layer knows which language to say it in — a
+/// sentence stored here would be pinned to one.
 class RoutineFailure extends RoutineState {
-  final String message;
-  const RoutineFailure(this.message);
-
-  @override
-  List<Object?> get props => [message];
+  const RoutineFailure();
 }

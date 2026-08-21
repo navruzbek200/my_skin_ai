@@ -1,7 +1,7 @@
 name: real_beauty_ai
 description: "Real Beauty — Korean-style skincare app"
 publish_to: 'none'
-version: 1.0.2+3
+version: 1.1.0+4
 
 environment:
   sdk: ^3.11.1
@@ -9,7 +9,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   cupertino_icons: ^1.0.8
+
+  # Localisation: uz / ru / en. `intl` is what gen-l10n emits against, and what
+  # formats dates per locale.
+  intl: any
   google_fonts: ^6.1.0
   flutter_animate: ^4.5.0
   url_launcher: ^6.3.2
@@ -41,6 +47,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  # Generates AppLocalizations from lib/l10n/*.arb — see l10n.yaml.
+  generate: true
   assets:
     - assets/splash.png
     - assets/banner_skin.jpg

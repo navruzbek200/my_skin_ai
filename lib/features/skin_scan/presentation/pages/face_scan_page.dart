@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:go_router/go_router.dart';
 import 'package:real_beauty_ai/core/permissions/camera_permission_service.dart';
@@ -45,15 +46,27 @@ class _FaceScanScreenState extends State<FaceScanScreen>
 
   // ── State ─────────────────────────────────────────────────────
   _ScanPhase _phase = _ScanPhase.idle;
-  final _guidanceNotifier = ValueNotifier<String?>('Yuzingizni ramkaga olib keling');
+  // Seeded null and filled from didChangeDependencies: the first guidance
+  // sentence is a localised string, and localisations are not reachable from a
+  // field initialiser.
+  final _guidanceNotifier = ValueNotifier<String?>(null);
   final _analysisTextNotifier = ValueNotifier<String>('');
 
-  static const _analysisPhrases = [
-    'Savolnoma javoblari qayta ishlanmoqda',
-    'Teri tipi aniqlanmoqda',
-    'Tavsiyalar shakllantirilmoqda',
-    'Natija tayyorlanmoqda',
-  ];
+  List<String> get _analysisPhrases => [
+        context.l10n.faceScanStep1,
+        context.l10n.faceScanStep2,
+        context.l10n.faceScanStep3,
+        context.l10n.faceScanStep4,
+      ];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Only while the scanner is still waiting for a face: overwriting a live
+    // instruction ("come closer") on a language change would be a jarring
+    // reset in the middle of a scan.
+    _guidanceNotifier.value ??= context.l10n.faceScanAlign;
+  }
 
   // ── Timers ────────────────────────────────────────────────────
   Timer? _stabilityTimer;
@@ -145,18 +158,18 @@ class _FaceScanScreenState extends State<FaceScanScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Kamera ruxsati kerak',
+            Text(context.l10n.faceScanPermissionTitle,
                 style: GoogleFonts.nunito(
                     fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
             const SizedBox(height: 12),
             Text(
-              "Yuzingizni to'g'ri joylashtirish uchun old kamera kerak. Tahlil natijasi savolnoma javoblaringiz asosida tayyorlanadi.",
+              context.l10n.faceScanPermissionBody,
               style: GoogleFonts.nunito(fontSize: 14, color: Colors.white60, height: 1.5),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             _PrimaryButton(
-              label: 'Ruxsat berish',
+              label: context.l10n.commonAllow,
               onTap: () {
                 Navigator.of(ctx).pop();
                 _initCameraWithPermission();
@@ -168,7 +181,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
                 Navigator.of(ctx).pop();
                 _navigateToAnalysis();
               },
-              child: Text('Anketa bilan davom etish',
+              child: Text(context.l10n.faceScanContinueWithQuiz,
                   style: GoogleFonts.nunito(fontSize: 14, color: Colors.white30)),
             ),
           ],
@@ -189,11 +202,11 @@ class _FaceScanScreenState extends State<FaceScanScreen>
         child: AlertDialog(
         backgroundColor: const Color(0xFF0D0D1A),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text("Kamera ruxsati o'chirilgan",
+        title: Text(context.l10n.faceScanPermissionDeniedTitle,
             style: GoogleFonts.nunito(
                 color: Colors.white, fontWeight: FontWeight.w800)),
         content: Text(
-          'Yuzingizni joylashtirish uchun Sozlamalardan "Kamera" ruxsatini yoqing (ixtiyoriy).',
+          context.l10n.faceScanPermissionDeniedBody,
           style: GoogleFonts.nunito(color: Colors.white60, fontSize: 14, height: 1.5),
         ),
         actions: [
@@ -202,7 +215,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
               Navigator.of(ctx).pop();
               _navigateToAnalysis();
             },
-            child: Text("O'tkazib yuborish",
+            child: Text(context.l10n.commonSkip,
                 style: GoogleFonts.nunito(color: Colors.white30)),
           ),
           TextButton(
@@ -274,11 +287,11 @@ class _FaceScanScreenState extends State<FaceScanScreen>
         child: AlertDialog(
         backgroundColor: const Color(0xFF0D0D1A),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('Kamera topilmadi',
+        title: Text(context.l10n.faceScanNoCameraTitle,
             style: GoogleFonts.nunito(
                 color: Colors.white, fontWeight: FontWeight.w800)),
         content: Text(
-          'Qurilmangizda kamera ishlamayapti. Anketa asosida davom etish mumkin.',
+          context.l10n.faceScanNoCameraBody,
           style: GoogleFonts.nunito(color: Colors.white60, fontSize: 14, height: 1.5),
         ),
         actions: [
@@ -287,7 +300,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
               Navigator.of(ctx).pop();
               _navigateToAnalysis();
             },
-            child: Text('Davom etish',
+            child: Text(context.l10n.commonContinue,
                 style: GoogleFonts.nunito(
                     color: const Color(0xFF9D7FEA), fontWeight: FontWeight.w700)),
           ),
@@ -369,7 +382,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
 
       if (_phase == _ScanPhase.scanning) {
         _hasFace = guidance == null;
-        _guidanceNotifier.value = guidance ?? 'Yuzingizni tutib turing';
+        _guidanceNotifier.value = guidance ?? context.l10n.faceScanHold;
         return;
       }
       _guidanceNotifier.value = guidance;
@@ -390,9 +403,9 @@ class _FaceScanScreenState extends State<FaceScanScreen>
   }
 
   String? _evaluateGuidance(List<Face> faces, CameraImage image) {
-    if (_lightLevel < 0.12) return "Yorug'roq joyga o'ting";
-    if (faces.isEmpty) return 'Yuzingizni ramkaga olib keling';
-    if (faces.length > 1) return "Bitta yuz ko'rsating";
+    if (_lightLevel < 0.12) return context.l10n.faceScanTooDark;
+    if (faces.isEmpty) return context.l10n.faceScanAlign;
+    if (faces.length > 1) return context.l10n.faceScanOneFace;
     final face = faces.first;
     // ML Kit returns coordinates in the upright (rotated) frame — swap
     // buffer dimensions for 90/270 rotations before comparing.
@@ -401,20 +414,20 @@ class _FaceScanScreenState extends State<FaceScanScreen>
     final ih = (swapDims ? image.width : image.height).toDouble();
     final refDim = math.min(iw, ih);
     final faceRatio = face.boundingBox.width / refDim;
-    if (faceRatio < 0.18) return 'Yaqinroq keling';
-    if (faceRatio > 0.90) return 'Sal uzoqlashing';
+    if (faceRatio < 0.18) return context.l10n.faceScanCloser;
+    if (faceRatio > 0.90) return context.l10n.faceScanFurther;
     final xOff = ((face.boundingBox.center.dx - iw / 2) / iw).abs();
     final yOff = ((face.boundingBox.center.dy - ih / 2) / ih).abs();
-    if (xOff > 0.25 || yOff > 0.25) return 'Yuzni markazga oling';
+    if (xOff > 0.25 || yOff > 0.25) return context.l10n.faceScanCenter;
     // Skip euler/eye checks during scanning — user is actively rotating head.
     if (_phase != _ScanPhase.scanning) {
       final eulerY = face.headEulerAngleY ?? 0.0;
       final eulerZ = face.headEulerAngleZ ?? 0.0;
-      if (eulerY.abs() > 30 || eulerZ.abs() > 25) return "To'g'ri qarang";
+      if (eulerY.abs() > 30 || eulerZ.abs() > 25) return context.l10n.faceScanLookStraight;
       final lEye = face.leftEyeOpenProbability;
       final rEye = face.rightEyeOpenProbability;
       if (lEye != null && rEye != null && lEye < 0.2 && rEye < 0.2) {
-        return "Ko'zingizni oching";
+        return context.l10n.faceScanOpenEyes;
       }
     }
     return null;
@@ -448,7 +461,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
     _scanCtrl.value = 0;
     _hasFace = true;
     setState(() => _phase = _ScanPhase.scanning);
-    _guidanceNotifier.value = 'Yuzingizni tutib turing';
+    _guidanceNotifier.value = context.l10n.faceScanHold;
     _startScanTicker();
   }
 
@@ -536,11 +549,11 @@ class _FaceScanScreenState extends State<FaceScanScreen>
         child: AlertDialog(
         backgroundColor: const Color(0xFF0D0D1A),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('Vaqt tugadi',
+        title: Text(context.l10n.faceScanTimeoutTitle,
             style: GoogleFonts.nunito(
                 color: Colors.white, fontWeight: FontWeight.w800)),
         content: Text(
-          "Qayta urinasizmi yoki davom etasizmi?",
+          context.l10n.faceScanTimeoutBody,
           style: GoogleFonts.nunito(color: Colors.white60, fontSize: 14, height: 1.5),
         ),
         actions: [
@@ -558,7 +571,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
               Navigator.of(ctx).pop();
               _navigateToAnalysis();
             },
-            child: Text('Davom etish',
+            child: Text(context.l10n.commonContinue,
                 style: GoogleFonts.nunito(color: Colors.white30)),
           ),
         ],
@@ -573,7 +586,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
     _frameSkip = 0;
     _lightLevel = 0.5;
     _morphCtrl.value = 0;
-    _guidanceNotifier.value = 'Yuzingizni ramkaga olib keling';
+    _guidanceNotifier.value = context.l10n.faceScanAlign;
     _segFilled.fillRange(0, _kSegments, false);
     _filledCount = 0;
     _scanCtrl.value = 0;
@@ -889,7 +902,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
           child: Column(
             children: [
               Text(
-                'Natija tayyorlanmoqda...',
+                context.l10n.faceScanPreparingResult,
                 style: GoogleFonts.nunito(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -969,7 +982,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Kamera tayyorlanmoqda',
+                  context.l10n.faceScanPreparingCamera,
                   style: GoogleFonts.nunito(
                     fontSize: 14,
                     color: Colors.white.withValues(alpha: pulse * 0.7),
@@ -1012,18 +1025,14 @@ class _FaceScanScreenState extends State<FaceScanScreen>
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Qanday ishlaydi?',
+            Text(context.l10n.faceScanHowTitle,
                 style: GoogleFonts.nunito(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                     color: Colors.white)),
             const SizedBox(height: 12),
             Text(
-              "• Yuzingizni oval ichiga joylang\n"
-              "• To'g'ri va frontal qarang\n"
-              "• Ko'zingizni oching\n"
-              "• Yaxshi yorug'lik bo'lsin\n"
-              "• Skaner avtomatik boshlanadi",
+              context.l10n.faceScanHowBody,
               style: GoogleFonts.nunito(
                   fontSize: 14, color: Colors.white54, height: 1.7),
             ),
@@ -1037,7 +1046,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
                     color: const Color(0xFF9D7FEA).withValues(alpha: 0.25)),
               ),
               child: Text(
-                "Bu kosmetik tahlil bo'lib, tibbiy tashxis hisoblanmaydi.",
+                context.l10n.faceScanDisclaimer,
                 style: GoogleFonts.nunito(
                     fontSize: 12, color: const Color(0xFF9D7FEA), height: 1.5),
               ),

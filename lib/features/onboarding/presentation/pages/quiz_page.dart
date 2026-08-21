@@ -3,11 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
 import 'package:real_beauty_ai/data/quiz_data.dart';
 import 'package:real_beauty_ai/features/skin_quiz/presentation/bloc/quiz_cubit.dart';
 import 'package:real_beauty_ai/models/quiz_question.dart';
 import 'package:go_router/go_router.dart';
 import 'package:real_beauty_ai/services/local_store.dart';
+import 'package:real_beauty_ai/core/l10n/localized_text.dart';
 
 class QuizScreen extends StatelessWidget {
   const QuizScreen({super.key});
@@ -77,18 +79,18 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         backgroundColor: Colors.white,
         title: Text(
-          'Chiqasizmi?',
+          context.l10n.quizExitTitle,
           style: GoogleFonts.nunito(
               fontWeight: FontWeight.w800, color: _textDark, fontSize: 17),
         ),
         content: Text(
-          'Javoblaringiz saqlanmaydi.',
+          context.l10n.quizExitBody,
           style: GoogleFonts.nunito(fontSize: 14, color: _textMuted, height: 1.5),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text('Bekor qilish',
+            child: Text(context.l10n.commonCancel,
                 style: GoogleFonts.nunito(
                     fontWeight: FontWeight.w600, color: _textMuted, fontSize: 14)),
           ),
@@ -97,7 +99,7 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
               Navigator.of(ctx).pop();
               _exit();
             },
-            child: Text('Chiqish',
+            child: Text(context.l10n.accountSignOut,
                 style: GoogleFonts.nunito(
                     fontWeight: FontWeight.w700, color: _accent, fontSize: 14)),
           ),
@@ -110,7 +112,7 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
     HapticFeedback.lightImpact();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Iltimos, bitta javobni tanlang',
+        content: Text(context.l10n.quizSelectOne,
             style: GoogleFonts.nunito(fontSize: 14, color: Colors.white)),
         backgroundColor: _accent,
         behavior: SnackBarBehavior.floating,
@@ -128,16 +130,12 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         backgroundColor: Colors.white,
         title: Text(
-          "Ma'lumotlar va maxfiylik",
+          context.l10n.quizPrivacyTitle,
           style: GoogleFonts.nunito(
               fontWeight: FontWeight.w800, color: _textDark, fontSize: 17),
         ),
         content: Text(
-          'Savolnoma javoblaringiz faqat qurilmangizda mahalliy saqlanadi va '
-          'hech qachon internetga yuborilmaydi.\n\n'
-          'Kamera ishlatiladigan bosqichda tasvirlar faqat qurilma ichida '
-          'qayta ishlanadi — hech narsa saqlanmaydi yoki yuborilmaydi.\n\n'
-          'Tahlil natijasi quiz javoblaringiz asosida hisoblanadi.',
+          context.l10n.quizPrivacyBody,
           style: GoogleFonts.nunito(
               fontSize: 13, color: const Color(0xFF4A4070), height: 1.6),
         ),
@@ -147,7 +145,7 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
               LocalStore.instance.acceptPrivacy();
               Navigator.of(context).pop();
             },
-            child: Text('Qabul qilaman',
+            child: Text(context.l10n.quizAccept,
                 style: GoogleFonts.nunito(
                     fontWeight: FontWeight.w700, color: _accent, fontSize: 14)),
           ),
@@ -353,7 +351,7 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
               ),
               const Spacer(),
               Text(
-                'Teri Tahlili',
+                context.l10n.quizTitle,
                 style: GoogleFonts.nunito(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
@@ -429,7 +427,7 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  group.title,
+                  context.tr(group.title),
                   style: GoogleFonts.nunito(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -439,7 +437,7 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
               ),
               const Spacer(),
               Text(
-                'Savol ${state.currentIndex + 1}',
+                context.l10n.quizQuestionNumber(state.currentIndex + 1),
                 style: GoogleFonts.nunito(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
@@ -450,7 +448,7 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
           ),
           const SizedBox(height: 12),
           Text(
-            question.text,
+            context.tr(question.text),
             style: GoogleFonts.nunito(
               fontSize: 16,
               fontWeight: FontWeight.w700,
@@ -477,7 +475,7 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
     return Column(
       children: List.generate(labels.length, (i) {
         return _OptionCard(
-          label: labels[i],
+          label: context.tr(labels[i]),
           selected: i == val,
           onTap: () {
             HapticFeedback.selectionClick();
@@ -501,7 +499,9 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 8),
           child: Text(
-            question.hint ?? 'Javobingizni yozing',
+            question.hint == null
+                ? context.l10n.quizWriteAnswer
+                : context.tr(question.hint!),
             style: GoogleFonts.nunito(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -527,7 +527,9 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
             style: GoogleFonts.nunito(
                 fontSize: 15, color: _textDark, height: 1.5),
             decoration: InputDecoration(
-              hintText: question.hint ?? 'Bu yerga yozing...',
+              hintText: question.hint == null
+                  ? context.l10n.quizWriteHere
+                  : context.tr(question.hint!),
               hintStyle:
                   GoogleFonts.nunito(color: _textMuted, fontSize: 14),
               border: OutlineInputBorder(
@@ -556,7 +558,7 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
     return Column(
       children: List.generate(options.length, (i) {
         return _OptionCard(
-          label: options[i],
+          label: context.tr(options[i]),
           selected: i == selected,
           onTap: () {
             HapticFeedback.selectionClick();

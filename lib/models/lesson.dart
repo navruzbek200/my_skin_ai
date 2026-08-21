@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'package:real_beauty_ai/core/l10n/localized_text.dart';
+
 enum LessonStepType { intro, fact, list, tip }
 
 class LessonStep {
-  final LessonStepType type;
-  final String title;
-  final String body;
-  final List<String>? items;
-  final String? keyword;
-
   const LessonStep({
     required this.type,
     required this.title,
@@ -16,18 +12,19 @@ class LessonStep {
     this.items,
     this.keyword,
   });
+
+  final LessonStepType type;
+  final LocalizedText title;
+  final LocalizedText body;
+  final List<LocalizedText>? items;
+
+  /// The word pulled out and set large behind the step. Some are ingredient
+  /// names, identical in every language; others are ordinary words that have
+  /// to be translated, which is why this is a [LocalizedText] and not a String.
+  final LocalizedText? keyword;
 }
 
 class Lesson {
-  final String id;
-  final String title;
-  final String subtitle;
-  final String category;
-  final String duration;
-  final String level;
-  final Color color;
-  final List<LessonStep> steps;
-
   const Lesson({
     required this.id,
     required this.title,
@@ -38,4 +35,14 @@ class Lesson {
     required this.color,
     required this.steps,
   });
+
+  /// Stable across languages and rewordings.
+  final String id;
+  final LocalizedText title;
+  final LocalizedText subtitle;
+  final LocalizedText category;
+  final LocalizedText duration;
+  final LocalizedText level;
+  final Color color;
+  final List<LessonStep> steps;
 }

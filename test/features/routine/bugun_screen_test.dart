@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:real_beauty_ai/features/home/presentation/pages/bugun_page.dart';
 import 'package:real_beauty_ai/services/local_store.dart';
+
+import '../../support/localized_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Minimal valid SkinResult JSON — oily skin with Bh concern.
@@ -22,7 +24,7 @@ void main() {
     await LocalStore.instance.init();
   });
 
-  Widget wrap() => const MaterialApp(home: BugunScreen());
+  Widget wrap() => localizedApp(const BugunScreen());
 
   testWidgets('renders 9 tasks and shows 0 / 9 vazifa initially', (tester) async {
     await tester.pumpWidget(wrap());

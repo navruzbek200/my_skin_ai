@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
 import 'package:real_beauty_ai/core/theme/colors.dart';
 import 'package:real_beauty_ai/features/home/presentation/pages/bugun_page.dart';
 import 'package:real_beauty_ai/features/products/presentation/pages/products_page.dart';
@@ -73,6 +74,7 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     final bottom = MediaQuery.of(context).padding.bottom;
     final bugunSvg = _isDaytime ? 'assets/icons/sun.svg' : 'assets/icons/moon.svg';
+    final l10n = context.l10n;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -106,7 +108,7 @@ class _MainShellState extends State<MainShell> {
             children: [
               _NavItem(
                 svgPath: bugunSvg,
-                label: 'Bugun',
+                label: l10n.navToday,
                 active: _currentIndex == 0,
                 onTap: () {
                   HapticFeedback.selectionClick();
@@ -115,7 +117,7 @@ class _MainShellState extends State<MainShell> {
               ),
               _NavItem(
                 imagePath: 'assets/icons/cosmetics.png',
-                label: 'Mahsulot',
+                label: l10n.navProducts,
                 active: _currentIndex == 1,
                 onTap: () {
                   HapticFeedback.selectionClick();
@@ -124,7 +126,7 @@ class _MainShellState extends State<MainShell> {
               ),
               // Center scan button
               Semantics(
-                label: 'Tahlil',
+                label: l10n.navScan,
                 button: true,
                 child: GestureDetector(
                   onTap: () {
@@ -158,7 +160,7 @@ class _MainShellState extends State<MainShell> {
                         ),
                         const SizedBox(height: 1),
                         Text(
-                          'Tahlil',
+                          l10n.navScan,
                           textScaler: TextScaler.noScaling,
                           style: GoogleFonts.nunito(
                             fontSize: 11,
@@ -173,7 +175,7 @@ class _MainShellState extends State<MainShell> {
               ),
               _NavItem(
                 imagePath: 'assets/icons/ideas.png',
-                label: 'Darslar',
+                label: l10n.navLessons,
                 active: _currentIndex == 3,
                 onTap: () {
                   HapticFeedback.selectionClick();
@@ -182,7 +184,7 @@ class _MainShellState extends State<MainShell> {
               ),
               _NavItem(
                 imagePath: 'assets/icons/customer.png',
-                label: 'Kosmetolog',
+                label: l10n.navCosmetologist,
                 active: _currentIndex == 4,
                 onTap: () {
                   HapticFeedback.selectionClick();
@@ -267,7 +269,7 @@ class _SkinAnalysisModalState extends State<_SkinAnalysisModal>
                     top: 12, right: 12,
                     child: Semantics(
                       button: true,
-                      label: 'Yopish',
+                      label: MaterialLocalizations.of(context).closeButtonTooltip,
                       child: GestureDetector(
                         onTap: () => Navigator.pop(context),
                         child: Container(
@@ -294,7 +296,7 @@ class _SkinAnalysisModalState extends State<_SkinAnalysisModal>
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      'Teringizni tahlil qiling',
+                      context.l10n.promoTitle,
                       style: GoogleFonts.nunito(
                         fontSize: 21,
                         fontWeight: FontWeight.w800,
@@ -303,7 +305,7 @@ class _SkinAnalysisModalState extends State<_SkinAnalysisModal>
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Teri tipingizni aniqlash uchun qisqa savolnomaga javob bering va shaxsiylashtirilgan parvarish rejasini oling.',
+                      context.l10n.promoBody,
                       style: GoogleFonts.nunito(
                         fontSize: 13,
                         color: const Color(0xFF9490B0),
@@ -332,7 +334,7 @@ class _SkinAnalysisModalState extends State<_SkinAnalysisModal>
                         ),
                         child: Center(
                           child: Text(
-                            'Tahlilni boshlash',
+                            context.l10n.promoStart,
                             style: GoogleFonts.nunito(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,

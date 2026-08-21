@@ -73,13 +73,7 @@ void main() {
       // The message also has to cover a Google-only account, which produces
       // this exact code and cannot be told apart from a mistyped password.
       isA<AuthError>().having(
-        (e) => e.message,
-        'msg',
-        allOf(
-          startsWith("Parol noto'g'ri"),
-          contains('Google'),
-        ),
-      ),
+          (e) => e.message, 'msg', AuthMessage.wrongPasswordOrGoogle),
     ],
   );
 
@@ -93,11 +87,8 @@ void main() {
     act: (c) => c.continueWithEmail('a@b.com', '123'),
     expect: () => [
       isA<AuthLoading>(),
-      isA<AuthError>().having(
-        (e) => e.message,
-        'msg',
-        "Parol kamida 6 belgidan iborat bo'lishi kerak",
-      ),
+      isA<AuthError>()
+          .having((e) => e.message, 'msg', AuthMessage.weakPassword),
     ],
     verify: (_) {
       verifyNever(() => ds.signIn(any(), any()));
@@ -136,7 +127,7 @@ void main() {
       return AuthCubit(ds);
     },
     act: (c) => c.sendPasswordReset('a@b.com'),
-    expect: () => [isA<AuthInfo>()],
+    expect: () => [isA<AuthLoading>(), isA<AuthInfo>()],
   );
 
   // ── Delete via password re-auth ──────────────────────────────────────
@@ -163,7 +154,8 @@ void main() {
     act: (c) => c.reauthenticateAndDelete('nope'),
     expect: () => [
       isA<AuthLoading>(),
-      isA<AuthError>().having((e) => e.message, 'msg', "Parol noto'g'ri"),
+      isA<AuthError>()
+          .having((e) => e.message, 'msg', AuthMessage.wrongPassword),
     ],
     verify: (_) => verifyNever(() => ds.deleteAccount()),
   );
@@ -210,11 +202,8 @@ void main() {
     act: (c) => c.reauthenticateAndDelete('whatever'),
     expect: () => [
       isA<AuthLoading>(),
-      isA<AuthError>().having(
-        (e) => e.message,
-        'msg',
-        contains('Sessiya tugadi'),
-      ),
+      isA<AuthError>()
+          .having((e) => e.message, 'msg', AuthMessage.sessionExpired),
     ],
   );
 
@@ -253,4 +242,222 @@ void main() {
     act: (c) => c.logout(),
     expect: () => [isA<AuthInitial>()],
   );
+
+  // ── Addresses that must never reach Firebase ─────────────────────────
+  //
+  // The verification mail is the real check, but three kinds of address fail
+  // it in ways we can see coming: a throwaway inbox that expires, a domain
+  // reserved by RFC 2606 that can never receive anything, and a string that is
+  // not an address at all. Each one, left to Firebase, produces an account
+  // nobody can ever confirm or recover — so none of them may create one.
+
+  blocTest<AuthCubit, AuthState>(
+    'a disposable inbox is refused before an account exists',
+    build: () => AuthCubit(ds),
+    act: (c) => c.continueWithEmail('throwaway@mailinator.com', 'secret123'),
+    expect: () => [
+      isA<AuthLoading>(),
+      isA<AuthError>()
+          .having((e) => e.message, 'msg', AuthMessage.disposableEmail),
+    ],
+    verify: (_) {
+      verifyNever(() => ds.register(any(), any(), any()));
+      verifyNever(() => ds.signIn(any(), any()));
+    },
+  );
+
+  blocTest<AuthCubit, AuthState>(
+    'a disposable subdomain is refused too',
+    build: () => AuthCubit(ds),
+    act: (c) => c.continueWithEmail('x@inbox.mailinator.com', 'secret123'),
+    expect: () => [
+      isA<AuthLoading>(),
+      isA<AuthError>()
+          .having((e) => e.message, 'msg', AuthMessage.disposableEmail),
+    ],
+    verify: (_) => verifyNever(() => ds.register(any(), any(), any())),
+  );
+
+  blocTest<AuthCubit, AuthState>(
+    'a reserved domain that can never receive mail is refused',
+    build: () => AuthCubit(ds),
+    act: (c) => c.continueWithEmail('someone@example.com', 'secret123'),
+    expect: () => [
+      isA<AuthLoading>(),
+      isA<AuthError>()
+          .having((e) => e.message, 'msg', AuthMessage.unreachableEmail),
+    ],
+    verify: (_) => verifyNever(() => ds.register(any(), any(), any())),
+  );
+
+  blocTest<AuthCubit, AuthState>(
+    'a malformed address never reaches Firebase',
+    build: () => AuthCubit(ds),
+    act: (c) => c.continueWithEmail('not-an-email', 'secret123'),
+    expect: () => [
+      isA<AuthLoading>(),
+      isA<AuthError>()
+          .having((e) => e.message, 'msg', AuthMessage.invalidEmail),
+    ],
+    verify: (_) => verifyNever(() => ds.register(any(), any(), any())),
+  );
+
+  blocTest<AuthCubit, AuthState>(
+    'a bare domain with no dot is refused — "a@localhost" is not reachable',
+    build: () => AuthCubit(ds),
+    act: (c) => c.continueWithEmail('a@localhost', 'secret123'),
+    expect: () => [
+      isA<AuthLoading>(),
+      isA<AuthError>(),
+    ],
+    verify: (_) => verifyNever(() => ds.register(any(), any(), any())),
+  );
+
+  blocTest<AuthCubit, AuthState>(
+    'the address is folded to lower case before Firebase sees it',
+    build: () {
+      when(() => ds.register(any(), any(), any())).thenAnswer((_) async {});
+      return AuthCubit(ds);
+    },
+    // Firebase stores addresses lower-cased anyway; normalising here is what
+    // keeps "Ali@" and "ali@" from looking like two accounts in our own code.
+    act: (c) => c.continueWithEmail('  Ali@Gmail.COM ', 'secret123'),
+    expect: () => [isA<AuthLoading>(), isA<AuthAuthenticated>()],
+    verify: (_) =>
+        verify(() => ds.register('ali@gmail.com', 'secret123', null)).called(1),
+  );
+
+  blocTest<AuthCubit, AuthState>(
+    'a second tap while a request is in flight is ignored',
+    build: () {
+      when(() => ds.register(any(), any(), any())).thenAnswer((_) async {
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      });
+      return AuthCubit(ds);
+    },
+    act: (c) {
+      // Without the re-entry guard both calls see a free address and race each
+      // other into two registrations, and both fail in ways that make no sense
+      // to somebody who simply pressed "done" twice.
+      c.continueWithEmail('a@b.com', 'secret123');
+      c.continueWithEmail('a@b.com', 'secret123');
+    },
+    wait: const Duration(milliseconds: 100),
+    expect: () => [isA<AuthLoading>(), isA<AuthAuthenticated>()],
+    verify: (_) => verify(() => ds.register(any(), any(), any())).called(1),
+  );
+
+  // ── Which button is spinning ─────────────────────────────────────────
+
+  blocTest<AuthCubit, AuthState>(
+    'the loading state names the method that started it',
+    build: () {
+      when(() => ds.signInWithGoogle()).thenAnswer((_) async => true);
+      return AuthCubit(ds);
+    },
+    act: (c) => c.signInWithGoogle(),
+    expect: () => [
+      // Both sign-in paths share one cubit, so without this a tap on
+      // "Continue" spins the Google button too.
+      isA<AuthLoading>().having((s) => s.method, 'method', AuthMethod.google),
+      isA<AuthAuthenticated>(),
+    ],
+  );
+
+  // ── Confirming the address ───────────────────────────────────────────
+
+  blocTest<AuthCubit, AuthState>(
+    'refreshVerification reports a still-unconfirmed address as a failure',
+    build: () {
+      when(() => ds.refreshEmailVerified()).thenAnswer((_) async => false);
+      return AuthCubit(ds);
+    },
+    act: (c) => c.refreshVerification(),
+    expect: () => [
+      isA<AuthLoading>(),
+      isA<AuthError>()
+          .having((e) => e.message, 'msg', AuthMessage.notVerifiedYet),
+    ],
+  );
+
+  blocTest<AuthCubit, AuthState>(
+    'refreshVerification reports a confirmed address as a notice',
+    build: () {
+      when(() => ds.refreshEmailVerified()).thenAnswer((_) async => true);
+      return AuthCubit(ds);
+    },
+    act: (c) => c.refreshVerification(),
+    expect: () => [
+      isA<AuthLoading>(),
+      isA<AuthInfo>()
+          .having((e) => e.message, 'msg', AuthMessage.emailVerified),
+    ],
+  );
+
+  blocTest<AuthCubit, AuthState>(
+    'a resend that is rate-limited says so instead of failing silently',
+    build: () {
+      when(() => ds.sendEmailVerification())
+          .thenThrow(FirebaseAuthException(code: 'too-many-requests'));
+      return AuthCubit(ds);
+    },
+    act: (c) => c.sendEmailVerification(),
+    expect: () => [
+      isA<AuthLoading>(),
+      isA<AuthError>()
+          .having((e) => e.message, 'msg', AuthMessage.tooManyRequests),
+    ],
+  );
+
+  blocTest<AuthCubit, AuthState>(
+    'abandoning a mistyped sign-up deletes the record rather than signing out',
+    build: () {
+      when(() => ds.deleteAccount()).thenAnswer((_) async {});
+      return AuthCubit(ds);
+    },
+    act: (c) => c.abandonUnverifiedAccount(),
+    expect: () => [isA<AuthInitial>()],
+    verify: (_) {
+      // Left behind, the record both holds an unreachable address for ever and
+      // blocks that address from being registered again.
+      verify(() => ds.deleteAccount()).called(1);
+      verifyNever(() => ds.signOut());
+    },
+  );
+
+  blocTest<AuthCubit, AuthState>(
+    'abandoning still gets the user out when the delete fails',
+    build: () {
+      when(() => ds.deleteAccount())
+          .thenThrow(FirebaseAuthException(code: 'network-request-failed'));
+      when(() => ds.signOut()).thenAnswer((_) async {});
+      return AuthCubit(ds);
+    },
+    act: (c) => c.abandonUnverifiedAccount(),
+    expect: () => [isA<AuthInitial>()],
+    verify: (_) {
+      // Stranding somebody on a screen they cannot pass is worse than leaving
+      // one stale record on the server.
+      verify(() => ds.signOut()).called(1);
+    },
+  );
+
+  // ── Returning-user copy ──────────────────────────────────────────────
+
+  test('the device only remembers that someone signed in, never who', () async {
+    when(() => ds.register(any(), any(), any())).thenAnswer((_) async {});
+    final cubit = AuthCubit(ds);
+    expect(cubit.hasAccountOnDevice, isFalse);
+
+    await cubit.continueWithEmail('a@b.com', 'secret123');
+    expect(cubit.hasAccountOnDevice, isTrue);
+    // The address itself is deliberately not stored: on a shared phone an
+    // email left in a prefilled field is somebody's identity on display.
+    expect(
+      SharedPreferences.getInstance().then((p) => p.getKeys()),
+      completion(isNot(contains('last_email'))),
+    );
+
+    await cubit.close();
+  });
 }

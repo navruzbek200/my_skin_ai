@@ -10,6 +10,7 @@ import 'package:real_beauty_ai/widgets/lessons/lesson_card.dart';
 import 'package:real_beauty_ai/widgets/lessons/section_header.dart';
 import 'package:real_beauty_ai/widgets/lessons/yoga_section_header.dart';
 import 'package:real_beauty_ai/widgets/lessons/yoga_video_card.dart';
+import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
 
 class LessonsScreen extends StatefulWidget {
   const LessonsScreen({super.key});
@@ -91,7 +92,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      "Yuz yogasi, ingrediyentlar va maqolalar",
+                      context.l10n.lessonsSubtitle,
                       style: GoogleFonts.nunito(
                         fontSize: 13,
                         color: AppColors.muted,
@@ -109,7 +110,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
             child: YogaSectionHeader(
               isExpanded: _yogaExpanded,
               onTap: _toggleYoga,
-              title: 'Yuz Yoga',
+              title: context.l10n.lessonsYoga,
               count: yogaExercises.length,
             ),
           ),
@@ -130,7 +131,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
             child: YogaSectionHeader(
               isExpanded: _yogaVoiceExpanded,
               onTap: _toggleYogaVoice,
-              title: 'Yoga mashqlari',
+              title: context.l10n.lessonsYogaExercises,
               avatarPath: 'assets/yoga avatar 2.jpg',
               count: yogaVoiceExercises.length,
             ),

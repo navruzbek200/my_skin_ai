@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/colors.dart';
 import '../../../models/lesson.dart';
 import 'animated_lesson_icon.dart';
+import 'package:real_beauty_ai/core/l10n/localized_text.dart';
 
 class IntroStep extends StatelessWidget {
   final LessonStep step;
@@ -18,7 +19,7 @@ class IntroStep extends StatelessWidget {
         AnimatedLessonIcon(color: color),
         const SizedBox(height: 24),
         Text(
-          step.title,
+          context.tr(step.title),
           textAlign: TextAlign.center,
           style: GoogleFonts.nunito(
             fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.text,
@@ -32,7 +33,7 @@ class IntroStep extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
           ),
           child: Text(
-            step.body,
+            context.tr(step.body),
             style: GoogleFonts.nunito(
               fontSize: 15, color: AppColors.text, height: 1.6,
             ),

@@ -1,3 +1,5 @@
+import 'package:real_beauty_ai/core/l10n/localized_text.dart';
+
 import 'routine_step.dart';
 
 /// Generates a personalized daily routine from the user's skin profile.
@@ -32,24 +34,68 @@ class RoutineEngine {
 
     // ── Morning (4 fixed slots) ──
     final amCleanse = isDry
-        ? 'Yuzni iliq suv bilan yuving'
+        ? const LocalizedText(
+            'Yuzni iliq suv bilan yuving',
+            'Умойтесь тёплой водой',
+            'Rinse your face with warm water',
+          )
         : isOily
-            ? 'Penka bilan yuzni yaxshilab yuving'
+            ? const LocalizedText(
+                'Penka bilan yuzni yaxshilab yuving',
+                'Тщательно умойтесь пенкой',
+                'Wash thoroughly with a foaming cleanser',
+              )
             : isCombo
-                ? 'Penka bilan yuving, burun va peshonaga ko\'proq e\'tibor bering'
-                : 'Penka bilan yuzni yuving';
+                ? const LocalizedText(
+                    "Penka bilan yuving, burun va peshonaga ko'proq e'tibor bering",
+                    'Умойтесь пенкой, уделив больше внимания носу и лбу',
+                    'Wash with a foaming cleanser, focusing on nose and forehead',
+                  )
+                : const LocalizedText(
+                    'Penka bilan yuzni yuving',
+                    'Умойтесь пенкой',
+                    'Wash with a foaming cleanser',
+                  );
     final amToner = isOily
-        ? 'Toner surting — yog\'ni kamaytiradi'
+        ? const LocalizedText(
+            "Toner surting — yog'ni kamaytiradi",
+            'Нанесите тоник — уменьшает жирность',
+            'Apply toner — cuts down the oil',
+          )
         : isCombo
-            ? 'Toner surting — burun va peshonaga yaxshilab, yanoqlarga yengil'
-            : 'Toner surting — namlaydi';
+            ? const LocalizedText(
+                'Toner surting — burun va peshonaga yaxshilab, yanoqlarga yengil',
+                'Нанесите тоник — тщательно на нос и лоб, легко на щёки',
+                'Apply toner — thoroughly on nose and forehead, lightly on cheeks',
+              )
+            : const LocalizedText(
+                'Toner surting — namlaydi',
+                'Нанесите тоник — увлажняет',
+                'Apply toner — it hydrates',
+              );
     final amSerum = wantsVitC
-        ? 'C-vitamin serum surting — yuz rangini yorqinlashtiradi'
+        ? const LocalizedText(
+            'C-vitamin serum surting — yuz rangini yorqinlashtiradi',
+            'Нанесите сыворотку с витамином C — выравнивает тон',
+            'Apply a vitamin C serum — brightens your complexion',
+          )
         : isOily
-            ? 'Serum surting — teri teshikchalarini kichraytiradi'
+            ? const LocalizedText(
+                'Serum surting — teri teshikchalarini kichraytiradi',
+                'Нанесите сыворотку — сужает поры',
+                'Apply serum — tightens the pores',
+              )
             : isCombo
-                ? 'Serum surting — burun-peshonaga yengil, yanoqlarga ko\'proq'
-                : 'Serum surting — namlaydi';
+                ? const LocalizedText(
+                    "Serum surting — burun-peshonaga yengil, yanoqlarga ko'proq",
+                    'Нанесите сыворотку — легко на нос и лоб, больше на щёки',
+                    'Apply serum — lightly on nose and forehead, more on cheeks',
+                  )
+                : const LocalizedText(
+                    'Serum surting — namlaydi',
+                    'Нанесите сыворотку — увлажняет',
+                    'Apply serum — it hydrates',
+                  );
 
     final morning = <RoutineStep>[
       RoutineStep(id: 'am_cleanse', title: amCleanse),
@@ -57,54 +103,138 @@ class RoutineEngine {
       RoutineStep(id: 'am_serum',   title: amSerum),
       const RoutineStep(
         id: 'am_spf',
-        title: 'Quyosh kremini surting — tashqariga chiqishdan oldin',
+        title: LocalizedText(
+          'Quyosh kremini surting — tashqariga chiqishdan oldin',
+          'Нанесите солнцезащитный крем — перед выходом на улицу',
+          'Apply sunscreen — before you go outside',
+        ),
       ),
     ];
 
     // ── Evening (5 fixed slots) ──
     final pmCleanse = isOily
-        ? 'Avval yog\'li tozalovchi, keyin penka bilan yuving'
+        ? const LocalizedText(
+            "Avval yog'li tozalovchi, keyin penka bilan yuving",
+            'Сначала гидрофильное масло, затем пенка',
+            'Cleansing oil first, then a foaming cleanser',
+          )
         : isDry
-            ? 'Yuzni iliq suv bilan yengil yuving'
+            ? const LocalizedText(
+                'Yuzni iliq suv bilan yengil yuving',
+                'Умойтесь тёплой водой, без нажима',
+                'Rinse gently with warm water',
+              )
             : isCombo
-                ? 'Penka bilan yuving, burun-peshonaga ko\'proq e\'tibor bering'
-                : 'Penka bilan yuzni yuving';
+                ? const LocalizedText(
+                    "Penka bilan yuving, burun-peshonaga ko'proq e'tibor bering",
+                    'Умойтесь пенкой, уделив больше внимания носу и лбу',
+                    'Wash with a foaming cleanser, focusing on nose and forehead',
+                  )
+                : const LocalizedText(
+                    'Penka bilan yuzni yuving',
+                    'Умойтесь пенкой',
+                    'Wash with a foaming cleanser',
+                  );
     final pmToner = isOily
-        ? 'Toner surting — yog\'ni muvozanatlaydi'
+        ? const LocalizedText(
+            "Toner surting — yog'ni muvozanatlaydi",
+            'Нанесите тоник — балансирует жирность',
+            'Apply toner — balances the oil',
+          )
         : isCombo
-            ? 'Toner surting — har ikki zonaga alohida e\'tibor biling'
-            : 'Toner surting — namlaydi';
+            ? const LocalizedText(
+                "Toner surting — har ikki zonaga alohida e'tibor bering",
+                'Нанесите тоник — отдельно на каждую зону',
+                'Apply toner — treat each zone on its own',
+              )
+            : const LocalizedText(
+                'Toner surting — namlaydi',
+                'Нанесите тоник — увлажняет',
+                'Apply toner — it hydrates',
+              );
 
-    final String pmTreatment;
+    final LocalizedText pmTreatment;
     if (sensitive) {
-      pmTreatment = 'Tinchlantiruvchi serum surting — terini bezovta qilmaydi';
+      pmTreatment = const LocalizedText(
+        'Tinchlantiruvchi serum surting — terini bezovta qilmaydi',
+        'Нанесите успокаивающую сыворотку — не раздражает кожу',
+        'Apply a soothing serum — it will not irritate',
+      );
     } else if (isActiveNight && concerns.any(_retinol.contains)) {
-      pmTreatment = 'Retinol serum surting — haftada 3 marta shu qadamni bajaring';
+      pmTreatment = const LocalizedText(
+        'Retinol serum surting — haftada 3 marta shu qadamni bajaring',
+        'Нанесите сыворотку с ретинолом — этот шаг 3 раза в неделю',
+        'Apply a retinol serum — this step three nights a week',
+      );
     } else if (isActiveNight && concerns.any(_exfoliate.contains)) {
-      pmTreatment = 'Piling surting — qora nuqtalar va o\'lik hujayralarni tozalaydi';
+      pmTreatment = const LocalizedText(
+        "Piling surting — qora nuqtalar va o'lik hujayralarni tozalaydi",
+        'Сделайте пилинг — очищает чёрные точки и отмершие клетки',
+        'Exfoliate — clears blackheads and dead skin',
+      );
     } else {
-      pmTreatment = 'Namlantiruvchi serum surting';
+      pmTreatment = const LocalizedText(
+        'Namlantiruvchi serum surting',
+        'Нанесите увлажняющую сыворотку',
+        'Apply a hydrating serum',
+      );
     }
 
     final pmMoist = isDry
-        ? 'Tungi kremni qalin qilib surting — teri kechasi namlaydi'
+        ? const LocalizedText(
+            'Tungi kremni qalin qilib surting — teri kechasi namlaydi',
+            'Нанесите ночной крем плотным слоем — кожа восстанавливается ночью',
+            'Apply night cream generously — skin repairs overnight',
+          )
         : isOily
-            ? 'Yengil namlantiruvchi surting — ozroq, yuzni yog\'latmang'
+            ? const LocalizedText(
+                "Yengil namlantiruvchi surting — ozroq, yuzni yog'latmang",
+                'Нанесите лёгкий увлажняющий крем — немного, без жирного блеска',
+                'Apply a light moisturiser — a little, no greasy finish',
+              )
             : isCombo
-                ? 'Kremni surting — yanoqlarga ko\'proq, burun-peshonaga kam'
-                : 'Namlantiruvchi kremni surting';
+                ? const LocalizedText(
+                    "Kremni surting — yanoqlarga ko'proq, burun-peshonaga kam",
+                    'Нанесите крем — больше на щёки, меньше на нос и лоб',
+                    'Apply cream — more on the cheeks, less on nose and forehead',
+                  )
+                : const LocalizedText(
+                    'Namlantiruvchi kremni surting',
+                    'Нанесите увлажняющий крем',
+                    'Apply a moisturiser',
+                  );
 
-    final String pmLast;
+    final LocalizedText pmLast;
     if (hasEye) {
-      pmLast = 'Ko\'z atrofiga maxsus krem surting — yengil teging';
+      pmLast = const LocalizedText(
+        "Ko'z atrofiga maxsus krem surting — yengil teging",
+        'Нанесите крем для век — лёгкими касаниями',
+        'Apply eye cream — with a light touch',
+      );
     } else if (isMaskNight) {
       pmLast = isOily
-          ? 'Loy niqob qo\'ying — teri teshikchalarini tozalaydi, 10-15 daqiqa turing'
+          ? const LocalizedText(
+              "Loy niqob qo'ying — teri teshikchalarini tozalaydi, 10-15 daqiqa turing",
+              'Нанесите глиняную маску — очищает поры, держите 10–15 минут',
+              'Apply a clay mask — clears the pores, leave for 10–15 minutes',
+            )
           : isCombo
-              ? 'Loy niqob faqat burun-peshonaga, yanoqlarga namlantiruvchi niqob qo\'ying'
-              : 'Namlantiruvchi niqob qo\'ying — 15-20 daqiqa turing';
+              ? const LocalizedText(
+                  "Loy niqob faqat burun-peshonaga, yanoqlarga namlantiruvchi niqob qo'ying",
+                  'Глиняная маска только на нос и лоб, на щёки — увлажняющая',
+                  'Clay mask on nose and forehead only, hydrating mask on the cheeks',
+                )
+              : const LocalizedText(
+                  "Namlantiruvchi niqob qo'ying — 15-20 daqiqa turing",
+                  'Нанесите увлажняющую маску — держите 15–20 минут',
+                  'Apply a hydrating mask — leave for 15–20 minutes',
+                );
     } else {
-      pmLast = 'Tungi namlantiruvchi niqob qo\'ying';
+      pmLast = const LocalizedText(
+        "Tungi namlantiruvchi niqob qo'ying",
+        'Нанесите ночную увлажняющую маску',
+        'Apply an overnight hydrating mask',
+      );
     }
 
     final evening = <RoutineStep>[

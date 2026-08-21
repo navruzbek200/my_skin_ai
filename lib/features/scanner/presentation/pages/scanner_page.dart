@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
 import 'package:real_beauty_ai/core/theme/colors.dart';
 import 'package:real_beauty_ai/data/skin_problems_data.dart';
 import 'package:real_beauty_ai/models/skin_analysis_result.dart';
 import 'package:real_beauty_ai/services/local_store.dart';
 import 'package:go_router/go_router.dart';
+import 'package:real_beauty_ai/core/l10n/localized_text.dart';
+import 'package:real_beauty_ai/logic/skin_copy.dart';
 
 class ScannerScreen extends StatelessWidget {
   const ScannerScreen({super.key});
@@ -26,7 +30,7 @@ class ScannerScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Teri tahlilini boshlang',
+                    context.l10n.scanStartTitle,
                     style: GoogleFonts.nunito(
                       fontSize: 32,
                       fontWeight: FontWeight.w800,
@@ -34,7 +38,7 @@ class ScannerScreen extends StatelessWidget {
                     ),
                   ).animate().fadeIn(duration: 400.ms),
                   Text(
-                    'Savolnoma orqali teri tipingizni aniqlang',
+                    context.l10n.scanStartBody,
                     style: GoogleFonts.nunito(
                       fontSize: 14,
                       color: AppColors.muted,
@@ -62,7 +66,7 @@ class ScannerScreen extends StatelessWidget {
   Widget _buildScanCard(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Teri tahlilini boshlash — savolnoma orqali',
+      label: context.l10n.scanStartCta,
       child: GestureDetector(
         onTap: () => context.push('/quiz'),
         child: Container(
@@ -100,7 +104,7 @@ class ScannerScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Teri tahlilini boshlash',
+                      context.l10n.scanStartCta,
                       style: GoogleFonts.nunito(
                         fontSize: 17,
                         fontWeight: FontWeight.w700,
@@ -109,7 +113,7 @@ class ScannerScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Bir necha daqiqa vaqt ajrating',
+                      context.l10n.scanStartHint,
                       style: GoogleFonts.nunito(
                         fontSize: 12,
                         color: AppColors.muted,
@@ -230,7 +234,7 @@ class _EmptyStateCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Birinchi skaningiz saqlandi',
+                  context.l10n.scanFirstSaved,
                   style: GoogleFonts.nunito(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
@@ -239,7 +243,7 @@ class _EmptyStateCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  "O'zgarishni ko'rish uchun yana skan qiling",
+                  context.l10n.scanFirstSavedBody,
                   style: GoogleFonts.nunito(
                     fontSize: 13,
                     color: const Color(0xFF9490B0),
@@ -261,13 +265,11 @@ class _ComparisonCard extends StatelessWidget {
 
   const _ComparisonCard({required this.latest, required this.previous});
 
-  static String _fmtDate(DateTime dt) {
-    const months = [
-      'yan', 'fev', 'mar', 'apr', 'may', 'iyun',
-      'iyul', 'avg', 'sen', 'okt', 'noy', 'dek',
-    ];
-    return '${dt.day} ${months[dt.month - 1]}';
-  }
+  /// Through `intl` rather than a hard-coded month table: the table only ever
+  /// held Uzbek abbreviations, so a Russian or English reader saw "12 iyul" in
+  /// the middle of their own interface.
+  static String _fmtDate(BuildContext context, DateTime dt) =>
+      DateFormat.MMMd(Localizations.localeOf(context).toString()).format(dt);
 
   @override
   Widget build(BuildContext context) {
@@ -305,7 +307,7 @@ class _ComparisonCard extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  "So'nggi vs oldingi skan",
+                  context.l10n.scanComparison,
                   style: GoogleFonts.nunito(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
@@ -317,15 +319,17 @@ class _ComparisonCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           _SkinTypeRow(
-            label: "So'nggi",
-            skinType: latest.skinType,
-            date: _fmtDate(latest.takenAt),
+            label: context.l10n.scanLatest,
+            skinType: context.skinTypeLabel(latest.skinTypeCode,
+                stored: latest.skinType),
+            date: _fmtDate(context, latest.takenAt),
           ),
           const SizedBox(height: 8),
           _SkinTypeRow(
             label: 'Oldingi',
-            skinType: previous.skinType,
-            date: _fmtDate(previous.takenAt),
+            skinType: context.skinTypeLabel(previous.skinTypeCode,
+                stored: previous.skinType),
+            date: _fmtDate(context, previous.takenAt),
             muted: true,
           ),
         ],
@@ -371,7 +375,7 @@ class _SkinTypeRow extends StatelessWidget {
         ),
         const SizedBox(width: 6),
         Text(
-          '$skinType teri',
+          context.l10n.scanSkinTypeValue(skinType),
           style: GoogleFonts.nunito(
             fontSize: 13,
             fontWeight: FontWeight.w700,
@@ -408,7 +412,7 @@ class _AiDisclaimer extends StatelessWidget {
         ),
         const SizedBox(width: 5),
         Text(
-          'AI tahlili — tibbiy tashxis emas',
+          context.l10n.scanAiNote,
           style: GoogleFonts.nunito(
             fontSize: 11,
             color: const Color(0xFFB8A8D8),
@@ -430,7 +434,7 @@ class _SkinProblemsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Teri muammolari',
+          context.l10n.scanProblems,
           style: GoogleFonts.nunito(
             fontSize: 18,
             fontWeight: FontWeight.w800,
@@ -439,7 +443,7 @@ class _SkinProblemsSection extends StatelessWidget {
         ).animate().fadeIn(delay: 150.ms),
         const SizedBox(height: 4),
         Text(
-          'Sabablari va yechimlari',
+          context.l10n.scanCauses,
           style: GoogleFonts.nunito(
             fontSize: 13,
             color: const Color(0xFF9490B0),
@@ -529,7 +533,7 @@ class _SkinProblemCardState extends State<_SkinProblemCard> {
                 right: 12,
                 bottom: 12,
                 child: Text(
-                  p.name,
+                  context.tr(p.name),
                   style: GoogleFonts.nunito(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
@@ -637,7 +641,7 @@ class SkinProblemDetailPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    problem.name,
+                    context.tr(problem.name),
                     style: GoogleFonts.nunito(
                       fontSize: 28,
                       fontWeight: FontWeight.w800,
@@ -657,14 +661,14 @@ class SkinProblemDetailPage extends StatelessWidget {
                   _DetailCard(
                     icon: Icons.help_outline_rounded,
                     label: 'Sababi',
-                    text: problem.cause,
+                    text: context.tr(problem.cause),
                     accentColor: const Color(0xFF7060AA),
                   ),
                   const SizedBox(height: 14),
                   _DetailCard(
                     icon: Icons.check_circle_outline_rounded,
                     label: 'Yechimi',
-                    text: problem.solution,
+                    text: context.tr(problem.solution),
                     accentColor: const Color(0xFF16A34A),
                   ),
                   if (problem.note != null) ...[
@@ -690,7 +694,7 @@ class SkinProblemDetailPage extends StatelessWidget {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              problem.note!,
+                              context.tr(problem.note!),
                               style: GoogleFonts.nunito(
                                 fontSize: 13,
                                 color: problem.color,

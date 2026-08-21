@@ -1,32 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import 'package:real_beauty_ai/core/constants/api_constants.dart';
+import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
 import 'package:real_beauty_ai/core/theme/colors.dart';
+import 'package:real_beauty_ai/core/theme/typography.dart';
+import 'package:real_beauty_ai/features/auth/data/email_rules.dart';
 import 'package:real_beauty_ai/features/auth/presentation/bloc/auth_cubit.dart';
+import 'package:real_beauty_ai/features/auth/presentation/pages/auth_message_text.dart';
+import 'package:real_beauty_ai/features/auth/presentation/widgets/auth_widgets.dart';
+import 'package:real_beauty_ai/l10n/app_localizations.dart';
+import 'package:real_beauty_ai/widgets/buttons.dart';
 import 'package:real_beauty_ai/widgets/google_sign_in_button.dart';
 
-void _openPrivacyPolicy() {
-  launchUrl(Uri.parse(privacyPolicyUrl), mode: LaunchMode.externalApplication);
-}
-
-// Real email format check.
-final _emailPattern = RegExp(r'^[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}$');
-String? _validateEmail(String? v) {
-  final value = v?.trim() ?? '';
-  if (value.isEmpty) return 'Email kiriting';
-  if (!_emailPattern.hasMatch(value)) return 'Haqiqiy email kiriting';
+/// Takes the strings rather than a [BuildContext]: a validator runs inside
+/// `Form.validate()`, where the context of the field is not the context of the
+/// screen, and passing the looked-up strings in keeps this a pure function a
+/// test can call directly.
+String? validateEmail(String? value, AppLocalizations l10n) {
+  final v = value?.trim() ?? '';
+  if (v.isEmpty) return l10n.authEmailRequired;
+  if (!EmailRules.isWellFormed(v)) return l10n.authEmailInvalid;
+  // Both are rejected here rather than after sign-up. The account would
+  // otherwise be created, the confirmation mail would go to an inbox that
+  // expires — or to a domain that does not exist — and the person would be
+  // holding an account they can never confirm and never recover.
+  if (EmailRules.isDisposable(v)) return l10n.authErrorDisposableEmail;
+  if (EmailRules.isUnreachable(v)) return l10n.authErrorEmailUnreachable;
   return null;
 }
 
-/// One screen, one form, no sign-in/sign-up choice.
+/// One screen, one form, no sign-in / sign-up switch.
 ///
-/// Asking someone whether they already have an account is a question about our
-/// database, not about them, and this audience should not have to answer it —
-/// [AuthCubit.continueWithEmail] works it out from the address.
+/// Asking somebody whether they already have an account is a question about our
+/// database, not about them — [AuthCubit.continueWithEmail] works it out from
+/// the address instead.
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
 
@@ -35,373 +47,402 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  bool _obscure = true;
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
+  final _emailFocus = FocusNode();
   final _passwordFocus = FocusNode();
+  bool _obscure = true;
   bool _submitted = false;
+
+  /// The corrected address offered under the field when the domain looks like a
+  /// misspelling of one everybody uses. Never applied on its own — a domain
+  /// that merely resembles a typo may well be someone's real employer.
+  String? _suggestion;
 
   @override
   void dispose() {
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
+    _emailFocus.dispose();
     _passwordFocus.dispose();
     super.dispose();
   }
 
-  void _submit() {
-    setState(() => _submitted = true);
-    if (!_formKey.currentState!.validate()) return;
-    FocusScope.of(context).unfocus();
-    context
-        .read<AuthCubit>()
-        .continueWithEmail(_emailCtrl.text, _passwordCtrl.text);
+  void _onEmailChanged(String value) {
+    final suggestion = EmailRules.suggestionFor(value);
+    if (suggestion != _suggestion) setState(() => _suggestion = suggestion);
   }
 
-  void _showError(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: GoogleFonts.nunito(color: Colors.white)),
-        backgroundColor: const Color(0xFF7060AA),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        // Long enough to read the two-sentence wrong-password message, which
-        // is the one that tells a Google user which button to press instead.
-        duration: const Duration(seconds: 5),
+  void _applySuggestion() {
+    final fixed = _suggestion;
+    if (fixed == null) return;
+    _emailCtrl.text = fixed;
+    _emailCtrl.selection = TextSelection.collapsed(offset: fixed.length);
+    setState(() => _suggestion = null);
+    _formKey.currentState?.validate();
+  }
+
+  Future<void> _submit() async {
+    // Validation stays off until the first submit, so the form does not turn
+    // red under somebody who is still typing their address for the first time.
+    setState(() => _submitted = true);
+    if (!_formKey.currentState!.validate()) {
+      // Announced rather than merely shown: without this the only signal that
+      // nothing happened is a red line a screen-reader user never hears.
+      SemanticsService.sendAnnouncement(
+        View.of(context),
+        context.l10n.authEmailInvalid,
+        Directionality.of(context),
+      );
+      return;
+    }
+    FocusScope.of(context).unfocus();
+
+    final auth = context.read<AuthCubit>();
+    // Only on a device that has never signed anyone in — which is the sign-up
+    // case in everything but name. A returning user is typing an address that
+    // has already proved it works, and a confirmation step there would be a
+    // tax on every single sign-in.
+    if (!auth.hasAccountOnDevice) {
+      final confirmed = await _confirmAddress();
+      if (!mounted || confirmed != true) return;
+    }
+    auth.continueWithEmail(_emailCtrl.text, _passwordCtrl.text);
+  }
+
+  /// The last chance to catch a mistyped address, and the only one that costs
+  /// nothing.
+  ///
+  /// Everything the client *can* check has already run: the format, the
+  /// throwaway domains, the misspelt providers. None of that sees the half of
+  /// an address that goes wrong most often — the part before the `@`, where
+  /// `ali7@gmail.com` and `ali@gmail.com` are both perfectly valid and only one
+  /// of them is yours. No lookup can tell them apart, so the person who knows
+  /// is asked, once, before the account exists.
+  ///
+  /// Asking here rather than on the verify screen is the whole point: after
+  /// sign-up the address is already taken on the server, the mail is already
+  /// gone to a stranger, and undoing it means deleting an account. Before
+  /// sign-up it costs one tap.
+  Future<bool?> _confirmAddress() {
+    final l10n = context.l10n;
+    return showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+        ),
+        title: Text(l10n.authConfirmTitle, style: AppText.h3),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // The address is the thing being checked, so it is the loudest
+            // thing in the dialog — set apart from the prose, not buried in a
+            // sentence somebody will skim past.
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceAlt,
+                borderRadius: BorderRadius.circular(AppRadius.sm),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Text(
+                EmailRules.normalise(_emailCtrl.text),
+                textAlign: TextAlign.center,
+                style: AppText.h3,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(l10n.authConfirmBody, style: AppText.bodyMuted),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.muted,
+              minimumSize: const Size(0, AppTouch.min),
+            ),
+            child: Text(l10n.authConfirmEdit,
+                style: AppText.labelSm.copyWith(color: AppColors.muted)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.cta,
+              minimumSize: const Size(0, AppTouch.min),
+            ),
+            child: Text(l10n.authConfirmSend,
+                style: AppText.labelSm.copyWith(color: AppColors.cta)),
+          ),
+        ],
       ),
-    );
+    ).whenComplete(() {
+      // Dismissing to fix a typo should land the cursor where the typo is,
+      // rather than making somebody hunt for the field they were just shown.
+      if (!mounted) return;
+      _emailFocus.requestFocus();
+      _emailCtrl.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: _emailCtrl.text.length,
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final bottom = MediaQuery.of(context).padding.bottom;
-    final top = MediaQuery.of(context).padding.top;
+    final l10n = context.l10n;
+    final padding = MediaQuery.paddingOf(context);
+    // Somebody who has signed in on this phone before is not being introduced
+    // to the app, they are coming back to it — see [LocalStore.hasAccount].
+    final returning = context.read<AuthCubit>().hasAccountOnDevice;
 
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
+        // AuthCubit is a single app-wide instance, and pushing '/forgot' keeps
+        // this screen mounted underneath it — so without this guard, a reset
+        // email fired from that screen makes this listener throw its own
+        // snackbar on top of the one already showing there.
+        if (ModalRoute.of(context)?.isCurrent == false) return;
         if (state is AuthAuthenticated) {
           HapticFeedback.mediumImpact();
           // Tells the platform the autofill session ended well, which is what
           // makes iOS and Android offer to save the credentials to the
-          // keychain. Without it the AutofillGroup above only ever *fills* —
-          // nobody's password ever gets stored, so the next sign-in is typed
-          // out by hand again.
+          // keychain. Without it the AutofillGroup below only ever *fills* —
+          // nobody's password is ever stored, so the next sign-in is typed out
+          // by hand again.
           TextInput.finishAutofillContext();
-          context.go('/home');
+          // Navigation is the router's job: the guard redirects off '/auth' as
+          // soon as AuthBloc reports the new session, and to '/verify-email'
+          // rather than '/home' when the address still needs confirming.
         } else if (state is AuthError) {
-          _showError(context, state.message);
+          showAuthSnack(context, state.message.text(l10n), isError: true);
+        } else if (state is AuthInfo) {
+          showAuthSnack(context, state.message.text(l10n), isError: false);
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
-        body: Form(
-          key: _formKey,
-          autovalidateMode: _submitted
-              ? AutovalidateMode.onUserInteraction
-              : AutovalidateMode.disabled,
-          child: AutofillGroup(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(28, top + 24, 28, bottom + 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(child: Image.asset('assets/splash.png', height: 104)),
-                  const SizedBox(height: 14),
-                  Text(
-                    'Xush kelibsiz',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.nunito(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w800,
-                      color: const Color(0xFF3D2F8A),
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-                  _AuthField(
-                    label: 'Email',
-                    icon: Icons.mail_outline_rounded,
-                    keyboardType: TextInputType.emailAddress,
-                    controller: _emailCtrl,
-                    validator: _validateEmail,
-                    textInputAction: TextInputAction.next,
-                    autofillHints: const [AutofillHints.email],
-                    onFieldSubmitted: (_) => _passwordFocus.requestFocus(),
-                  ),
-                  const SizedBox(height: 12),
-                  _AuthField(
-                    label: 'Parol',
-                    helperText: 'Kamida 6 belgi',
-                    icon: Icons.lock_outline_rounded,
-                    obscure: _obscure,
-                    controller: _passwordCtrl,
-                    focusNode: _passwordFocus,
-                    validator: (v) {
-                      if (v == null || v.isEmpty) return 'Parol kiriting';
-                      if (v.length < 6) {
-                        return "Parol kamida 6 belgidan iborat bo'lishi kerak";
-                      }
-                      return null;
-                    },
-                    textInputAction: TextInputAction.done,
-                    autofillHints: const [AutofillHints.password],
-                    onFieldSubmitted: (_) => _submit(),
-                    suffixIcon: Semantics(
-                      button: true,
-                      label: _obscure ? 'Parolni ko\'rsatish' : 'Parolni yashirish',
-                      child: GestureDetector(
-                        onTap: () => setState(() => _obscure = !_obscure),
-                        // Without this the 20px icon is the only hit target;
-                        // the transparent padding around it swallowed taps.
-                        behavior: HitTestBehavior.opaque,
-                        child: Icon(
-                          _obscure
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          color: AppColors.muted,
-                          size: 20,
+        backgroundColor: AppColors.surface,
+        body: Stack(
+          children: [
+            const AuthBackdrop(),
+            SafeArea(
+              child: Form(
+                key: _formKey,
+                autovalidateMode: _submitted
+                    ? AutovalidateMode.onUserInteraction
+                    : AutovalidateMode.disabled,
+                child: AutofillGroup(
+                  child: ListView(
+                    padding: EdgeInsets.fromLTRB(24, 12, 24, padding.bottom + 24),
+                    children: [
+                      Center(
+                        child: Semantics(
+                          label: l10n.appName,
+                          image: true,
+                          child: Image.asset('assets/splash.png', height: 96),
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  BlocBuilder<AuthCubit, AuthState>(
-                    builder: (context, state) {
-                      return _AuthButton(
-                        label: 'Davom etish',
-                        isLoading: state is AuthLoading,
-                        onTap: _submit,
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  Center(
-                    child: GestureDetector(
-                      onTap: () => context.push('/forgot'),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Text(
-                          'Parolni unutdingizmi?',
-                          style: GoogleFonts.nunito(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF7060AA),
+                      const SizedBox(height: 24),
+                      Text(
+                        returning ? l10n.authWelcomeBack : l10n.authWelcome,
+                        style: AppText.display,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        returning
+                            ? l10n.authSubtitleReturning
+                            : l10n.authSubtitle,
+                        style: AppText.bodyMuted,
+                      ),
+                      const SizedBox(height: 24),
+                      AuthField(
+                        label: l10n.commonEmail,
+                        icon: Icons.mail_outline_rounded,
+                        controller: _emailCtrl,
+                        focusNode: _emailFocus,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        autofillHints: const [AutofillHints.email],
+                        validator: (v) => validateEmail(v, l10n),
+                        onChanged: _onEmailChanged,
+                        onFieldSubmitted: (_) => _passwordFocus.requestFocus(),
+                      ),
+                      if (_suggestion != null) ...[
+                        const SizedBox(height: 6),
+                        _DidYouMean(
+                          address: _suggestion!,
+                          onTap: _applySuggestion,
+                        ),
+                      ],
+                      const SizedBox(height: 14),
+                      AuthField(
+                        label: l10n.commonPassword,
+                        helperText: l10n.authPasswordHelper,
+                        icon: Icons.lock_outline_rounded,
+                        controller: _passwordCtrl,
+                        focusNode: _passwordFocus,
+                        obscure: _obscure,
+                        textInputAction: TextInputAction.done,
+                        autofillHints: const [AutofillHints.password],
+                        validator: (v) {
+                          if (v == null || v.isEmpty) {
+                            return l10n.authPasswordRequired;
+                          }
+                          if (v.length < 6) return l10n.authPasswordTooShort;
+                          return null;
+                        },
+                        onFieldSubmitted: (_) => _submit(),
+                        suffix: PasswordVisibilityToggle(
+                          obscured: _obscure,
+                          onToggle: () => setState(() => _obscure = !_obscure),
+                          showLabel: l10n.authShowPassword,
+                          hideLabel: l10n.authHidePassword,
+                        ),
+                      ),
+                      const SizedBox(height: 22),
+                      BlocBuilder<AuthCubit, AuthState>(
+                        builder: (context, state) {
+                          final loading = state is AuthLoading;
+                          return PrimaryPillButton(
+                            label: l10n.authContinue,
+                            // Spins only for the tap that started here, but
+                            // refuses taps while either path is in flight —
+                            // otherwise pressing this lights the Google button
+                            // too and nobody can tell which one they pressed.
+                            isLoading:
+                                loading && state.method == AuthMethod.email,
+                            onPressed: loading ? null : _submit,
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 4),
+                      Center(
+                        child: TextButton(
+                          onPressed: () => context.push('/forgot'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppColors.cta,
+                            // A bare TextButton is 36dp tall; this floors the
+                            // row at a thumb-sized target.
+                            minimumSize: const Size(0, AppTouch.min),
+                          ),
+                          child: Text(
+                            l10n.authForgotPassword,
+                            style:
+                                AppText.labelSm.copyWith(color: AppColors.cta),
                           ),
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 10),
+                      OrDivider(label: l10n.authOr),
+                      const SizedBox(height: 18),
+                      const GoogleSignInButton(),
+                      const SizedBox(height: 24),
+                      const _PrivacyNote(),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  const _OrDivider(),
-                  const SizedBox(height: 18),
-                  const GoogleSignInButton(),
-                  const SizedBox(height: 20),
-                  const _PrivacyLink(),
-                ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 }
 
-// ── Shared widgets ───────────────────────────────────────────
+/// "Did you mean ali@gmail.com?" — a tap applies it.
+///
+/// Offered rather than corrected silently, and shown as an ordinary hint
+/// instead of an error: the address may be perfectly real, and rewriting what
+/// somebody typed under their fingers is worse than one extra tap.
+class _DidYouMean extends StatelessWidget {
+  const _DidYouMean({required this.address, required this.onTap});
 
-/// Floating-label field: the label sits inside the box and rises onto the
-/// border on focus, so every input stays self-describing without the extra
-/// stacked label row that stretched this screen vertically.
-class _AuthField extends StatelessWidget {
-  final String label;
-  final String? helperText;
-  final IconData icon;
-  final bool obscure;
-  final Widget? suffixIcon;
-  final TextInputType? keyboardType;
-  final TextEditingController? controller;
-  final FocusNode? focusNode;
-  final String? Function(String?)? validator;
-  final TextInputAction? textInputAction;
-  final Iterable<String>? autofillHints;
-  final void Function(String)? onFieldSubmitted;
-
-  const _AuthField({
-    required this.label,
-    required this.icon,
-    this.helperText,
-    this.obscure = false,
-    this.suffixIcon,
-    this.keyboardType,
-    this.controller,
-    this.focusNode,
-    this.validator,
-    this.textInputAction,
-    this.autofillHints,
-    this.onFieldSubmitted,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      focusNode: focusNode,
-      obscureText: obscure,
-      keyboardType: keyboardType,
-      validator: validator,
-      textInputAction: textInputAction,
-      autofillHints: autofillHints,
-      onFieldSubmitted: onFieldSubmitted,
-      style: GoogleFonts.nunito(
-        fontSize: 15,
-        color: AppColors.text,
-        fontWeight: FontWeight.w600,
-      ),
-      decoration: InputDecoration(
-        labelText: label,
-        helperText: helperText,
-        labelStyle: GoogleFonts.nunito(
-          fontSize: 15,
-          color: const Color(0xFF9490B0),
-          fontWeight: FontWeight.w500,
-        ),
-        floatingLabelStyle: GoogleFonts.nunito(
-          fontSize: 14,
-          color: const Color(0xFF7060AA),
-          fontWeight: FontWeight.w700,
-        ),
-        helperStyle: GoogleFonts.nunito(
-          fontSize: 11,
-          color: const Color(0xFFB3AFC7),
-        ),
-        errorStyle: GoogleFonts.nunito(fontSize: 11),
-        prefixIcon: Icon(icon, color: const Color(0xFFBBB8D0), size: 20),
-        suffixIcon: suffixIcon,
-        filled: true,
-        fillColor: const Color(0xFFF8F7FC),
-        contentPadding:
-            const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFEAE8F5), width: 1.5),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFEAE8F5), width: 1.5),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFF7060AA), width: 1.8),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFE57373), width: 1.5),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFE57373), width: 1.8),
-        ),
-      ),
-    );
-  }
-}
-
-class _AuthButton extends StatelessWidget {
-  final String label;
+  final String address;
   final VoidCallback onTap;
-  final bool isLoading;
-  const _AuthButton({
-    required this.label,
-    required this.onTap,
-    this.isLoading = false,
-  });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 56,
-      child: ElevatedButton(
-        onPressed: isLoading ? null : onTap,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF4A3A9A),
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: const Color(0xFF4A3A9A).withValues(alpha: 0.6),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(999),
+    return Semantics(
+      button: true,
+      label: context.l10n.authErrorEmailTypo,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: AppTouch.min),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceAlt,
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+            border: Border.all(color: AppColors.border),
           ),
-        ),
-        child: isLoading
-            ? const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  valueColor: AlwaysStoppedAnimation(Colors.white),
-                ),
-              )
-            : Text(
-                label,
-                style: GoogleFonts.nunito(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
+          child: Row(
+            children: [
+              const Icon(Icons.lightbulb_outline_rounded,
+                  size: 17, color: AppColors.muted),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text.rich(
+                  TextSpan(
+                    style: AppText.labelMuted,
+                    children: [
+                      TextSpan(text: '${context.l10n.authErrorEmailTypo} '),
+                      TextSpan(
+                        text: address,
+                        style: AppText.labelSm.copyWith(color: AppColors.cta),
+                      ),
+                    ],
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
 
-class _OrDivider extends StatelessWidget {
-  const _OrDivider();
+class _PrivacyNote extends StatelessWidget {
+  const _PrivacyNote();
 
   @override
   Widget build(BuildContext context) {
-    final line = Expanded(
-      child: Container(height: 1, color: const Color(0xFFEAE8F5)),
-    );
-    return Row(
+    final l10n = context.l10n;
+    return Column(
       children: [
-        line,
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          child: Text(
-            'yoki',
-            style: GoogleFonts.nunito(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFFB3AFC7),
-            ),
-          ),
+        Text(
+          l10n.authTermsNote,
+          textAlign: TextAlign.center,
+          style: AppText.labelMuted,
         ),
-        line,
-      ],
-    );
-  }
-}
-
-class _PrivacyLink extends StatelessWidget {
-  const _PrivacyLink();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: GestureDetector(
-        onTap: _openPrivacyPolicy,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+        TextButton(
+          onPressed: () => launchUrl(
+            Uri.parse(privacyPolicyUrl),
+            mode: LaunchMode.externalApplication,
+          ),
+          style: TextButton.styleFrom(
+            foregroundColor: AppColors.cta,
+            minimumSize: const Size(0, AppTouch.min),
+          ),
           child: Text(
-            'Maxfiylik siyosati',
-            style: GoogleFonts.nunito(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF9490B0),
+            l10n.commonPrivacyPolicy,
+            style: AppText.labelSm.copyWith(
+              color: AppColors.cta,
               decoration: TextDecoration.underline,
+              decorationColor: AppColors.cta,
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

@@ -5,13 +5,20 @@
 // auth, and walks the shell's tabs on a timer while screenshots are taken.
 //
 // Delete after use. Never referenced by the app.
+import 'dart:ui' show PlatformDispatcher;
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:real_beauty_ai/core/l10n/app_language.dart';
+import 'package:real_beauty_ai/core/l10n/locale_cubit.dart';
 import 'package:real_beauty_ai/core/theme/colors.dart';
+import 'package:real_beauty_ai/l10n/app_localizations.dart';
 import 'package:real_beauty_ai/features/shell/main_shell.dart';
 import 'package:real_beauty_ai/firebase_options.dart';
 import 'package:real_beauty_ai/services/local_store.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const _profileJson =
@@ -24,6 +31,10 @@ const _profileJson =
 /// Seconds each tab stays on screen before the next one. The capture script
 /// sleeps in step with this.
 const _dwell = Duration(seconds: 10);
+
+/// Which language the captures come out in. The store listing needs a set per
+/// language, so this is the one knob to turn between runs.
+const shotLanguage = AppLanguage.uz;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,9 +82,26 @@ class _Shots extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
+    // The delegates and the LocaleCubit are not optional here: every screen
+    // reads `context.l10n`, which throws without them, so a harness that
+    // builds its own MaterialApp has to install exactly what `App` does.
+    //
+    // Set `shotLanguage` to capture the store listing in another language.
+    return BlocProvider<LocaleCubit>(
+      create: (_) => LocaleCubit(
+        deviceLocale: PlatformDispatcher.instance.locale,
+      )..setLanguage(shotLanguage),
+      child: MaterialApp.router(
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.light,
+      locale: shotLanguage.locale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLanguage.supportedLocales,
       theme: ThemeData(
         brightness: Brightness.light,
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
@@ -89,6 +117,7 @@ class _Shots extends StatelessWidget {
           child: child ?? const SizedBox.shrink(),
         );
       },
+      ),
     );
   }
 }

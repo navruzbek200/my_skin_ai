@@ -6,11 +6,18 @@ import '../../models/lesson.dart';
 import 'package:go_router/go_router.dart';
 import 'info_row_card.dart';
 import 'lesson_styles.dart';
+import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
+import 'package:real_beauty_ai/core/l10n/localized_text.dart';
 
 class LessonCard extends StatelessWidget {
   final Lesson lesson;
 
   const LessonCard({super.key, required this.lesson});
+
+  void _open(BuildContext context) {
+    HapticFeedback.selectionClick();
+    context.push('/lesson-detail', extra: lesson);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,15 +30,17 @@ class LessonCard extends StatelessWidget {
     return Semantics(
       button: true,
       label:
-          '${lesson.title}. ${lesson.subtitle}. '
-          '${lesson.level}, ${lesson.duration}, ${lesson.steps.length} qadam',
+          '${context.tr(lesson.title)}. ${context.tr(lesson.subtitle)}. '
+          '${context.tr(lesson.level)}, ${context.tr(lesson.duration)}, '
+          '${context.l10n.lessonStepCount(lesson.steps.length)}',
+      // Without this the card announces itself as a button and then offers no
+      // way to press it: ExcludeSemantics below drops the InkWell's own tap
+      // action along with its label.
+      onTap: () => _open(context),
       child: ExcludeSemantics(
         child: InfoRowCard(
           accentColor: accent,
-          onTap: () {
-            HapticFeedback.selectionClick();
-            context.push('/lesson-detail', extra: lesson);
-          },
+          onTap: () => _open(context),
           content: Padding(
             padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
             child: Column(
@@ -39,7 +48,7 @@ class LessonCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    _Chip(label: lesson.category, color: accent),
+                    _Chip(label: context.tr(lesson.category), color: accent),
                     const Spacer(),
                     Icon(
                       Icons.timer_outlined,
@@ -48,7 +57,7 @@ class LessonCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 3),
                     Text(
-                      lesson.duration,
+                      context.tr(lesson.duration),
                       style: GoogleFonts.nunito(
                         fontSize: 11,
                         color: AppColors.muted,
@@ -58,7 +67,7 @@ class LessonCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 7),
                 Text(
-                  lesson.title,
+                  context.tr(lesson.title),
                   style: GoogleFonts.nunito(
                     fontSize: 15.5,
                     fontWeight: FontWeight.w800,
@@ -67,7 +76,7 @@ class LessonCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  lesson.subtitle,
+                  context.tr(lesson.subtitle),
                   style: GoogleFonts.nunito(
                     fontSize: 12,
                     color: AppColors.muted,
@@ -80,7 +89,7 @@ class LessonCard extends StatelessWidget {
                     Icon(Icons.signal_cellular_alt, size: 12, color: accent),
                     const SizedBox(width: 3),
                     Text(
-                      lesson.level,
+                      context.tr(lesson.level),
                       style: GoogleFonts.nunito(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -95,7 +104,7 @@ class LessonCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 3),
                     Text(
-                      '${lesson.steps.length} qadam',
+                      context.l10n.lessonStepCount(lesson.steps.length),
                       style: GoogleFonts.nunito(
                         fontSize: 11,
                         color: AppColors.muted,

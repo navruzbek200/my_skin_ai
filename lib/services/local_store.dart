@@ -23,6 +23,9 @@ class LocalStore {
   static const _skinKey = 'skin_profile_v1';
   static const _privacyKey = 'privacy_accepted_v1';
   static const _routinePrefix = 'routine:';
+  static const _localeKey = 'locale_v1';
+  static const _hasAccountKey = 'has_account_v1';
+  static const _gatedSignupsKey = 'gated_signups_v1';
 
   // ── Date helpers ──────────────────────────────────────────────
 
@@ -136,6 +139,99 @@ class LocalStore {
       for (final key in keys) {
         await _prefs.remove(key);
       }
+    } catch (_) {}
+  }
+
+  // ── Language ──────────────────────────────────────────────────
+  //
+  // Null until somebody picks a language, which is what lets the first run
+  // follow the phone's own language instead of overriding it with a default.
+
+  String? get localeCode {
+    try {
+      return _prefs.getString(_localeKey);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> saveLocaleCode(String code) async {
+    try {
+      await _prefs.setString(_localeKey, code);
+    } catch (_) {}
+  }
+
+  // ── Returning user ────────────────────────────────────────────
+  //
+  // Whether anyone has ever signed in on this device. Only a flag: it changes
+  // the sign-in copy from "welcome" to "welcome back" and nothing else. The
+  // address itself is deliberately not kept — on a shared phone an email left
+  // in a prefilled field is somebody's identity on display, and Firebase
+  // restores the real session by itself anyway.
+
+  bool get hasAccount {
+    try {
+      return _prefs.getBool(_hasAccountKey) ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> markHasAccount() async {
+    try {
+      await _prefs.setBool(_hasAccountKey, true);
+    } catch (_) {}
+  }
+
+  Future<void> clearHasAccount() async {
+    try {
+      await _prefs.remove(_hasAccountKey);
+    } catch (_) {}
+  }
+
+  // ── Sign-ups that must confirm their address ──────────────────
+  //
+  // The verification gate grandfathers in accounts created before a cut-off
+  // date, because those were made when no verification step existed and some
+  // of them hold addresses their owner can no longer read. That date has to
+  // sit a week ahead of the build so a staged rollout cannot catch an
+  // old-build sign-up and gate it mid-flight — which leaves a window where a
+  // brand-new sign-up on *this* build is not gated either.
+  //
+  // This closes that window exactly. When this build creates an account it
+  // records the uid, and the gate treats those as required-to-confirm
+  // regardless of the date. It is per-uid rather than a device-level flag on
+  // purpose: signing out and into an older, grandfathered account on the same
+  // phone must not drag that account into the gate.
+
+  Set<String> get gatedSignups {
+    try {
+      return (_prefs.getStringList(_gatedSignupsKey) ?? const []).toSet();
+    } catch (_) {
+      return const {};
+    }
+  }
+
+  bool isGatedSignup(String uid) => gatedSignups.contains(uid);
+
+  Future<void> markGatedSignup(String uid) async {
+    try {
+      final all = gatedSignups.toList();
+      if (all.contains(uid)) return;
+      all.add(uid);
+      // Capped: this only ever grows by one per sign-up on this device, but a
+      // shared phone should not accumulate a list without end.
+      if (all.length > 20) all.removeRange(0, all.length - 20);
+      await _prefs.setStringList(_gatedSignupsKey, all);
+    } catch (_) {}
+  }
+
+  /// Dropped once the address is confirmed — the account has passed the gate
+  /// and never needs to be looked up again.
+  Future<void> clearGatedSignup(String uid) async {
+    try {
+      final all = gatedSignups.toList()..remove(uid);
+      await _prefs.setStringList(_gatedSignupsKey, all);
     } catch (_) {}
   }
 

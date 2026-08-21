@@ -15,7 +15,7 @@ class CosmetologistsCubit extends Cubit<CosmetologistsState> {
       final items = await _repo.getCosmetologists();
       emit(CosmetologistsLoaded(items));
     } catch (_) {
-      emit(CosmetologistsError("Kosmetologlarni yuklashda xato"));
+      emit(CosmetologistsError());
     }
   }
 }

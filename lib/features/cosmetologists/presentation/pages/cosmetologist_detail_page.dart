@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:real_beauty_ai/core/theme/colors.dart';
 import 'package:real_beauty_ai/models/cosmetolog.dart';
 import 'package:real_beauty_ai/features/cosmetologists/presentation/pages/cosmetologist_page.dart';
+import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
 
 class KosmetologDetailScreen extends StatefulWidget {
   final Cosmetolog cosmetolog;
@@ -50,7 +51,7 @@ class _KosmetologDetailScreenState extends State<KosmetologDetailScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Ilovani ochib bo\'lmadi',
+          context.l10n.cosmoCallFailed,
           style: GoogleFonts.nunito(color: Colors.white),
         ),
         backgroundColor: AppColors.primary,
@@ -197,7 +198,7 @@ class _KosmetologDetailScreenState extends State<KosmetologDetailScreen> {
                         child: _StatTile(
                           icon: Icons.workspace_premium_outlined,
                           label: 'Tajriba',
-                          value: '${c.experienceYears} yil',
+                          value: context.l10n.cosmoYears(c.experienceYears),
                         ),
                       ),
                       const SizedBox(width: 12),

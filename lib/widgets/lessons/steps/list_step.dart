@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/colors.dart';
 import '../../../models/lesson.dart';
+import 'package:real_beauty_ai/core/l10n/localized_text.dart';
 
 class ListStep extends StatelessWidget {
   final LessonStep step;
@@ -17,7 +18,7 @@ class ListStep extends StatelessWidget {
       children: [
         const SizedBox(height: 20),
         Text(
-          step.title,
+          context.tr(step.title),
           style: GoogleFonts.nunito(
             fontSize: 22,
             fontWeight: FontWeight.w800,
@@ -59,7 +60,7 @@ class ListStep extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        item,
+                        context.tr(item),
                         style: GoogleFonts.nunito(
                           fontSize: 14,
                           color: AppColors.text,

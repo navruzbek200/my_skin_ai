@@ -9,7 +9,6 @@ class ProductsLoaded extends ProductsState {
   ProductsLoaded(this.items);
 }
 
-class ProductsError extends ProductsState {
-  final String message;
-  ProductsError(this.message);
-}
+/// Carries no message: there is one thing to say here, and the screen is the
+/// only layer that knows which language to say it in.
+class ProductsError extends ProductsState {}

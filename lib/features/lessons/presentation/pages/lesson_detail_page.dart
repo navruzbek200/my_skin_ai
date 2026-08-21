@@ -9,6 +9,8 @@ import 'package:real_beauty_ai/widgets/lessons/steps/intro_step.dart';
 import 'package:real_beauty_ai/widgets/lessons/steps/list_step.dart';
 import 'package:real_beauty_ai/widgets/lessons/steps/tip_step.dart';
 import 'package:real_beauty_ai/widgets/primary_button.dart';
+import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
+import 'package:real_beauty_ai/core/l10n/localized_text.dart';
 
 /// Width of the strip along the left edge reserved for the system back
 /// gesture. Matches Cupertino's own `_kBackGestureWidth`.
@@ -176,7 +178,7 @@ class _Header extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      lesson.title,
+                      context.tr(lesson.title),
                       style: GoogleFonts.nunito(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
@@ -184,7 +186,7 @@ class _Header extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${stepIndex + 1} / ${lesson.steps.length} qadam',
+                      context.l10n.lessonStepOf(stepIndex + 1, lesson.steps.length),
                       style: GoogleFonts.nunito(
                         fontSize: 12,
                         color: AppColors.muted,
@@ -283,7 +285,7 @@ class _BottomNav extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
       child: PrimaryButton(
-        label: isLast ? 'Darsni tugatish ✓' : 'Keyingi →',
+        label: isLast ? context.l10n.lessonFinish : context.l10n.lessonNext,
         onPressed: onNext,
       ),
     );

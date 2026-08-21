@@ -1,0 +1,8 @@
+# Uzbek is the source language: it is the one the app was written in, so it is
+# the template every other locale is checked against.
+arb-dir: lib/l10n
+template-arb-file: app_uz.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+nullable-getter: false
+untranslated-messages-file: l10n_missing.txt

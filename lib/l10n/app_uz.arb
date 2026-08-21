@@ -1,0 +1,385 @@
+{
+  "@@locale": "uz",
+  "appName": "My Skin AI",
+  "commonEmail": "Email",
+  "commonPassword": "Parol",
+  "commonContinue": "Davom etish",
+  "commonCancel": "Bekor qilish",
+  "commonRetry": "Qayta urinish",
+  "commonSkip": "O'tkazib yuborish",
+  "commonSettings": "Sozlamalar",
+  "commonDelete": "O'chirish",
+  "commonAllow": "Ruxsat berish",
+  "commonPrivacyPolicy": "Maxfiylik siyosati",
+  "languageTitle": "Til",
+  "languageUz": "O'zbekcha",
+  "languageRu": "Русский",
+  "languageEn": "English",
+  "introTitle": "Sog'lom teri —\nchiroyli hayot",
+  "introSubtitle": "Shaxsiy teri tahlili va koreyacha parvarish tavsiyalari",
+  "introStart": "Boshlash",
+  "introChooseLanguage": "Tilni tanlang",
+  "authWelcome": "Xush kelibsiz",
+  "authWelcomeBack": "Qaytganingizdan xursandmiz",
+  "authSubtitle": "Email va parol kiriting — hisob bo'lmasa, biz uni o'zimiz ochamiz.",
+  "authSubtitleReturning": "Avvalgi hisobingizga kiring va parvarish rejangizni davom ettiring.",
+  "authContinue": "Davom etish",
+  "authForgotPassword": "Parolni unutdingizmi?",
+  "authOr": "yoki",
+  "authGoogleButton": "Google bilan kirish",
+  "authPasswordHelper": "Kamida 6 belgi",
+  "authShowPassword": "Parolni ko'rsatish",
+  "authHidePassword": "Parolni yashirish",
+  "authEmailRequired": "Email kiriting",
+  "authEmailInvalid": "Haqiqiy email kiriting",
+  "authPasswordRequired": "Parol kiriting",
+  "authPasswordTooShort": "Parol kamida 6 belgidan iborat bo'lishi kerak",
+  "authTermsNote": "Davom etish orqali siz shartlarimizga rozilik bildirasiz",
+  "authResendIn": "Qayta yuborish — {seconds} s",
+  "@authResendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "authErrorGeneric": "Xato yuz berdi. Qaytadan urinib ko'ring",
+  "authErrorTimeout": "Javob kelmadi. Internetni tekshirib, qayta urinib ko'ring",
+  "authErrorUserNotFound": "Bunday email topilmadi",
+  "authErrorWrongPassword": "Parol noto'g'ri",
+  "authErrorWrongPasswordOrGoogle": "Parol noto'g'ri. Agar Google orqali ro'yxatdan o'tgan bo'lsangiz, pastdagi Google tugmasi bilan kiring",
+  "authErrorEmailInUse": "Bu email allaqachon ro'yxatdan o'tgan",
+  "authErrorInvalidEmail": "Email format noto'g'ri",
+  "authErrorNetwork": "Internet aloqasi yo'q",
+  "authErrorTooManyRequests": "Ko'p urinish. Biroz kutib qaytib keling",
+  "authErrorRequiresRecentLogin": "Xavfsizlik uchun qaytadan kiring",
+  "authErrorSessionExpired": "Sessiya tugadi. Ilovaga qaytadan kiring",
+  "authErrorGoogle": "Google orqali kirishda xato yuz berdi",
+  "authErrorPasswordRequired": "Parolni kiriting",
+  "authErrorNotVerifiedYet": "Hali tasdiqlanmagan. Xatingizdagi havolani bosing",
+  "authErrorDisposableEmail": "Vaqtinchalik email qabul qilinmaydi. Doimiy manzilingizni kiriting",
+  "authErrorEmailTypo": "Email manzilida xatolik bordek. Tekshirib ko'ring",
+  "authErrorEmailUnreachable": "Bunday email domeni mavjud emas. Manzilni tekshiring",
+  "authConfirmTitle": "Manzil to'g'rimi?",
+  "authConfirmBody": "Tasdiqlash havolasi shu manzilga keladi. Bitta harf xato bo'lsa, xat yetib bormaydi: akkauntga ham kira olmaysiz, parolni ham tiklay olmaysiz.",
+  "authConfirmEdit": "To'g'rilash",
+  "authConfirmSend": "Ha, bu meniki",
+  "authInfoResetSent": "Parolni tiklash havolasi yuborildi (spam papkasini ham tekshiring)",
+  "authInfoVerificationSent": "Tasdiqlash havolasi yuborildi (spam papkasini ham tekshiring)",
+  "authInfoProfileUpdated": "Saqlandi",
+  "authInfoEmailVerified": "Email tasdiqlandi",
+  "verifyTitle": "Emailingizni tasdiqlang",
+  "verifyBody": "{email} manziliga tasdiqlash havolasi yubordik. Xatni oching va havolani bosing.",
+  "@verifyBody": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "verifyHint": "Xat kelmadimi? Spam papkasini ham tekshiring — bir necha daqiqa ketishi mumkin.",
+  "verifyCheck": "Tasdiqladim, tekshirish",
+  "verifyResend": "Havolani qayta yuborish",
+  "verifyWhy": "Parolni unutsangiz, tiklash havolasi faqat tasdiqlangan manzilga yuboriladi. Shuning uchun bu qadam bir marta talab qilinadi.",
+  "verifyUseAnother": "Boshqa email bilan boshlash",
+  "verifyStartOverTitle": "Boshqa email bilan boshlansinmi?",
+  "verifyStartOverBody": "Bu hisob o'chiriladi va siz yangi email bilan ro'yxatdan o'tasiz. Teri profilingiz va tahlil tarixingiz qurilmada qoladi.",
+  "verifyStartOverConfirm": "Ha, boshqasini kiritaman",
+  "forgotTitle": "Parolni tiklash",
+  "forgotSubtitle": "Email manzilingizni kiriting,\nbiz sizga tiklash havolasini yuboramiz",
+  "forgotSend": "Havolani yuborish",
+  "forgotSentTitle": "Havola yuborildi!",
+  "forgotSentBody": "Email manzilingizni tekshiring (spam papkasini ham ko'ring) va havola orqali yangi parol o'rnating",
+  "forgotBackToSignIn": "Kirish sahifasiga qaytish",
+  "accountTitle": "Hisob",
+  "accountDefaultName": "My Skin AI foydalanuvchisi",
+  "accountSkinProfile": "Teri profili",
+  "accountRetakeAnalysis": "Tahlilni qayta o'tkazish",
+  "accountNotAnalysed": "Hali tahlil qilinmagan",
+  "accountStartAnalysis": "Tahlilni boshlash",
+  "accountLanguage": "Til",
+  "accountEmailUnverified": "Email tasdiqlanmagan",
+  "accountEmailUnverifiedBody": "Parolni unutsangiz, tiklash havolasi faqat tasdiqlangan manzilga yuboriladi.",
+  "accountSendLink": "Havolani yuborish",
+  "accountResendLink": "Havolani qayta yuborish",
+  "accountSignOut": "Chiqish",
+  "accountSignOutTitle": "Chiqasizmi?",
+  "accountSignOutBody": "Hisobdan chiqishni tasdiqlaysizmi?",
+  "accountDeleteAccount": "Akkauntni o'chirish",
+  "accountDeleteBody": "Akkaunt butunlay o'chiriladi. Davom etasizmi?",
+  "accountDeletedNotice": "Akkaunt o'chirildi — qurilmadagi ma'lumotlar tozalandi",
+  "accountNoEmail": "Bu hisobda email yo'q",
+  "accountConfirmIdentity": "Kimligingizni tasdiqlang",
+  "accountConfirmPasswordBody": "Akkauntni o'chirish uchun parolingizni kiriting.",
+  "accountConfirmGoogleBody": "Akkauntni o'chirish uchun Google hisobingiz orqali tasdiqlang.",
+  "accountResetSentBody": "Tiklash havolasi {email} manziliga yuborildi (spam papkasini ham tekshiring). Brauzerda yangi parol o'rnating, so'ng shu yerga qaytib uni kiriting.",
+  "@accountResetSentBody": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "accountNewPassword": "Yangi parol",
+  "accountConfirmDelete": "Tasdiqlab o'chirish",
+  "accountConfirmDeleteGoogle": "Google bilan tasdiqlab o'chirish",
+  "accountVersion": "Versiya {version}",
+  "@accountVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "navToday": "Bugun",
+  "navProducts": "Mahsulot",
+  "navScan": "Tahlil",
+  "navLessons": "Darslar",
+  "navCosmetologist": "Kosmetolog",
+  "homeTasksProgress": "{done} / {total} vazifa",
+  "@homeTasksProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "homeStartAnalysisTitle": "Teri tahlilini boshlang",
+  "homeStartAnalysisBody": "Shaxsiy parvarish dasturingizni olish uchun qisqa tahlil o'ting.",
+  "homeStreakDays": "{days} kun",
+  "@homeStreakDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "homeStreakLabel": "Ketma-ket parvarish",
+  "homeAllDone": "Hammasi bajarildi!",
+  "homeGoal": "Parvarish maqsadi",
+  "homeMorning": "Ertalab",
+  "homeEvening": "Kechqurun",
+  "promoTitle": "Teringizni tahlil qiling",
+  "promoBody": "Teri tipingizni aniqlash uchun qisqa savolnomaga javob bering va shaxsiylashtirilgan parvarish rejasini oling.",
+  "promoStart": "Tahlilni boshlash",
+  "quizTitle": "Teri Tahlili",
+  "quizQuestionNumber": "Savol {number}",
+  "@quizQuestionNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "quizSelectOne": "Iltimos, bitta javobni tanlang",
+  "quizWriteAnswer": "Javobingizni yozing",
+  "quizWriteHere": "Bu yerga yozing...",
+  "quizExitTitle": "Chiqasizmi?",
+  "quizExitBody": "Javoblaringiz saqlanmaydi.",
+  "quizPrivacyTitle": "Ma'lumotlar va maxfiylik",
+  "quizPrivacyBody": "Savolnoma javoblaringiz faqat qurilmangizda mahalliy saqlanadi va hech qachon internetga yuborilmaydi.\n\nKamera ishlatiladigan bosqichda tasvirlar faqat qurilma ichida qayta ishlanadi — hech narsa saqlanmaydi yoki yuborilmaydi.\n\nTahlil natijasi savolnoma javoblaringiz asosida hisoblanadi.",
+  "quizAccept": "Qabul qilaman",
+  "analysisTitle": "Tahlil qilinmoqda...",
+  "analysisSubtitle": "Savollaringiz asosida tahlil qilinmoqda",
+  "analysisStep1": "Savollar tahlil qilinmoqda",
+  "analysisStep2": "Teri turi aniqlanmoqda",
+  "analysisStep3": "Muammolar baholanmoqda",
+  "analysisStep4": "Natijalar tayyorlanmoqda",
+  "resultsTitle": "Teri tahlili tayyor!",
+  "resultsSkinType": "Teri tipingiz",
+  "resultsSkinTypeValue": "{type} teri",
+  "@resultsSkinTypeValue": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "resultsMoreAdvice": "+{count} tavsiya",
+  "@resultsMoreAdvice": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "resultsMainAdvice": "Asosiy tavsiya",
+  "resultsExtraAdvice": "Qo'shimcha tavsiyalar",
+  "resultsDisclaimer": "Bu kosmetik tahlil tibbiy tashxis hisoblanmaydi. Teri muammolari bo'lsa mutaxassisga murojaat qiling.",
+  "resultsStart": "Dasturni boshlash",
+  "scanInstructionsTitle": "Skanerlash yo'riqnomasi",
+  "scanTipGlasses": "Ko'zoynakni yeching",
+  "scanTipGlassesSub": "Va yorug' joy toping",
+  "scanTipHead": "Boshingizni tik tuting",
+  "scanTipHeadSub": "Va Boshlash tugmasini bosing",
+  "scanTipLook": "To'g'ri va frontal qarang",
+  "scanTipLookSub": "Avtomatik suratga olinadi",
+  "scanStartTitle": "Teri tahlilini boshlang",
+  "scanStartBody": "Savolnoma orqali teri tipingizni aniqlang",
+  "scanStartCta": "Teri tahlilini boshlash",
+  "scanStartHint": "Bir necha daqiqa vaqt ajrating",
+  "scanFirstSaved": "Birinchi skaningiz saqlandi",
+  "scanFirstSavedBody": "O'zgarishni ko'rish uchun yana skan qiling",
+  "scanComparison": "So'nggi va oldingi skan",
+  "scanLatest": "So'nggi",
+  "scanSkinTypeValue": "{type} teri",
+  "@scanSkinTypeValue": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "scanAiNote": "AI tahlili — tibbiy tashxis emas",
+  "scanProblems": "Teri muammolari",
+  "scanCauses": "Sabablari va yechimlari",
+  "faceScanAlign": "Yuzingizni ramkaga olib keling",
+  "faceScanHold": "Yuzingizni tutib turing",
+  "faceScanStep1": "Savolnoma javoblari qayta ishlanmoqda",
+  "faceScanStep2": "Teri tipi aniqlanmoqda",
+  "faceScanStep3": "Tavsiyalar shakllantirilmoqda",
+  "faceScanStep4": "Natija tayyorlanmoqda",
+  "faceScanPreparingResult": "Natija tayyorlanmoqda...",
+  "faceScanPreparingCamera": "Kamera tayyorlanmoqda",
+  "faceScanPermissionTitle": "Kamera ruxsati kerak",
+  "faceScanPermissionBody": "Yuzingizni to'g'ri joylashtirish uchun old kamera kerak. Tahlil natijasi savolnoma javoblaringiz asosida tayyorlanadi.",
+  "faceScanPermissionDeniedTitle": "Kamera ruxsati o'chirilgan",
+  "faceScanPermissionDeniedBody": "Yuzingizni joylashtirish uchun Sozlamalardan \"Kamera\" ruxsatini yoqing (ixtiyoriy).",
+  "faceScanContinueWithQuiz": "Anketa bilan davom etish",
+  "faceScanNoCameraTitle": "Kamera topilmadi",
+  "faceScanNoCameraBody": "Qurilmangizda kamera ishlamayapti. Anketa asosida davom etish mumkin.",
+  "faceScanTooDark": "Yorug'roq joyga o'ting",
+  "faceScanOneFace": "Bitta yuz ko'rsating",
+  "faceScanCloser": "Yaqinroq keling",
+  "faceScanFurther": "Sal uzoqlashing",
+  "faceScanCenter": "Yuzni markazga oling",
+  "faceScanLookStraight": "To'g'ri qarang",
+  "faceScanOpenEyes": "Ko'zingizni oching",
+  "faceScanTimeoutTitle": "Vaqt tugadi",
+  "faceScanTimeoutBody": "Qayta urinasizmi yoki davom etasizmi?",
+  "faceScanHowTitle": "Qanday ishlaydi?",
+  "faceScanHowBody": "• Yuzingizni oval ichiga joylang\n• To'g'ri va frontal qarang\n• Ko'zingizni oching\n• Yaxshi yorug'lik bo'lsin\n• Skaner avtomatik boshlanadi",
+  "faceScanDisclaimer": "Bu kosmetik tahlil bo'lib, tibbiy tashxis hisoblanmaydi.",
+  "productsTitle": "Koreya brend\nmahsulotlar",
+  "productsEmpty": "Mahsulot topilmadi",
+  "productsBenefits": "Foydali tomonlari",
+  "productsError": "Mahsulotlarni yuklashda xato",
+  "lessonBadge": "Maqola",
+  "lessonsSubtitle": "Yuz yogasi, ingrediyentlar va maqolalar",
+  "lessonsYoga": "Yuz Yoga",
+  "lessonsYogaExercises": "Yoga mashqlari",
+  "lessonsExerciseCount": "{count} ta mashq",
+  "@lessonsExerciseCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonStepOf": "{current} / {total} qadam",
+  "@lessonStepOf": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonStepCount": "{count} qadam",
+  "@lessonStepCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lessonFinish": "Darsni tugatish ✓",
+  "lessonNext": "Keyingi →",
+  "lessonReadTime": "O'qish uchun {duration}",
+  "@lessonReadTime": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "lessonPlayPause": "Videoni ijro etish yoki to'xtatish",
+  "cosmoSearchHint": "Kosmetolog qidirish...",
+  "cosmoNoSearchResults": "\"{query}\" bo'yicha hech narsa topilmadi",
+  "@cosmoNoSearchResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "cosmoNoFilterResults": "{filter} bo'yicha kosmetolog topilmadi",
+  "@cosmoNoFilterResults": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
+  "cosmoTryOther": "Boshqa kalit so'z yoki filtr sinab ko'ring",
+  "cosmoYears": "{years} yil",
+  "@cosmoYears": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "cosmoYearsExperience": "{years} yillik tajriba",
+  "@cosmoYearsExperience": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "cosmoCallFailed": "Ilovani ochib bo'lmadi",
+  "cosmoError": "Kosmetologlarni yuklashda xato",
+  "routineError": "Rejani tuzishda xato yuz berdi",
+  "productsHeading": "Mahsulotlar",
+  "productsPrice": "{amount} so'm",
+  "@productsPrice": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "productsPriceOnRequest": "Narxi so'rov bo'yicha",
+  "productsCount": "{count} ta mahsulot",
+  "@productsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsFilterAll": "Barchasi",
+  "productsEmptyBody": "Bu bo'limda hozircha mahsulot yo'q. Boshqa turkumni tanlang.",
+  "productsErrorBody": "Internetni tekshirib, qaytadan urinib ko'ring.",
+  "forgotWhyTitle": "Nima bo'ladi?",
+  "forgotStep1": "Emailingizga havola yuboramiz",
+  "forgotStep2": "Havolani bosib, yangi parol o'rnatasiz",
+  "forgotStep3": "Yangi parol bilan ilovaga kirasiz",
+  "forgotNoEmailHint": "Xat kelmadimi? Spam papkasini tekshiring yoki bir necha daqiqa kuting.",
+  "forgotGoogleHint": "Google orqali kirgan bo'lsangiz, parolingiz yo'q — kirish sahifasidagi Google tugmasidan foydalaning.",
+  "forgotResend": "Qayta yuborish",
+  "forgotSentTo": "Havola {email} manziliga yuborildi",
+  "@forgotSentTo": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  }
+}

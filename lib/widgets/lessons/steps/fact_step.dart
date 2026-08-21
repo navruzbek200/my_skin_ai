@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/colors.dart';
 import '../../../models/lesson.dart';
+import 'package:real_beauty_ai/core/l10n/localized_text.dart';
 
 class FactStep extends StatelessWidget {
   final LessonStep step;
@@ -16,7 +17,7 @@ class FactStep extends StatelessWidget {
       children: [
         const SizedBox(height: 20),
         Text(
-          step.title,
+          context.tr(step.title),
           style: GoogleFonts.nunito(
             fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.text,
           ),
@@ -32,7 +33,7 @@ class FactStep extends StatelessWidget {
               border: Border.all(color: color.withValues(alpha: 0.3)),
             ),
             child: Text(
-              kw,
+              context.tr(kw),
               textAlign: TextAlign.center,
               style: GoogleFonts.nunito(
                 fontSize: 16, fontWeight: FontWeight.w800, color: color,
@@ -48,7 +49,7 @@ class FactStep extends StatelessWidget {
             border: Border(left: BorderSide(color: color, width: 4)),
           ),
           child: Text(
-            step.body,
+            context.tr(step.body),
             style: GoogleFonts.nunito(
               fontSize: 15, color: AppColors.text, height: 1.6,
             ),

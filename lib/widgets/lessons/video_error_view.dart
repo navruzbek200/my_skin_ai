@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
 
 class VideoErrorView extends StatelessWidget {
   final Color color;
@@ -25,7 +26,7 @@ class VideoErrorView extends StatelessWidget {
             Icon(icon, size: 36, color: color.withValues(alpha: 0.4)),
             const SizedBox(height: 8),
             Text(
-              'qayta urinish',
+              context.l10n.commonRetry,
               style: GoogleFonts.nunito(fontSize: 11, color: Colors.white38),
             ),
           ],

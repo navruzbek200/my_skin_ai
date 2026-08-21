@@ -63,7 +63,7 @@ class RoutineCubit extends Cubit<RoutineState> {
       );
     } catch (e, st) {
       AppLogger.error('Routine build failed', e, st);
-      emit(const RoutineFailure('Rejani tuzishda xato yuz berdi'));
+      emit(const RoutineFailure());
     }
   }
 

@@ -9,6 +9,8 @@ import '../../services/video_playback_manager.dart';
 import 'lesson_styles.dart';
 import 'video_error_view.dart';
 import 'video_placeholder.dart';
+import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
+import 'package:real_beauty_ai/core/l10n/localized_text.dart';
 
 enum _VideoState { idle, loading, ready, error }
 
@@ -168,9 +170,10 @@ class _YogaVideoCardState extends State<YogaVideoCard> {
       child: Semantics(
         button: true,
         label:
-            '${widget.index + 1}. ${ex.name}. ${ex.target}, ${ex.duration}. '
-            '${ex.description}',
-        hint: 'Videoni ijro etish yoki toxtatish',
+            '${widget.index + 1}. ${context.tr(ex.name)}. '
+            '${context.tr(ex.target)}, ${context.tr(ex.duration)}. '
+            '${context.tr(ex.description)}',
+        hint: context.l10n.lessonPlayPause,
         onTap: _togglePlayback,
         child: ExcludeSemantics(child: _buildCard(ex)),
       ),
@@ -343,7 +346,7 @@ class _InfoPanel extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  exercise.name,
+                  context.tr(exercise.name),
                   style: GoogleFonts.nunito(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
@@ -355,7 +358,7 @@ class _InfoPanel extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              _TargetChip(label: exercise.target),
+              _TargetChip(label: context.tr(exercise.target)),
             ],
           ),
           const SizedBox(height: 7),
@@ -369,7 +372,7 @@ class _InfoPanel extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                exercise.duration,
+                context.tr(exercise.duration),
                 style: GoogleFonts.nunito(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -381,7 +384,7 @@ class _InfoPanel extends StatelessWidget {
           const SizedBox(height: 10),
           // Row 3: description (no accent bar — clean white card)
           Text(
-            exercise.description,
+            context.tr(exercise.description),
             style: GoogleFonts.nunito(
               fontSize: 12,
               color: AppColors.muted,

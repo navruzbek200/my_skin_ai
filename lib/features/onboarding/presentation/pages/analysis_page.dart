@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
 import 'package:go_router/go_router.dart';
 import 'package:real_beauty_ai/core/router/route_args.dart';
 import 'package:real_beauty_ai/logic/skin_logic.dart';
@@ -26,12 +27,19 @@ class _AnalysisScreenState extends State<AnalysisScreen>
   static const _textDark = Color(0xFF2D2050);
   static const _textMuted = Color(0xFF9490B0);
 
-  static const _steps = [
-    'Savollar tahlil qilinmoqda',
-    'Teri turi aniqlanmoqda',
-    'Muammolar baholanmoqda',
-    'Natijalar tayyorlanmoqda',
-  ];
+  /// Four labels, resolved against the interface language. A `const` list of
+  /// finished sentences cannot be — the strings are only known once there is a
+  /// context to look them up in.
+  List<String> get _steps => [
+        context.l10n.analysisStep1,
+        context.l10n.analysisStep2,
+        context.l10n.analysisStep3,
+        context.l10n.analysisStep4,
+      ];
+
+  /// Read where the count is needed off the build path, so the timing maths
+  /// does not have to reach for localisations from a callback.
+  static const _stepCount = 4;
 
   @override
   void initState() {
@@ -78,13 +86,13 @@ class _AnalysisScreenState extends State<AnalysisScreen>
   }
 
   bool _isDone(int i) {
-    if (_waitingForApi && i == _steps.length - 1) return false;
-    return _ctrl.value > (i + 1) / _steps.length;
+    if (_waitingForApi && i == _stepCount - 1) return false;
+    return _ctrl.value > (i + 1) / _stepCount;
   }
 
   bool _isActive(int i) {
-    if (_waitingForApi && i == _steps.length - 1) return true;
-    return _ctrl.value > i / _steps.length && !_isDone(i);
+    if (_waitingForApi && i == _stepCount - 1) return true;
+    return _ctrl.value > i / _stepCount && !_isDone(i);
   }
 
   @override
@@ -98,7 +106,7 @@ class _AnalysisScreenState extends State<AnalysisScreen>
             children: [
               const Spacer(flex: 2),
               Text(
-                'Tahlil qilinmoqda...',
+                context.l10n.analysisTitle,
                 style: GoogleFonts.nunito(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
@@ -107,7 +115,7 @@ class _AnalysisScreenState extends State<AnalysisScreen>
               ).animate().fadeIn(duration: 400.ms),
               const SizedBox(height: 8),
               Text(
-                'Savollaringiz asosida tahlil qilinmoqda',
+                context.l10n.analysisSubtitle,
                 style: GoogleFonts.nunito(fontSize: 14, color: _textMuted),
               ).animate().fadeIn(delay: 200.ms),
               const SizedBox(height: 56),

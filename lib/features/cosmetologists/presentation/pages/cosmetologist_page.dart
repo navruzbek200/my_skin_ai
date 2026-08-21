@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
 import 'package:real_beauty_ai/core/theme/colors.dart';
 import 'package:real_beauty_ai/features/cosmetologists/presentation/bloc/cosmetologists_cubit.dart';
 import 'package:real_beauty_ai/models/cosmetolog.dart';
@@ -122,7 +123,7 @@ class _KonnikmaBodyState extends State<_KonnikmaBody> {
                             onChanged: (v) => setState(() => _search = v),
                             style: GoogleFonts.nunito(fontSize: 14, color: AppColors.text),
                             decoration: InputDecoration(
-                              hintText: 'Kosmetolog qidirish...',
+                              hintText: context.l10n.cosmoSearchHint,
                               hintStyle: GoogleFonts.nunito(color: AppColors.muted, fontSize: 14),
                               prefixIcon: const Icon(Icons.search_rounded, color: AppColors.muted, size: 20),
                               suffixIcon: _search.isNotEmpty
@@ -201,7 +202,7 @@ class _KonnikmaBodyState extends State<_KonnikmaBody> {
                           const Icon(Icons.wifi_off_rounded, size: 48, color: AppColors.muted),
                           const SizedBox(height: 16),
                           Text(
-                            state.message,
+                            context.l10n.cosmoError,
                             style: GoogleFonts.nunito(fontSize: 15, color: AppColors.muted),
                             textAlign: TextAlign.center,
                           ),
@@ -209,7 +210,7 @@ class _KonnikmaBodyState extends State<_KonnikmaBody> {
                           TextButton(
                             onPressed: () => context.read<CosmetologistsCubit>().load(),
                             child: Text(
-                              'Qayta urinish',
+                              context.l10n.commonRetry,
                               style: GoogleFonts.nunito(
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.primary,
@@ -240,8 +241,8 @@ class _KonnikmaBodyState extends State<_KonnikmaBody> {
                             const SizedBox(height: 16),
                             Text(
                               _search.isNotEmpty
-                                  ? '"$_search" bo\'yicha hech narsa topilmadi'
-                                  : '$_filter bo\'yicha kosmetolog topilmadi',
+                                  ? context.l10n.cosmoNoSearchResults(_search)
+                                  : context.l10n.cosmoNoFilterResults(_filter),
                               style: GoogleFonts.nunito(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
@@ -251,7 +252,7 @@ class _KonnikmaBodyState extends State<_KonnikmaBody> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              "Boshqa kalit so'z yoki filtr sinab ko'ring",
+                              context.l10n.cosmoTryOther,
                               style: GoogleFonts.nunito(fontSize: 13, color: AppColors.muted),
                               textAlign: TextAlign.center,
                             ),
@@ -372,7 +373,7 @@ class _CosmetologCardState extends State<_CosmetologCard> {
                               size: 13, color: AppColors.muted),
                           const SizedBox(width: 2),
                           Text(
-                            '${c.experienceYears} yillik tajriba',
+                            context.l10n.cosmoYearsExperience(c.experienceYears),
                             style: GoogleFonts.nunito(fontSize: 12, color: AppColors.muted),
                           ),
                         ],

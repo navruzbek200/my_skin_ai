@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/colors.dart';
 import '../../../models/lesson.dart';
+import 'package:real_beauty_ai/core/l10n/localized_text.dart';
 
 class TipStep extends StatelessWidget {
   final LessonStep step;
@@ -34,7 +35,7 @@ class TipStep extends StatelessWidget {
               ).animate().scale(duration: 500.ms, curve: Curves.elasticOut),
               const SizedBox(height: 16),
               Text(
-                step.title,
+                context.tr(step.title),
                 textAlign: TextAlign.center,
                 style: GoogleFonts.nunito(
                   fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.text,
@@ -42,7 +43,7 @@ class TipStep extends StatelessWidget {
               ).animate().fadeIn(delay: 200.ms),
               const SizedBox(height: 14),
               Text(
-                step.body,
+                context.tr(step.body),
                 textAlign: TextAlign.center,
                 style: GoogleFonts.nunito(
                   fontSize: 15, color: AppColors.text, height: 1.6,

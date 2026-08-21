@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
 import 'dart:async' show unawaited;
 import 'package:real_beauty_ai/models/skin_analysis_result.dart';
 import 'package:real_beauty_ai/services/local_store.dart';
 import 'package:go_router/go_router.dart';
+import 'package:real_beauty_ai/logic/skin_copy.dart';
 
 class ResultsScreen extends StatefulWidget {
   final SkinAnalysisResult result;
@@ -20,18 +22,21 @@ class _ResultsScreenState extends State<ResultsScreen> {
   static const _bg = Color(0xFFF0ECF8);
   static const _accent = Color(0xFF7060AA);
   static const _textDark = Color(0xFF2D2050);
-  static const _typeColors = {
-    'Quruq': Color(0xFF7060AA),
-    'Aralash': Color(0xFF9B59B6),
-    'Normal': Color(0xFF7060AA),
-    "Yog'li": Color(0xFFFF8A35),
+  // Keyed on the one-letter code rather than on the Uzbek name: the name is
+  // now translated for display, so matching on it would drop back to the
+  // default colour and icon the moment the app was read in Russian.
+  static const _typeColors = <String, Color>{
+    'D': Color(0xFF7060AA),
+    'C': Color(0xFF9B59B6),
+    'N': Color(0xFF7060AA),
+    'O': Color(0xFFFF8A35),
   };
 
   static const _typeIconMap = <String, IconData>{
-    'Quruq': Icons.water_drop_outlined,
-    'Aralash': Icons.water_outlined,
-    'Normal': Icons.auto_awesome_outlined,
-    "Yog'li": Icons.grass_outlined,
+    'D': Icons.water_drop_outlined,
+    'C': Icons.water_outlined,
+    'N': Icons.auto_awesome_outlined,
+    'O': Icons.grass_outlined,
   };
 
   SkinAnalysisResult get _result => widget.result;
@@ -45,8 +50,9 @@ class _ResultsScreenState extends State<ResultsScreen> {
     unawaited(LocalStore.instance.saveAnalysisToHistory(_result));
   }
 
-  Color get _typeColor => _typeColors[_result.skinType] ?? _accent;
-  IconData get _typeIconData => _typeIconMap[_result.skinType] ?? Icons.auto_awesome_outlined;
+  Color get _typeColor => _typeColors[_result.skinTypeCode] ?? _accent;
+  IconData get _typeIconData =>
+      _typeIconMap[_result.skinTypeCode] ?? Icons.auto_awesome_outlined;
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +125,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Teri tahlili tayyor!',
+                    context.l10n.resultsTitle,
                     style: GoogleFonts.nunito(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -144,14 +150,22 @@ class _ResultsScreenState extends State<ResultsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Teri tipingiz',
+                              context.l10n.resultsSkinType,
                               style: GoogleFonts.nunito(
                                 fontSize: 12,
                                 color: Colors.white.withValues(alpha: 0.75),
                               ),
                             ),
                             Text(
-                              '${_result.skinType} teri',
+                              context.l10n.resultsSkinTypeValue(
+                                // Resolved from the code rather than read off
+                                // the stored name, so a language switch after
+                                // the analysis applies to it too.
+                                context.skinTypeLabel(
+                                  _result.skinTypeCode,
+                                  stored: _result.skinType,
+                                ),
+                              ),
                               style: GoogleFonts.nunito(
                                 fontSize: 26,
                                 fontWeight: FontWeight.w900,
@@ -168,7 +182,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                     children: [
                       if (_result.additionalBlocks.isNotEmpty)
                         _HeaderBadge(
-                          label: '+${_result.additionalBlocks.length} tavsiya',
+                          label: context.l10n.resultsMoreAdvice(_result.additionalBlocks.length),
                           color: Colors.white.withValues(alpha: 0.2),
                         ),
                     ],
@@ -184,11 +198,14 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
   Widget _buildBaseRec() {
     return _SectionCard(
-      title: 'Asosiy tavsiya',
+      title: context.l10n.resultsMainAdvice,
       icon: Icons.auto_awesome_outlined,
       iconColor: _typeColor,
       child: Text(
-        _result.baseRecommendation,
+        context.baseRecommendation(
+          _result.skinTypeCode,
+          stored: _result.baseRecommendation,
+        ),
         style: GoogleFonts.nunito(
           fontSize: 14,
           color: _textDark,
@@ -203,7 +220,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _SectionLabel(
-          text: "Qo'shimcha tavsiyalar",
+          text: context.l10n.resultsExtraAdvice,
           count: _result.additionalBlocks.length,
         ),
         const SizedBox(height: 12),
@@ -211,8 +228,16 @@ class _ResultsScreenState extends State<ResultsScreen> {
           final block = _result.additionalBlocks[i];
           final expanded = _expandedBlocks.contains(i);
           return _AdditionalCard(
-            title: block['title'] ?? '',
-            text: block['text'] ?? '',
+            title: context
+                .concernBlock(block['code'],
+                    storedTitle: block['title'] ?? '',
+                    storedText: block['text'] ?? '')
+                .title,
+            text: context
+                .concernBlock(block['code'],
+                    storedTitle: block['title'] ?? '',
+                    storedText: block['text'] ?? '')
+                .text,
             expanded: expanded,
             delay: 400 + i * 80,
             onToggle: () => setState(() {
@@ -244,8 +269,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Bu kosmetik tahlil tibbiy tashxis hisoblanmaydi. '
-              "Teri muammolari bo'lsa mutaxassisga murojaat qiling.",
+              context.l10n.resultsDisclaimer,
               style: GoogleFonts.nunito(
                 fontSize: 12,
                 color: Colors.orange.shade800,
@@ -524,7 +548,7 @@ class _ResultsCtaState extends State<_ResultsCta> {
           ),
           child: Center(
             child: Text(
-              "Dasturni boshlash",
+              context.l10n.resultsStart,
               style: GoogleFonts.nunito(
                 fontSize: 15,
                 fontWeight: FontWeight.w800,

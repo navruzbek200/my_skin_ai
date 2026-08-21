@@ -44,27 +44,27 @@ void main() {
   group('AM labels by skin type', () {
     test('oily → thorough foam cleanse', () {
       final r = RoutineEngine.generate(skinType: "Yog'li", concerns: {}, date: _mon);
-      expect(r.morning.first.title, 'Penka bilan yuzni yaxshilab yuving');
+      expect(r.morning.first.title.uz, 'Penka bilan yuzni yaxshilab yuving');
     });
 
     test('dry → warm-water cleanse', () {
       final r = RoutineEngine.generate(skinType: 'Quruq', concerns: {}, date: _mon);
-      expect(r.morning.first.title, 'Yuzni iliq suv bilan yuving');
+      expect(r.morning.first.title.uz, 'Yuzni iliq suv bilan yuving');
     });
 
     test('normal → foam cleanse', () {
       final r = RoutineEngine.generate(skinType: 'Normal', concerns: {}, date: _mon);
-      expect(r.morning.first.title, 'Penka bilan yuzni yuving');
+      expect(r.morning.first.title.uz, 'Penka bilan yuzni yuving');
     });
 
     test('pigmentation/aging concern → Vitamin C serum in AM', () {
       final r = RoutineEngine.generate(skinType: 'Normal', concerns: {'W'}, date: _mon);
-      expect(r.morning[2].title, contains('C-vitamin serum'));
+      expect(r.morning[2].title.uz, contains('C-vitamin serum'));
     });
 
     test('no aging concern + oily → pore-minimizing serum in AM', () {
       final r = RoutineEngine.generate(skinType: "Yog'li", concerns: {}, date: _mon);
-      expect(r.morning[2].title, contains('teri teshikchalarini kichraytiradi'));
+      expect(r.morning[2].title.uz, contains('teri teshikchalarini kichraytiradi'));
     });
   });
 
@@ -73,12 +73,12 @@ void main() {
   group('PM labels — moisturizer', () {
     test('dry → rich night cream in pm_moist slot', () {
       final r = RoutineEngine.generate(skinType: 'Quruq', concerns: {}, date: _mon);
-      expect(r.evening[3].title, contains('Tungi kremni qalin qilib surting'));
+      expect(r.evening[3].title.uz, contains('Tungi kremni qalin qilib surting'));
     });
 
     test('oily → light moisturizer in pm_moist slot', () {
       final r = RoutineEngine.generate(skinType: "Yog'li", concerns: {}, date: _mon);
-      expect(r.evening[3].title, contains('Yengil namlantiruvchi surting'));
+      expect(r.evening[3].title.uz, contains('Yengil namlantiruvchi surting'));
     });
   });
 
@@ -87,22 +87,22 @@ void main() {
   group('active nights (Tue / Thu / Sat)', () {
     test('oily + blackheads on Tue → exfoliating treatment', () {
       final r = RoutineEngine.generate(skinType: "Yog'li", concerns: {'Bh'}, date: _tue);
-      expect(r.evening[2].title, contains('Piling surting'));
+      expect(r.evening[2].title.uz, contains('Piling surting'));
     });
 
     test('oily + blackheads on Mon (not active) → hydrating serum', () {
       final r = RoutineEngine.generate(skinType: "Yog'li", concerns: {'Bh'}, date: _mon);
-      expect(r.evening[2].title, 'Namlantiruvchi serum surting');
+      expect(r.evening[2].title.uz, 'Namlantiruvchi serum surting');
     });
 
     test('aging concern on Thu → retinol treatment', () {
       final r = RoutineEngine.generate(skinType: 'Normal', concerns: {'W'}, date: _thu);
-      expect(r.evening[2].title, contains('Retinol serum surting'));
+      expect(r.evening[2].title.uz, contains('Retinol serum surting'));
     });
 
     test('retinol preferred over exfoliation when both concerns on active night', () {
       final r = RoutineEngine.generate(skinType: "Yog'li", concerns: {'W', 'Bh'}, date: _tue);
-      expect(r.evening[2].title, contains('Retinol serum surting'));
+      expect(r.evening[2].title.uz, contains('Retinol serum surting'));
     });
   });
 
@@ -115,7 +115,7 @@ void main() {
         concerns: {'S', 'Bh'},
         date: _tue, // active night
       );
-      expect(r.evening[2].title, contains('Tinchlantiruvchi serum'));
+      expect(r.evening[2].title.uz, contains('Tinchlantiruvchi serum'));
     });
 
     test('sensitive calming serum every day of the week', () {
@@ -127,7 +127,7 @@ void main() {
           date: DateTime(2024, 1, day),
         );
         expect(
-          r.evening[2].title,
+          r.evening[2].title.uz,
           contains('Tinchlantiruvchi serum'),
           reason: 'day=$day',
         );
@@ -140,17 +140,17 @@ void main() {
   group('Sunday mask night', () {
     test('oily + Sunday → clay mask in pm_last', () {
       final r = RoutineEngine.generate(skinType: "Yog'li", concerns: {}, date: _sun);
-      expect(r.evening.last.title, contains('Loy niqob'));
+      expect(r.evening.last.title.uz, contains('Loy niqob'));
     });
 
     test('normal/dry + Sunday → hydrating mask in pm_last', () {
       final r = RoutineEngine.generate(skinType: 'Normal', concerns: {}, date: _sun);
-      expect(r.evening.last.title, contains('Namlantiruvchi niqob'));
+      expect(r.evening.last.title.uz, contains('Namlantiruvchi niqob'));
     });
 
     test('eye concern overrides Sunday mask (eye cream wins)', () {
       final r = RoutineEngine.generate(skinType: 'Normal', concerns: {'Ew'}, date: _sun);
-      expect(r.evening.last.title, contains("Ko'z atrofiga maxsus krem"));
+      expect(r.evening.last.title.uz, contains("Ko'z atrofiga maxsus krem"));
     });
   });
 
@@ -159,17 +159,17 @@ void main() {
   group('eye concern', () {
     test('Ew concern on weekday → eye cream in pm_last', () {
       final r = RoutineEngine.generate(skinType: 'Normal', concerns: {'Ew'}, date: _mon);
-      expect(r.evening.last.title, contains("Ko'z atrofiga maxsus krem"));
+      expect(r.evening.last.title.uz, contains("Ko'z atrofiga maxsus krem"));
     });
 
     test('Ed concern on weekday → eye cream in pm_last', () {
       final r = RoutineEngine.generate(skinType: 'Normal', concerns: {'Ed'}, date: _mon);
-      expect(r.evening.last.title, contains("Ko'z atrofiga maxsus krem"));
+      expect(r.evening.last.title.uz, contains("Ko'z atrofiga maxsus krem"));
     });
 
     test('no eye concern weekday → night mask fallback', () {
       final r = RoutineEngine.generate(skinType: 'Normal', concerns: {}, date: _mon);
-      expect(r.evening.last.title, "Tungi namlantiruvchi niqob qo'ying");
+      expect(r.evening.last.title.uz, "Tungi namlantiruvchi niqob qo'ying");
     });
   });
 }

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
+import 'package:real_beauty_ai/l10n/app_localizations.dart';
 import 'package:real_beauty_ai/core/theme/colors.dart';
 import 'package:real_beauty_ai/widgets/looping_video_thumb.dart';
 import 'package:real_beauty_ai/widgets/primary_button.dart';
@@ -14,8 +16,8 @@ class _StepItem {
   final int number;
   final String? videoAsset;
   final String? imageAsset;
-  final String title;
-  final String subtitle;
+  final _Copy title;
+  final _Copy subtitle;
 
   const _StepItem({
     required this.number,
@@ -27,26 +29,40 @@ class _StepItem {
   });
 }
 
+/// The copy resolved against the interface language. Held as functions rather
+/// than as finished strings so the list can stay `const` — the sentences are
+/// only known once there is a context to look them up in.
+typedef _Copy = String Function(AppLocalizations);
+
 const _steps = [
   _StepItem(
     number: 1,
     videoAsset: 'assets/videos/scan/step1_glasses.mp4',
-    title: "Ko'zoynakni yeching",
-    subtitle: "Va yorug' joy toping",
+    title: _glassesTitle,
+    subtitle: _glassesSubtitle,
   ),
   _StepItem(
     number: 2,
     videoAsset: 'assets/videos/scan/step2_straight.mp4',
-    title: 'Boshingizni tik tuting',
-    subtitle: 'Va Boshlash tugmasini bosing',
+    title: _headTitle,
+    subtitle: _headSubtitle,
   ),
   _StepItem(
     number: 3,
     videoAsset: 'assets/videos/scan/step3_circle.mp4',
-    title: "To'g'ri va frontal qarang",
-    subtitle: "Avtomatik suratga olinadi",
+    title: _lookTitle,
+    subtitle: _lookSubtitle,
   ),
 ];
+
+// Top-level functions rather than closures, so the `_steps` list above stays a
+// compile-time constant.
+String _glassesTitle(AppLocalizations l) => l.scanTipGlasses;
+String _glassesSubtitle(AppLocalizations l) => l.scanTipGlassesSub;
+String _headTitle(AppLocalizations l) => l.scanTipHead;
+String _headSubtitle(AppLocalizations l) => l.scanTipHeadSub;
+String _lookTitle(AppLocalizations l) => l.scanTipLook;
+String _lookSubtitle(AppLocalizations l) => l.scanTipLookSub;
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 
@@ -164,7 +180,8 @@ class _Sheet extends StatelessWidget {
             if (i < _steps.length - 1) const SizedBox(height: 22),
           ],
           const SizedBox(height: 32),
-          PrimaryButton(label: 'Davom etish', onPressed: onContinue),
+          PrimaryButton(
+              label: context.l10n.commonContinue, onPressed: onContinue),
         ],
       ),
     )
@@ -186,7 +203,7 @@ class _Header extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            "Skanerlash yo'riqnomasi",
+            context.l10n.scanInstructionsTitle,
             style: GoogleFonts.nunito(
               fontSize: 20,
               fontWeight: FontWeight.w800,
@@ -340,7 +357,7 @@ class _StepText extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          step.title,
+          step.title(context.l10n),
           style: GoogleFonts.nunito(
             fontSize: 16,
             fontWeight: FontWeight.w700,
@@ -349,7 +366,7 @@ class _StepText extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          step.subtitle,
+          step.subtitle(context.l10n),
           style: GoogleFonts.nunito(
             fontSize: 13,
             color: const Color(0xFF8E8EA0),

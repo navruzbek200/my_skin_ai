@@ -5,8 +5,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
 import 'package:real_beauty_ai/features/routine/presentation/bloc/routine_cubit.dart';
 import 'package:real_beauty_ai/services/local_store.dart';
+import 'package:real_beauty_ai/core/l10n/localized_text.dart';
 
 /// The day's skincare plan.
 ///
@@ -88,8 +91,8 @@ class _BugunViewState extends State<_BugunView> with WidgetsBindingObserver {
             builder: (context, state) => switch (state) {
               RoutineLoading() => const _CenteredSpinner(),
               RoutineNoProfile() => _NoProfileMessage(topPad: topPad),
-              RoutineFailure(:final message) => _FailureMessage(
-                message: message,
+              RoutineFailure() => _FailureMessage(
+                message: context.l10n.routineError,
                 onRetry: () => context.read<RoutineCubit>().load(),
               ),
               RoutineReady() => _ReadyBody(
@@ -171,7 +174,7 @@ class _ReadyBody extends StatelessWidget {
                 _SectionHeader(
                   svgAsset: 'assets/icons/sun.svg',
                   iconColor: const Color(0xFFE8A040),
-                  text: 'Ertalab',
+                  text: context.l10n.homeMorning,
                   doneCount: state.morningDone,
                   total: state.morning.length,
                 ),
@@ -180,7 +183,7 @@ class _ReadyBody extends StatelessWidget {
                 _SectionHeader(
                   svgAsset: 'assets/icons/moon.svg',
                   iconColor: const Color(0xFF5848B0),
-                  text: 'Kechqurun',
+                  text: context.l10n.homeEvening,
                   doneCount: state.eveningDone,
                   total: state.evening.length,
                 ),
@@ -243,7 +246,7 @@ class _Header extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                          'Bugun',
+                          context.l10n.navToday,
                           // A one-word title has no business wrapping; if the
                           // largest allowed text scale ever squeezes it, clip
                           // rather than stack a single word over two lines.
@@ -259,7 +262,7 @@ class _Header extends StatelessWidget {
                         .animate(key: const ValueKey('hdr_title'))
                         .fadeIn(duration: 350.ms),
                     Text(
-                          '$doneCount / $total vazifa',
+                          context.l10n.homeTasksProgress(doneCount, total),
                           style: GoogleFonts.nunito(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
@@ -346,7 +349,7 @@ class _NoProfileMessage extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
           child: Text(
-            'Bugun',
+            context.l10n.navToday,
             style: GoogleFonts.nunito(
               fontSize: 36,
               fontWeight: FontWeight.w700,
@@ -394,7 +397,7 @@ class _FailureMessage extends StatelessWidget {
             TextButton(
               onPressed: onRetry,
               child: Text(
-                'Qayta urinish',
+                context.l10n.commonRetry,
                 style: GoogleFonts.nunito(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -498,7 +501,7 @@ class _NoProfileCta extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'Teri tahlilini boshlang',
+                context.l10n.homeStartAnalysisTitle,
                 style: GoogleFonts.nunito(
                   fontSize: 17,
                   fontWeight: FontWeight.w800,
@@ -507,7 +510,7 @@ class _NoProfileCta extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                "Shaxsiy parvarish dasturingizni olish uchun qisqa tahlil o'ting.",
+                context.l10n.homeStartAnalysisBody,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.nunito(
                   fontSize: 13,
@@ -535,7 +538,7 @@ class _NoProfileCta extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    'Tahlilni boshlash',
+                    context.l10n.promoStart,
                     style: GoogleFonts.nunito(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
@@ -572,21 +575,26 @@ class _StreakCalendarSheet extends StatefulWidget {
 class _StreakCalendarSheetState extends State<_StreakCalendarSheet> {
   late DateTime _month;
 
-  static const _dayLabels = ['Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh', 'Ya'];
-  static const _monthNames = [
-    'Yanvar',
-    'Fevral',
-    'Mart',
-    'Aprel',
-    'May',
-    'Iyun',
-    'Iyul',
-    'Avgust',
-    'Sentabr',
-    'Oktabr',
-    'Noyabr',
-    'Dekabr',
-  ];
+  /// Month and weekday names come from `intl` rather than from a hard-coded
+  /// table. The table only ever held Uzbek, so a Russian or English reader saw
+  /// "Yanvar" across the top of their own calendar.
+  ///
+  /// The week starts on Monday here regardless of locale, because the grid
+  /// below is laid out from `DateTime.weekday`, which counts from Monday — a
+  /// locale-driven first day would shift the labels without shifting the cells.
+  static List<String> _dayLabels(BuildContext context) {
+    final locale = Localizations.localeOf(context).toString();
+    final format = DateFormat.E(locale);
+    // 2024-01-01 was a Monday.
+    return List.generate(
+      7,
+      (i) => format.format(DateTime(2024, 1, 1).add(Duration(days: i))),
+    );
+  }
+
+  static String _monthLabel(BuildContext context, DateTime month) =>
+      DateFormat.yMMMM(Localizations.localeOf(context).toString())
+          .format(month);
 
   @override
   void initState() {
@@ -666,7 +674,7 @@ class _StreakCalendarSheetState extends State<_StreakCalendarSheet> {
                 _NavButton(icon: Icons.chevron_left_rounded, onTap: _prevMonth),
                 Expanded(
                   child: Text(
-                    '${_monthNames[_month.month - 1]} ${_month.year}',
+                    _monthLabel(context, _month),
                     textAlign: TextAlign.center,
                     style: GoogleFonts.nunito(
                       fontSize: 17,
@@ -685,7 +693,7 @@ class _StreakCalendarSheetState extends State<_StreakCalendarSheet> {
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: _dayLabels
+              children: _dayLabels(context)
                   .map(
                     (l) => SizedBox(
                       width: 40,
@@ -734,7 +742,7 @@ class _StreakCalendarSheetState extends State<_StreakCalendarSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${widget.currentStreak} kun',
+                        context.l10n.homeStreakDays(widget.currentStreak),
                         style: GoogleFonts.nunito(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
@@ -742,7 +750,7 @@ class _StreakCalendarSheetState extends State<_StreakCalendarSheet> {
                         ),
                       ),
                       Text(
-                        'Ketma-ket parvarish',
+                        context.l10n.homeStreakLabel,
                         style: GoogleFonts.nunito(
                           fontSize: 13,
                           color: Colors.white.withValues(alpha: 0.75),
@@ -894,7 +902,7 @@ class _GoalBadge extends StatelessWidget {
           ),
           const SizedBox(width: 6),
           Text(
-            allDone ? 'Hammasi bajarildi!' : 'Parvarish maqsadi',
+            allDone ? context.l10n.homeAllDone : context.l10n.homeGoal,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.nunito(
@@ -1190,7 +1198,7 @@ class _TaskCardState extends State<_TaskCard>
         child: Semantics(
           container: true,
           checked: done,
-          label: task.step.title,
+          label: context.tr(task.step.title),
           onTap: widget.onTap,
           child: GestureDetector(
             onTap: widget.onTap,
@@ -1247,7 +1255,7 @@ class _TaskCardState extends State<_TaskCard>
                         // leaving it in would read it twice.
                         child: ExcludeSemantics(
                           child: Text(
-                            task.step.title,
+                            context.tr(task.step.title),
                             style: GoogleFonts.nunito(
                               fontSize: 15,
                               fontWeight: FontWeight.w500,

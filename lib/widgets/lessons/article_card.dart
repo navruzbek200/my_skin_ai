@@ -6,6 +6,8 @@ import '../../models/article.dart';
 import 'package:go_router/go_router.dart';
 import 'info_row_card.dart';
 import 'lesson_styles.dart';
+import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
+import 'package:real_beauty_ai/core/l10n/localized_text.dart';
 
 /// One article in the Maqolalar list.
 ///
@@ -18,22 +20,27 @@ class ArticleCard extends StatelessWidget {
 
   const ArticleCard({super.key, required this.article});
 
+  void _open(BuildContext context) {
+    HapticFeedback.selectionClick();
+    context.push('/article-detail', extra: article);
+  }
+
   @override
   Widget build(BuildContext context) {
     final accent = article.iconColor;
 
     return Semantics(
       button: true,
-      label:
-          '${article.title}. ${article.summary}. '
-          "O'qish uchun ${article.duration}",
+      label: '${context.tr(article.title)}. ${context.tr(article.summary)}. '
+          '${context.l10n.lessonReadTime(context.tr(article.duration))}',
+      // Without this the card announces itself as a button and then offers no
+      // way to press it: ExcludeSemantics below drops the InkWell's own tap
+      // action along with its label.
+      onTap: () => _open(context),
       child: ExcludeSemantics(
         child: InfoRowCard(
           accentColor: accent,
-          onTap: () {
-            HapticFeedback.selectionClick();
-            context.push('/article-detail', extra: article);
-          },
+          onTap: () => _open(context),
           content: Padding(
             padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
             child: Column(
@@ -44,7 +51,7 @@ class ArticleCard extends StatelessWidget {
                     Icon(article.icon, size: 14, color: accent),
                     const SizedBox(width: 6),
                     Text(
-                      'Maqola',
+                      context.l10n.lessonBadge,
                       style: GoogleFonts.nunito(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
@@ -59,7 +66,7 @@ class ArticleCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      article.duration,
+                      context.tr(article.duration),
                       style: GoogleFonts.nunito(
                         fontSize: 11,
                         color: AppColors.muted,
@@ -69,7 +76,7 @@ class ArticleCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 9),
                 Text(
-                  article.title,
+                  context.tr(article.title),
                   style: GoogleFonts.nunito(
                     fontSize: 15.5,
                     fontWeight: FontWeight.w800,
@@ -81,7 +88,7 @@ class ArticleCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  article.summary,
+                  context.tr(article.summary),
                   style: GoogleFonts.nunito(
                     fontSize: 12,
                     color: AppColors.muted,

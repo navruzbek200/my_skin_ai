@@ -9,7 +9,5 @@ class CosmetologistsLoaded extends CosmetologistsState {
   CosmetologistsLoaded(this.items);
 }
 
-class CosmetologistsError extends CosmetologistsState {
-  final String message;
-  CosmetologistsError(this.message);
-}
+/// Carries no message, for the same reason as `ProductsError`.
+class CosmetologistsError extends CosmetologistsState {}

@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:real_beauty_ai/app.dart';
 import 'package:real_beauty_ai/core/di/injection.dart';
 import 'package:real_beauty_ai/core/utils/crash_reporter.dart';
@@ -33,8 +34,15 @@ Future<void> _bootstrap() async {
   // so 200MB covers the whole grid with room for the detail pages on top.
   PaintingBinding.instance.imageCache.maximumSizeBytes = 200 << 20;
 
+  // Month and weekday names for uz/ru/en. Without this `intl` only knows the
+  // one locale the platform starts in, and a date formatted in another throws.
+  await initializeDateFormatting();
+
   await _configureChrome();
   await _initFirebase();
+  // Before runApp, because LocaleCubit reads the stored language synchronously
+  // in its constructor — an app built before this resolves would open in the
+  // device language and then jump.
   await _initLocalStore();
 
   configureDependencies();

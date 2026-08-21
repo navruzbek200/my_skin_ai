@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:real_beauty_ai/core/theme/colors.dart';
 import 'package:real_beauty_ai/models/article.dart';
+import 'package:real_beauty_ai/core/l10n/localized_text.dart';
 
 class ArticleDetailScreen extends StatefulWidget {
   final Article article;
@@ -60,7 +61,7 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
                         children: [
                           _HeroBanner(article: widget.article),
                           const SizedBox(height: 20),
-                          _SummaryCard(text: widget.article.summary),
+                          _SummaryCard(text: context.tr(widget.article.summary)),
                           const SizedBox(height: 24),
                           ...widget.article.sections.map(
                             (s) => _SectionBlock(section: s),
@@ -223,7 +224,7 @@ class _HeroBanner extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            article.title,
+            context.tr(article.title),
             textAlign: TextAlign.center,
             style: GoogleFonts.nunito(
               fontSize: 22,
@@ -243,7 +244,7 @@ class _HeroBanner extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                article.duration,
+                context.tr(article.duration),
                 style: GoogleFonts.nunito(fontSize: 12, color: AppColors.muted),
               ),
               const SizedBox(width: 12),
@@ -316,7 +317,7 @@ class _SectionBlock extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            section.heading,
+            context.tr(section.heading),
             style: GoogleFonts.nunito(
               fontSize: 16,
               fontWeight: FontWeight.w800,
@@ -325,7 +326,7 @@ class _SectionBlock extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            section.body,
+            context.tr(section.body),
             style: GoogleFonts.nunito(
               fontSize: 14,
               color: AppColors.muted,

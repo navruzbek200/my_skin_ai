@@ -6,6 +6,7 @@ import 'package:real_beauty_ai/features/account/presentation/pages/account_page.
 import 'package:real_beauty_ai/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:real_beauty_ai/features/auth/presentation/pages/auth_page.dart';
 import 'package:real_beauty_ai/features/auth/presentation/pages/forgot_password_page.dart';
+import 'package:real_beauty_ai/features/auth/presentation/pages/verify_email_page.dart';
 import 'package:real_beauty_ai/features/cosmetologists/presentation/pages/cosmetologist_detail_page.dart';
 import 'package:real_beauty_ai/features/lessons/presentation/pages/article_detail_page.dart';
 import 'package:real_beauty_ai/features/lessons/presentation/pages/lesson_detail_page.dart';
@@ -23,11 +24,37 @@ import 'package:real_beauty_ai/models/lesson.dart';
 import 'package:real_beauty_ai/core/router/route_args.dart';
 import 'package:real_beauty_ai/models/skin_analysis_result.dart';
 
-final _protectedPaths = {
+const _protectedPaths = {
   '/home', '/quiz', '/scan-instructions', '/face-scan',
   '/analysis', '/results', '/account',
 };
-final _authOnlyPaths = {'/auth', '/intro'};
+const _authOnlyPaths = {'/auth', '/intro'};
+
+/// Where a session may go, as a pure function of the session and the path.
+///
+/// Split out of the redirect below so it can be tested directly: `appRouter`
+/// is a top-level final wired to the service locator, so a test cannot rebuild
+/// it per session — and a guard that decides who gets into the app is not
+/// something to leave uncovered. Returning null means "stay".
+@visibleForTesting
+String? authRedirect({
+  required bool loggedIn,
+  required bool gated,
+  required String path,
+}) {
+  // A signed-out visitor has no business on the gate either: it polls an
+  // account that is not there.
+  if (!loggedIn && (_protectedPaths.contains(path) || path == '/verify-email')) {
+    return '/auth';
+  }
+  if (gated && _protectedPaths.contains(path)) return '/verify-email';
+  if (loggedIn && !gated && path == '/verify-email') return '/home';
+  if (loggedIn && _authOnlyPaths.contains(path)) {
+    // Not '/home': that would walk a gated account straight past the gate.
+    return gated ? '/verify-email' : '/home';
+  }
+  return null;
+}
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -36,10 +63,16 @@ final GoRouter appRouter = GoRouter(
   refreshListenable: GoRouterRefreshStream(sl<AuthBloc>().stream),
   redirect: (context, state) {
     final session = sl<AuthBloc>().state;
-    final loggedIn = session.isAuthenticated;
     final path = state.matchedLocation;
-    if (!loggedIn && _protectedPaths.contains(path)) return '/auth';
-    if (loggedIn && _authOnlyPaths.contains(path)) return '/home';
+    // Google accounts arrive already verified, and accounts that predate the
+    // cut-off are grandfathered, so this only ever gates new password sign-ups
+    // that have not opened the emailed link yet.
+    final auth = authRedirect(
+      loggedIn: session.isAuthenticated,
+      gated: session.needsVerificationGate,
+      path: path,
+    );
+    if (auth != null) return auth;
     if (const {'/scan-instructions', '/face-scan'}.contains(path) &&
         state.extra is! List) {
       return '/home';
@@ -68,6 +101,10 @@ final GoRouter appRouter = GoRouter(
       path: '/forgot',
       pageBuilder: (context, state) =>
           _fade(state, const ForgotPasswordScreen()),
+    ),
+    GoRoute(
+      path: '/verify-email',
+      pageBuilder: (context, state) => _fade(state, const VerifyEmailScreen()),
     ),
     GoRoute(
       path: '/home',

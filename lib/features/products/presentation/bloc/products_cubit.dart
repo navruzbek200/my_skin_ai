@@ -17,7 +17,7 @@ class ProductsCubit extends Cubit<ProductsState> {
       final items = await _repo.getProducts();
       emit(ProductsLoaded(items));
     } catch (_) {
-      emit(ProductsError("Mahsulotlarni yuklashda xato"));
+      emit(ProductsError());
     }
   }
 }

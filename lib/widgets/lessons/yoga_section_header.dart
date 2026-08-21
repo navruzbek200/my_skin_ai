@@ -3,11 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/colors.dart';
 import 'lesson_styles.dart';
+import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
 
 class YogaSectionHeader extends StatefulWidget {
   final bool isExpanded;
   final VoidCallback onTap;
-  final String title;
+  final String? title;
   final String avatarPath;
 
   /// How many clips are inside. Shown under the title so a shut section says
@@ -18,7 +19,9 @@ class YogaSectionHeader extends StatefulWidget {
     super.key,
     required this.isExpanded,
     required this.onTap,
-    this.title = 'Yoga mashqlari',
+    // Null means "use the localised default", resolved in build where there
+    // is a context to look it up in — a const default cannot be translated.
+    this.title,
     this.avatarPath = 'assets/yoga_avatar.jpg',
     this.count,
   });
@@ -32,17 +35,22 @@ class _YogaSectionHeaderState extends State<YogaSectionHeader> {
 
   @override
   Widget build(BuildContext context) {
+    final title = widget.title ?? context.l10n.lessonsYogaExercises;
     return Semantics(
       button: true,
       expanded: widget.isExpanded,
       label: widget.count == null
-          ? widget.title
-          : '${widget.title}, ${widget.count} ta mashq',
-      child: ExcludeSemantics(child: _buildCard()),
+          ? title
+          : '$title, ${context.l10n.lessonsExerciseCount(widget.count!)}',
+      // ExcludeSemantics below drops the GestureDetector's tap along with its
+      // labels, so the action has to be declared here or the header is a
+      // control a screen reader can see and cannot open.
+      onTap: widget.onTap,
+      child: ExcludeSemantics(child: _buildCard(title)),
     );
   }
 
-  Widget _buildCard() {
+  Widget _buildCard(String title) {
     return GestureDetector(
       onTap: () {
         HapticFeedback.selectionClick();
@@ -109,7 +117,7 @@ class _YogaSectionHeaderState extends State<YogaSectionHeader> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      widget.title,
+                      title,
                       style: GoogleFonts.nunito(
                         fontSize: 17,
                         fontWeight: FontWeight.w800,
@@ -118,7 +126,7 @@ class _YogaSectionHeaderState extends State<YogaSectionHeader> {
                     ),
                     if (widget.count != null)
                       Text(
-                        '${widget.count} ta mashq',
+                        context.l10n.lessonsExerciseCount(widget.count!),
                         style: GoogleFonts.nunito(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,

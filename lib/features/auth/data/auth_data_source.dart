@@ -5,6 +5,11 @@ import 'package:google_sign_in/google_sign_in.dart';
 /// and no backend — everything here runs on the Firebase Auth SDK directly, so
 /// it works on the free Spark plan.
 abstract class AuthDataSource {
+  /// Uid of the signed-in account, or null when nobody is signed in. Read by
+  /// the cubit so a sign-up can be marked as one this build created — see
+  /// [LocalStore.markGatedSignup].
+  String? get currentUid;
+
   /// Address of the signed-in account, or null when nobody is signed in.
   ///
   /// Behind the interface rather than read from `FirebaseAuth.instance` at the
@@ -32,6 +37,12 @@ abstract class AuthDataSource {
   /// address is already verified, so a stray tap cannot spam the inbox.
   Future<void> sendEmailVerification();
 
+  /// Re-reads the account from the server and reports whether the address is
+  /// confirmed now. The link is opened in a mail client or a browser, so
+  /// nothing tells the app about it — the cached user has to be refreshed on
+  /// demand.
+  Future<bool> refreshEmailVerified();
+
   /// Returns false when user dismisses the Google account picker (not an error).
   Future<bool> signInWithGoogle();
 
@@ -41,6 +52,9 @@ abstract class AuthDataSource {
 }
 
 class FirebaseAuthDataSource implements AuthDataSource {
+  @override
+  String? get currentUid => FirebaseAuth.instance.currentUser?.uid;
+
   @override
   String? get currentEmail => FirebaseAuth.instance.currentUser?.email;
 
@@ -154,5 +168,15 @@ class FirebaseAuthDataSource implements AuthDataSource {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null || user.emailVerified) return;
     await user.sendEmailVerification();
+  }
+
+  @override
+  Future<bool> refreshEmailVerified() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return false;
+    await user.reload();
+    // `reload()` refreshes the SDK's copy but leaves this handle stale, so the
+    // answer has to be read off the instance rather than off `user`.
+    return FirebaseAuth.instance.currentUser?.emailVerified ?? false;
   }
 }
