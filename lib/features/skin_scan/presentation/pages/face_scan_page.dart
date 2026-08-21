@@ -223,7 +223,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
               Navigator.of(ctx).pop();
               widget.permissionService.openSettings();
             },
-            child: Text('Sozlamalar',
+            child: Text(context.l10n.commonSettingsApp,
                 style: GoogleFonts.nunito(
                     color: const Color(0xFF9D7FEA), fontWeight: FontWeight.w700)),
           ),
@@ -562,7 +562,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
               Navigator.of(ctx).pop();
               _reset();
             },
-            child: Text('Qayta',
+            child: Text(context.l10n.commonRetryShort,
                 style: GoogleFonts.nunito(
                     color: const Color(0xFF9D7FEA), fontWeight: FontWeight.w700)),
           ),

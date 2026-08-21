@@ -7,6 +7,7 @@ import 'package:real_beauty_ai/core/theme/colors.dart';
 import 'package:real_beauty_ai/models/cosmetolog.dart';
 import 'package:real_beauty_ai/features/cosmetologists/presentation/pages/cosmetologist_page.dart';
 import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
+import 'package:real_beauty_ai/core/l10n/localized_text.dart';
 
 class KosmetologDetailScreen extends StatefulWidget {
   final Cosmetolog cosmetolog;
@@ -180,7 +181,7 @@ class _KosmetologDetailScreenState extends State<KosmetologDetailScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        c.title,
+                        context.tr(c.title),
                         style: GoogleFonts.nunito(fontSize: 14, color: AppColors.muted),
                       ),
                     ],
@@ -197,7 +198,7 @@ class _KosmetologDetailScreenState extends State<KosmetologDetailScreen> {
                       Expanded(
                         child: _StatTile(
                           icon: Icons.workspace_premium_outlined,
-                          label: 'Tajriba',
+                          label: context.l10n.cosmoExperience,
                           value: context.l10n.cosmoYears(c.experienceYears),
                         ),
                       ),
@@ -205,8 +206,8 @@ class _KosmetologDetailScreenState extends State<KosmetologDetailScreen> {
                       Expanded(
                         child: _StatTile(
                           icon: Icons.location_on_outlined,
-                          label: 'Manzil',
-                          value: c.city,
+                          label: context.l10n.cosmoAddress,
+                          value: context.tr(c.city),
                         ),
                       ),
                     ],
@@ -222,7 +223,7 @@ class _KosmetologDetailScreenState extends State<KosmetologDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _SectionLabel('TELEFON'),
+                        _SectionLabel(context.l10n.cosmoPhone.toUpperCase()),
                         const SizedBox(height: 10),
                         _PhoneRow(phone: c.phone, onTap: _openPhone),
                       ],
@@ -237,10 +238,10 @@ class _KosmetologDetailScreenState extends State<KosmetologDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _SectionLabel('HAQIDA'),
+                      _SectionLabel(context.l10n.cosmoAbout.toUpperCase()),
                       const SizedBox(height: 10),
                       Text(
-                        c.bio,
+                        context.tr(c.bio),
                         style: GoogleFonts.nunito(
                           fontSize: 14,
                           color: const Color(0xFF5A5470),
@@ -259,7 +260,7 @@ class _KosmetologDetailScreenState extends State<KosmetologDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _SectionLabel('MUTAXASSISLIKLAR'),
+                      _SectionLabel(context.l10n.cosmoSpecialties.toUpperCase()),
                       const SizedBox(height: 12),
                       Wrap(
                         spacing: 8,
@@ -273,7 +274,7 @@ class _KosmetologDetailScreenState extends State<KosmetologDetailScreen> {
                           ),
                           child: Center(
                             child: Text(
-                              s,
+                              context.tr(s),
                               style: GoogleFonts.nunito(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,

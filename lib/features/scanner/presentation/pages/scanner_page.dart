@@ -176,7 +176,7 @@ class _ScanHistorySection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Natijalar',
+          context.l10n.scanResultsHeading,
           style: GoogleFonts.nunito(
             fontSize: 20,
             fontWeight: FontWeight.w800,
@@ -326,7 +326,7 @@ class _ComparisonCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           _SkinTypeRow(
-            label: 'Oldingi',
+            label: context.l10n.scanPrevious,
             skinType: context.skinTypeLabel(previous.skinTypeCode,
                 stored: previous.skinType),
             date: _fmtDate(context, previous.takenAt),
@@ -660,14 +660,14 @@ class SkinProblemDetailPage extends StatelessWidget {
                   const SizedBox(height: 24),
                   _DetailCard(
                     icon: Icons.help_outline_rounded,
-                    label: 'Sababi',
+                    label: context.l10n.scanProblemCause,
                     text: context.tr(problem.cause),
                     accentColor: const Color(0xFF7060AA),
                   ),
                   const SizedBox(height: 14),
                   _DetailCard(
                     icon: Icons.check_circle_outline_rounded,
-                    label: 'Yechimi',
+                    label: context.l10n.scanProblemSolution,
                     text: context.tr(problem.solution),
                     accentColor: const Color(0xFF16A34A),
                   ),

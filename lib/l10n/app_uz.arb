@@ -35,7 +35,7 @@
   "authPasswordRequired": "Parol kiriting",
   "authPasswordTooShort": "Parol kamida 6 belgidan iborat bo'lishi kerak",
   "authTermsNote": "Davom etish orqali siz shartlarimizga rozilik bildirasiz",
-  "authResendIn": "Qayta yuborish — {seconds} s",
+  "authResendIn": "{seconds, plural, other{Qayta yuborish — {seconds} s}}",
   "@authResendIn": {
     "placeholders": {
       "seconds": {
@@ -149,7 +149,7 @@
   },
   "homeStartAnalysisTitle": "Teri tahlilini boshlang",
   "homeStartAnalysisBody": "Shaxsiy parvarish dasturingizni olish uchun qisqa tahlil o'ting.",
-  "homeStreakDays": "{days} kun",
+  "homeStreakDays": "{days, plural, other{{days} kun}}",
   "@homeStreakDays": {
     "placeholders": {
       "days": {
@@ -198,7 +198,7 @@
       }
     }
   },
-  "resultsMoreAdvice": "+{count} tavsiya",
+  "resultsMoreAdvice": "{count, plural, other{+{count} tavsiya}}",
   "@resultsMoreAdvice": {
     "placeholders": {
       "count": {
@@ -271,7 +271,7 @@
   "lessonsSubtitle": "Yuz yogasi, ingrediyentlar va maqolalar",
   "lessonsYoga": "Yuz Yoga",
   "lessonsYogaExercises": "Yoga mashqlari",
-  "lessonsExerciseCount": "{count} ta mashq",
+  "lessonsExerciseCount": "{count, plural, other{{count} ta mashq}}",
   "@lessonsExerciseCount": {
     "placeholders": {
       "count": {
@@ -290,7 +290,7 @@
       }
     }
   },
-  "lessonStepCount": "{count} qadam",
+  "lessonStepCount": "{count, plural, other{{count} qadam}}",
   "@lessonStepCount": {
     "placeholders": {
       "count": {
@@ -327,7 +327,7 @@
     }
   },
   "cosmoTryOther": "Boshqa kalit so'z yoki filtr sinab ko'ring",
-  "cosmoYears": "{years} yil",
+  "cosmoYears": "{years, plural, other{{years} yil}}",
   "@cosmoYears": {
     "placeholders": {
       "years": {
@@ -335,7 +335,7 @@
       }
     }
   },
-  "cosmoYearsExperience": "{years} yillik tajriba",
+  "cosmoYearsExperience": "{years, plural, other{{years} yillik tajriba}}",
   "@cosmoYearsExperience": {
     "placeholders": {
       "years": {
@@ -356,7 +356,7 @@
     }
   },
   "productsPriceOnRequest": "Narxi so'rov bo'yicha",
-  "productsCount": "{count} ta mahsulot",
+  "productsCount": "{count, plural, other{{count} ta mahsulot}}",
   "@productsCount": {
     "placeholders": {
       "count": {
@@ -381,5 +381,28 @@
         "type": "String"
       }
     }
-  }
+  },
+  "commonBack": "Ortga",
+  "commonClose": "Yopish",
+  "commonDone": "Tayyor",
+  "commonRetryShort": "Qayta",
+  "commonSettingsApp": "Sozlamalar",
+  "lessonsHeading": "Darslar",
+  "lessonsIngredients": "Ingrediyentlar",
+  "lessonsArticles": "Maqolalar",
+  "scanResultsHeading": "Natijalar",
+  "scanPrevious": "Oldingi",
+  "scanProblemCause": "Sababi",
+  "scanProblemSolution": "Yechimi",
+  "cosmoHeading": "Kosmetologlar",
+  "cosmoExperience": "Tajriba",
+  "cosmoAddress": "Manzil",
+  "cosmoAbout": "Mutaxassis haqida",
+  "cosmoSpecialties": "Yo'nalishlari",
+  "cosmoFilterAll": "Barchasi",
+  "cosmoFilterFacialist": "Facialist",
+  "cosmoFilterDermatologist": "Dermatolog",
+  "cosmoFilterAesthetician": "Estetik",
+  "cosmoFilterInjection": "Injeksion",
+  "cosmoPhone": "Telefon"
 }

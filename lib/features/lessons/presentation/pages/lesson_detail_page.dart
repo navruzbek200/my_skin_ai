@@ -147,7 +147,7 @@ class _Header extends StatelessWidget {
           Row(
             children: [
               Semantics(
-                label: 'Ortga',
+                label: context.l10n.commonBack,
                 child: GestureDetector(
                   onTap: onBack,
                   child: Container(

@@ -118,7 +118,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String authResendIn(int seconds) {
-    return 'Отправить снова — $seconds с';
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: 'Отправить снова — $seconds с',
+      one: 'Отправить снова — $seconds с',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -377,7 +383,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String homeStreakDays(int days) {
-    return '$days дн.';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days дней',
+      many: '$days дней',
+      few: '$days дня',
+      one: '$days день',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -469,7 +483,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String resultsMoreAdvice(int count) {
-    return '+$count совет(ов)';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count советов',
+      many: '+$count советов',
+      few: '+$count совета',
+      one: '+$count совет',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -657,7 +679,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String lessonsExerciseCount(int count) {
-    return '$count упражн.';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count упражнений',
+      many: '$count упражнений',
+      few: '$count упражнения',
+      one: '$count упражнение',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -667,7 +697,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String lessonStepCount(int count) {
-    return '$count шагов';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count шагов',
+      many: '$count шагов',
+      few: '$count шага',
+      one: '$count шаг',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -702,12 +740,28 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String cosmoYears(int years) {
-    return '$years лет';
+    String _temp0 = intl.Intl.pluralLogic(
+      years,
+      locale: localeName,
+      other: '$years лет',
+      many: '$years лет',
+      few: '$years года',
+      one: '$years год',
+    );
+    return '$_temp0';
   }
 
   @override
   String cosmoYearsExperience(int years) {
-    return 'Опыт $years лет';
+    String _temp0 = intl.Intl.pluralLogic(
+      years,
+      locale: localeName,
+      other: 'Опыт $years лет',
+      many: 'Опыт $years лет',
+      few: 'Опыт $years года',
+      one: 'Опыт $years год',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -732,7 +786,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String productsCount(int count) {
-    return '$count товаров';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count товаров',
+      many: '$count товаров',
+      few: '$count товара',
+      one: '$count товар',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -772,4 +834,73 @@ class AppLocalizationsRu extends AppLocalizations {
   String forgotSentTo(String email) {
     return 'Ссылка отправлена на $email';
   }
+
+  @override
+  String get commonBack => 'Назад';
+
+  @override
+  String get commonClose => 'Закрыть';
+
+  @override
+  String get commonDone => 'Готово';
+
+  @override
+  String get commonRetryShort => 'Ещё раз';
+
+  @override
+  String get commonSettingsApp => 'Настройки';
+
+  @override
+  String get lessonsHeading => 'Уроки';
+
+  @override
+  String get lessonsIngredients => 'Ингредиенты';
+
+  @override
+  String get lessonsArticles => 'Статьи';
+
+  @override
+  String get scanResultsHeading => 'Результаты';
+
+  @override
+  String get scanPrevious => 'Предыдущий';
+
+  @override
+  String get scanProblemCause => 'Причина';
+
+  @override
+  String get scanProblemSolution => 'Решение';
+
+  @override
+  String get cosmoHeading => 'Косметологи';
+
+  @override
+  String get cosmoExperience => 'Опыт';
+
+  @override
+  String get cosmoAddress => 'Адрес';
+
+  @override
+  String get cosmoAbout => 'О специалисте';
+
+  @override
+  String get cosmoSpecialties => 'Направления';
+
+  @override
+  String get cosmoFilterAll => 'Все';
+
+  @override
+  String get cosmoFilterFacialist => 'Фациалист';
+
+  @override
+  String get cosmoFilterDermatologist => 'Дерматолог';
+
+  @override
+  String get cosmoFilterAesthetician => 'Эстетист';
+
+  @override
+  String get cosmoFilterInjection => 'Инъекционный';
+
+  @override
+  String get cosmoPhone => 'Телефон';
 }

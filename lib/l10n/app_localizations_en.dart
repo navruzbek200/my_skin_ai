@@ -118,7 +118,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String authResendIn(int seconds) {
-    return 'Resend in ${seconds}s';
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: 'Resend in ${seconds}s',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -378,7 +383,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String homeStreakDays(int days) {
-    return '$days days';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '$days day',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -470,7 +481,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String resultsMoreAdvice(int count) {
-    return '+$count more';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count more',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -657,7 +673,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String lessonsExerciseCount(int count) {
-    return '$count exercises';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count exercises',
+      one: '$count exercise',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -667,7 +689,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String lessonStepCount(int count) {
-    return '$count steps';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count steps',
+      one: '$count step',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -702,12 +730,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String cosmoYears(int years) {
-    return '$years yrs';
+    String _temp0 = intl.Intl.pluralLogic(
+      years,
+      locale: localeName,
+      other: '$years yrs',
+      one: '$years yr',
+    );
+    return '$_temp0';
   }
 
   @override
   String cosmoYearsExperience(int years) {
-    return '$years years of experience';
+    String _temp0 = intl.Intl.pluralLogic(
+      years,
+      locale: localeName,
+      other: '$years years of experience',
+      one: '$years year of experience',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -732,7 +772,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String productsCount(int count) {
-    return '$count products';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count products',
+      one: '$count product',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -772,4 +818,73 @@ class AppLocalizationsEn extends AppLocalizations {
   String forgotSentTo(String email) {
     return 'Link sent to $email';
   }
+
+  @override
+  String get commonBack => 'Back';
+
+  @override
+  String get commonClose => 'Close';
+
+  @override
+  String get commonDone => 'Done';
+
+  @override
+  String get commonRetryShort => 'Retry';
+
+  @override
+  String get commonSettingsApp => 'Settings';
+
+  @override
+  String get lessonsHeading => 'Lessons';
+
+  @override
+  String get lessonsIngredients => 'Ingredients';
+
+  @override
+  String get lessonsArticles => 'Articles';
+
+  @override
+  String get scanResultsHeading => 'Results';
+
+  @override
+  String get scanPrevious => 'Previous';
+
+  @override
+  String get scanProblemCause => 'Cause';
+
+  @override
+  String get scanProblemSolution => 'What helps';
+
+  @override
+  String get cosmoHeading => 'Specialists';
+
+  @override
+  String get cosmoExperience => 'Experience';
+
+  @override
+  String get cosmoAddress => 'Address';
+
+  @override
+  String get cosmoAbout => 'About this specialist';
+
+  @override
+  String get cosmoSpecialties => 'Focus areas';
+
+  @override
+  String get cosmoFilterAll => 'All';
+
+  @override
+  String get cosmoFilterFacialist => 'Facialist';
+
+  @override
+  String get cosmoFilterDermatologist => 'Dermatologist';
+
+  @override
+  String get cosmoFilterAesthetician => 'Aesthetician';
+
+  @override
+  String get cosmoFilterInjection => 'Injectables';
+
+  @override
+  String get cosmoPhone => 'Phone';
 }

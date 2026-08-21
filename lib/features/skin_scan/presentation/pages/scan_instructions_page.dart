@@ -214,7 +214,7 @@ class _Header extends StatelessWidget {
         const SizedBox(width: 12),
         Semantics(
           button: true,
-          label: 'Yopish',
+          label: context.l10n.commonClose,
           child: GestureDetector(
             onTap: onClose,
             child: Container(

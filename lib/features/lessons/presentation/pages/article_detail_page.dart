@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:real_beauty_ai/core/theme/colors.dart';
 import 'package:real_beauty_ai/models/article.dart';
 import 'package:real_beauty_ai/core/l10n/localized_text.dart';
+import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
 
 class ArticleDetailScreen extends StatefulWidget {
   final Article article;
@@ -125,7 +126,7 @@ class _ArticleAppBar extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
-              'Maqola',
+              context.l10n.lessonBadge,
               style: GoogleFonts.nunito(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
@@ -258,7 +259,7 @@ class _HeroBanner extends StatelessWidget {
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  'Maqola',
+                  context.l10n.lessonBadge,
                   style: GoogleFonts.nunito(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,

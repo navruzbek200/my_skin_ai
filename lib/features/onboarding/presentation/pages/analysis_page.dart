@@ -258,7 +258,7 @@ class _AnalysisScreenState extends State<AnalysisScreen>
                     ),
                     if (done)
                       Text(
-                        'Tayyor',
+                        context.l10n.commonDone,
                         style: GoogleFonts.nunito(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,

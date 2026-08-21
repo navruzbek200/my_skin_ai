@@ -10,6 +10,8 @@ import 'package:real_beauty_ai/features/cosmetologists/presentation/bloc/cosmeto
 import 'package:real_beauty_ai/models/cosmetolog.dart';
 import 'package:real_beauty_ai/widgets/chip_button.dart';
 import 'package:go_router/go_router.dart';
+import 'package:real_beauty_ai/data/cosmetologist_vocabulary.dart';
+import 'package:real_beauty_ai/core/l10n/localized_text.dart';
 
 class KonnikmaScreen extends StatelessWidget {
   const KonnikmaScreen({super.key});
@@ -32,7 +34,8 @@ class _KonnikmaBody extends StatefulWidget {
 
 class _KonnikmaBodyState extends State<_KonnikmaBody> {
   String _search = '';
-  String _filter = 'Barchasi';
+  /// Empty means the "all" chip. Matched against `Cosmetolog.filterTag`.
+  String _filter = '';
   final _searchCtrl = TextEditingController();
 
   @override
@@ -41,14 +44,21 @@ class _KonnikmaBodyState extends State<_KonnikmaBody> {
     super.dispose();
   }
 
-  static const _filters = ['Barchasi', 'Facialist', 'Dermatolog', 'Estetik', 'Injeksion'];
+  // Chips come from `cosmetologistFilters`, where each carries the Firestore
+  // key it matches and a translated label. Filtering on the key rather than on
+  // the visible text is what keeps every chip working after a language change.
+  static const _filters = cosmetologistFilters;
 
   List<Cosmetolog> _filtered(List<Cosmetolog> all) {
+    final query = _search.trim().toLowerCase();
     return all.where((c) {
-      final matchSearch = _search.isEmpty ||
-          c.name.toLowerCase().contains(_search.toLowerCase()) ||
-          c.title.toLowerCase().contains(_search.toLowerCase());
-      final matchFilter = _filter == 'Barchasi' || c.filterTag == _filter;
+      // Searched across every language, not only the one on screen: somebody
+      // reading in Russian may still type the title the way the directory
+      // spells it.
+      final matchSearch = query.isEmpty ||
+          c.name.toLowerCase().contains(query) ||
+          c.title.contains(query);
+      final matchFilter = _filter.isEmpty || c.filterTag == _filter;
       return matchSearch && matchFilter;
     }).toList();
   }
@@ -78,7 +88,7 @@ class _KonnikmaBodyState extends State<_KonnikmaBody> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Kosmetologlar',
+                              context.l10n.cosmoHeading,
                               style: GoogleFonts.nunito(
                                 fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.text,
                               ),
@@ -154,9 +164,12 @@ class _KonnikmaBodyState extends State<_KonnikmaBody> {
                                 .map((f) => Padding(
                                       padding: const EdgeInsets.only(right: 8),
                                       child: ChipButton(
-                                        label: f,
-                                        selected: f == _filter,
-                                        onTap: () => setState(() => _filter = f),
+                                        label: f.label(context.l10n),
+                                        selected: f.key == _filter,
+                                        onTap: () {
+                                          HapticFeedback.selectionClick();
+                                          setState(() => _filter = f.key);
+                                        },
                                       ),
                                     ))
                                 .toList(),
@@ -242,7 +255,14 @@ class _KonnikmaBodyState extends State<_KonnikmaBody> {
                             Text(
                               _search.isNotEmpty
                                   ? context.l10n.cosmoNoSearchResults(_search)
-                                  : context.l10n.cosmoNoFilterResults(_filter),
+                                  // The label, not the Firestore key: the
+                                  // message names the filter the person
+                                  // actually tapped.
+                                  : context.l10n.cosmoNoFilterResults(
+                                      _filters
+                                          .firstWhere((f) => f.key == _filter)
+                                          .label(context.l10n),
+                                    ),
                               style: GoogleFonts.nunito(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
@@ -363,7 +383,7 @@ class _CosmetologCardState extends State<_CosmetologCard> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        c.title,
+                        context.tr(c.title),
                         style: GoogleFonts.nunito(fontSize: 12, color: AppColors.muted),
                       ),
                       const SizedBox(height: 6),
@@ -385,7 +405,9 @@ class _CosmetologCardState extends State<_CosmetologCard> {
                           const SizedBox(width: 2),
                           Flexible(
                             child: Text(
-                              c.distance.isEmpty ? c.city : '${c.city} · ${c.distance}',
+                              c.distance.isEmpty
+                                  ? context.tr(c.city)
+                                  : '${context.tr(c.city)} · ${c.distance}',
                               style: GoogleFonts.nunito(fontSize: 12, color: AppColors.muted),
                               overflow: TextOverflow.ellipsis,
                             ),

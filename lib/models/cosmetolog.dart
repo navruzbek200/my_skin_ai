@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 
+import 'package:real_beauty_ai/core/l10n/localized_text.dart';
+
 class Cosmetolog {
+  /// A person's name, which is the same in every language.
   final String name;
-  final String title;
+
+  /// Job title, place and blurb come out of a Firestore directory written in
+  /// Uzbek. They are [LocalizedText] so the screen can show them in whichever
+  /// language is on — see `CosmetologistRepository`, which fills the other two
+  /// from optional `_ru` / `_en` columns and otherwise from a local vocabulary.
+  final LocalizedText title;
   final double rating;
   final int reviewCount;
   final String distance;
-  final String city;
-  final String bio;
-  final List<String> specialties;
+  final LocalizedText city;
+  final LocalizedText bio;
+  final List<LocalizedText> specialties;
   final bool verified;
   final String nextSlot;
   final List<Color> gradientColors;

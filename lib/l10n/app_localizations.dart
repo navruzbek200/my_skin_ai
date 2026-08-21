@@ -313,7 +313,7 @@ abstract class AppLocalizations {
   /// No description provided for @authResendIn.
   ///
   /// In uz, this message translates to:
-  /// **'Qayta yuborish — {seconds} s'**
+  /// **'{seconds, plural, other{Qayta yuborish — {seconds} s}}'**
   String authResendIn(int seconds);
 
   /// No description provided for @authErrorGeneric.
@@ -769,7 +769,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeStreakDays.
   ///
   /// In uz, this message translates to:
-  /// **'{days} kun'**
+  /// **'{days, plural, other{{days} kun}}'**
   String homeStreakDays(int days);
 
   /// No description provided for @homeStreakLabel.
@@ -937,7 +937,7 @@ abstract class AppLocalizations {
   /// No description provided for @resultsMoreAdvice.
   ///
   /// In uz, this message translates to:
-  /// **'+{count} tavsiya'**
+  /// **'{count, plural, other{+{count} tavsiya}}'**
   String resultsMoreAdvice(int count);
 
   /// No description provided for @resultsMainAdvice.
@@ -1291,7 +1291,7 @@ abstract class AppLocalizations {
   /// No description provided for @lessonsExerciseCount.
   ///
   /// In uz, this message translates to:
-  /// **'{count} ta mashq'**
+  /// **'{count, plural, other{{count} ta mashq}}'**
   String lessonsExerciseCount(int count);
 
   /// No description provided for @lessonStepOf.
@@ -1303,7 +1303,7 @@ abstract class AppLocalizations {
   /// No description provided for @lessonStepCount.
   ///
   /// In uz, this message translates to:
-  /// **'{count} qadam'**
+  /// **'{count, plural, other{{count} qadam}}'**
   String lessonStepCount(int count);
 
   /// No description provided for @lessonFinish.
@@ -1357,13 +1357,13 @@ abstract class AppLocalizations {
   /// No description provided for @cosmoYears.
   ///
   /// In uz, this message translates to:
-  /// **'{years} yil'**
+  /// **'{years, plural, other{{years} yil}}'**
   String cosmoYears(int years);
 
   /// No description provided for @cosmoYearsExperience.
   ///
   /// In uz, this message translates to:
-  /// **'{years} yillik tajriba'**
+  /// **'{years, plural, other{{years} yillik tajriba}}'**
   String cosmoYearsExperience(int years);
 
   /// No description provided for @cosmoCallFailed.
@@ -1405,7 +1405,7 @@ abstract class AppLocalizations {
   /// No description provided for @productsCount.
   ///
   /// In uz, this message translates to:
-  /// **'{count} ta mahsulot'**
+  /// **'{count, plural, other{{count} ta mahsulot}}'**
   String productsCount(int count);
 
   /// No description provided for @productsFilterAll.
@@ -1473,6 +1473,144 @@ abstract class AppLocalizations {
   /// In uz, this message translates to:
   /// **'Havola {email} manziliga yuborildi'**
   String forgotSentTo(String email);
+
+  /// No description provided for @commonBack.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ortga'**
+  String get commonBack;
+
+  /// No description provided for @commonClose.
+  ///
+  /// In uz, this message translates to:
+  /// **'Yopish'**
+  String get commonClose;
+
+  /// No description provided for @commonDone.
+  ///
+  /// In uz, this message translates to:
+  /// **'Tayyor'**
+  String get commonDone;
+
+  /// No description provided for @commonRetryShort.
+  ///
+  /// In uz, this message translates to:
+  /// **'Qayta'**
+  String get commonRetryShort;
+
+  /// No description provided for @commonSettingsApp.
+  ///
+  /// In uz, this message translates to:
+  /// **'Sozlamalar'**
+  String get commonSettingsApp;
+
+  /// No description provided for @lessonsHeading.
+  ///
+  /// In uz, this message translates to:
+  /// **'Darslar'**
+  String get lessonsHeading;
+
+  /// No description provided for @lessonsIngredients.
+  ///
+  /// In uz, this message translates to:
+  /// **'Ingrediyentlar'**
+  String get lessonsIngredients;
+
+  /// No description provided for @lessonsArticles.
+  ///
+  /// In uz, this message translates to:
+  /// **'Maqolalar'**
+  String get lessonsArticles;
+
+  /// No description provided for @scanResultsHeading.
+  ///
+  /// In uz, this message translates to:
+  /// **'Natijalar'**
+  String get scanResultsHeading;
+
+  /// No description provided for @scanPrevious.
+  ///
+  /// In uz, this message translates to:
+  /// **'Oldingi'**
+  String get scanPrevious;
+
+  /// No description provided for @scanProblemCause.
+  ///
+  /// In uz, this message translates to:
+  /// **'Sababi'**
+  String get scanProblemCause;
+
+  /// No description provided for @scanProblemSolution.
+  ///
+  /// In uz, this message translates to:
+  /// **'Yechimi'**
+  String get scanProblemSolution;
+
+  /// No description provided for @cosmoHeading.
+  ///
+  /// In uz, this message translates to:
+  /// **'Kosmetologlar'**
+  String get cosmoHeading;
+
+  /// No description provided for @cosmoExperience.
+  ///
+  /// In uz, this message translates to:
+  /// **'Tajriba'**
+  String get cosmoExperience;
+
+  /// No description provided for @cosmoAddress.
+  ///
+  /// In uz, this message translates to:
+  /// **'Manzil'**
+  String get cosmoAddress;
+
+  /// No description provided for @cosmoAbout.
+  ///
+  /// In uz, this message translates to:
+  /// **'Mutaxassis haqida'**
+  String get cosmoAbout;
+
+  /// No description provided for @cosmoSpecialties.
+  ///
+  /// In uz, this message translates to:
+  /// **'Yo\'nalishlari'**
+  String get cosmoSpecialties;
+
+  /// No description provided for @cosmoFilterAll.
+  ///
+  /// In uz, this message translates to:
+  /// **'Barchasi'**
+  String get cosmoFilterAll;
+
+  /// No description provided for @cosmoFilterFacialist.
+  ///
+  /// In uz, this message translates to:
+  /// **'Facialist'**
+  String get cosmoFilterFacialist;
+
+  /// No description provided for @cosmoFilterDermatologist.
+  ///
+  /// In uz, this message translates to:
+  /// **'Dermatolog'**
+  String get cosmoFilterDermatologist;
+
+  /// No description provided for @cosmoFilterAesthetician.
+  ///
+  /// In uz, this message translates to:
+  /// **'Estetik'**
+  String get cosmoFilterAesthetician;
+
+  /// No description provided for @cosmoFilterInjection.
+  ///
+  /// In uz, this message translates to:
+  /// **'Injeksion'**
+  String get cosmoFilterInjection;
+
+  /// No description provided for @cosmoPhone.
+  ///
+  /// In uz, this message translates to:
+  /// **'Telefon'**
+  String get cosmoPhone;
 }
 
 class _AppLocalizationsDelegate

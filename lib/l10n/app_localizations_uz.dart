@@ -120,7 +120,12 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String authResendIn(int seconds) {
-    return 'Qayta yuborish — $seconds s';
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: 'Qayta yuborish — $seconds s',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -380,7 +385,12 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String homeStreakDays(int days) {
-    return '$days kun';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days kun',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -472,7 +482,12 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String resultsMoreAdvice(int count) {
-    return '+$count tavsiya';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count tavsiya',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -660,7 +675,12 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String lessonsExerciseCount(int count) {
-    return '$count ta mashq';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ta mashq',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -670,7 +690,12 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String lessonStepCount(int count) {
-    return '$count qadam';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count qadam',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -705,12 +730,22 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String cosmoYears(int years) {
-    return '$years yil';
+    String _temp0 = intl.Intl.pluralLogic(
+      years,
+      locale: localeName,
+      other: '$years yil',
+    );
+    return '$_temp0';
   }
 
   @override
   String cosmoYearsExperience(int years) {
-    return '$years yillik tajriba';
+    String _temp0 = intl.Intl.pluralLogic(
+      years,
+      locale: localeName,
+      other: '$years yillik tajriba',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -735,7 +770,12 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String productsCount(int count) {
-    return '$count ta mahsulot';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ta mahsulot',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -776,4 +816,73 @@ class AppLocalizationsUz extends AppLocalizations {
   String forgotSentTo(String email) {
     return 'Havola $email manziliga yuborildi';
   }
+
+  @override
+  String get commonBack => 'Ortga';
+
+  @override
+  String get commonClose => 'Yopish';
+
+  @override
+  String get commonDone => 'Tayyor';
+
+  @override
+  String get commonRetryShort => 'Qayta';
+
+  @override
+  String get commonSettingsApp => 'Sozlamalar';
+
+  @override
+  String get lessonsHeading => 'Darslar';
+
+  @override
+  String get lessonsIngredients => 'Ingrediyentlar';
+
+  @override
+  String get lessonsArticles => 'Maqolalar';
+
+  @override
+  String get scanResultsHeading => 'Natijalar';
+
+  @override
+  String get scanPrevious => 'Oldingi';
+
+  @override
+  String get scanProblemCause => 'Sababi';
+
+  @override
+  String get scanProblemSolution => 'Yechimi';
+
+  @override
+  String get cosmoHeading => 'Kosmetologlar';
+
+  @override
+  String get cosmoExperience => 'Tajriba';
+
+  @override
+  String get cosmoAddress => 'Manzil';
+
+  @override
+  String get cosmoAbout => 'Mutaxassis haqida';
+
+  @override
+  String get cosmoSpecialties => 'Yo\'nalishlari';
+
+  @override
+  String get cosmoFilterAll => 'Barchasi';
+
+  @override
+  String get cosmoFilterFacialist => 'Facialist';
+
+  @override
+  String get cosmoFilterDermatologist => 'Dermatolog';
+
+  @override
+  String get cosmoFilterAesthetician => 'Estetik';
+
+  @override
+  String get cosmoFilterInjection => 'Injeksion';
+
+  @override
+  String get cosmoPhone => 'Telefon';
 }

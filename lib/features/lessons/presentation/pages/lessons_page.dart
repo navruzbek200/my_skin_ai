@@ -83,7 +83,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Darslar',
+                      context.l10n.lessonsHeading,
                       style: GoogleFonts.nunito(
                         fontSize: 26,
                         fontWeight: FontWeight.w900,
@@ -157,7 +157,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
               child: SectionHeader(
-                title: 'Ingrediyentlar',
+                title: context.l10n.lessonsIngredients,
                 count: lessons.length,
               ),
             ),
@@ -176,7 +176,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-              child: SectionHeader(title: 'Maqolalar', count: articles.length),
+              child: SectionHeader(title: context.l10n.lessonsArticles, count: articles.length),
             ),
           ),
           SliverPadding(

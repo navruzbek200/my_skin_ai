@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:real_beauty_ai/core/l10n/localized_text.dart';
+import 'package:real_beauty_ai/data/product_vocabulary.dart';
 import 'package:real_beauty_ai/data/products_data.dart';
 
 /// Concern name (matches SkinConcern.name) → relevant product categories.
@@ -48,11 +49,16 @@ class ProductRepository {
   /// stands in when it is not — so an untranslated product reads in Uzbek
   /// instead of showing a blank line.
   static LocalizedText _text(Map<String, dynamic> d, String key) {
-    final uz = d[key] as String? ?? '';
+    final uz = (d[key] as String? ?? '').trim();
+    if (uz.isEmpty) return const LocalizedText.same('');
+    // Beneath the explicit columns: the claim is translated term by term from
+    // the local vocabulary, so the line reads in the interface language even
+    // though the catalogue has no translated columns yet.
+    final fallback = ProductVocabulary.translate(uz);
     return LocalizedText(
       uz,
-      d['${key}_ru'] as String? ?? uz,
-      d['${key}_en'] as String? ?? uz,
+      d['${key}_ru'] as String? ?? fallback.ru,
+      d['${key}_en'] as String? ?? fallback.en,
     );
   }
 
@@ -74,7 +80,11 @@ class ProductRepository {
     final en = sibling('en');
     return [
       for (var i = 0; i < uz.length; i++)
-        LocalizedText(uz[i], ru?[i] ?? uz[i], en?[i] ?? uz[i]),
+        () {
+          final fallback = ProductVocabulary.translate(uz[i]);
+          return LocalizedText(
+              uz[i], ru?[i] ?? fallback.ru, en?[i] ?? fallback.en);
+        }(),
     ];
   }
 }
