@@ -210,11 +210,17 @@ def main() -> None:
         if too_small:
             soft.append((pid, width))
 
-        benefits = [
-            b.strip()
-            for b in (row.get("benefits") or "").split("|")
-            if b.strip()
-        ]
+        def pipe(col: str) -> list[str]:
+            return [b.strip() for b in (row.get(col) or "").split("|") if b.strip()]
+
+        benefits = pipe("benefits")
+        # The translated columns ride along only when they line up entry for
+        # entry with the Uzbek one: the app zips the lists by index, so a row
+        # that gained or lost a bullet in translation would pair the wrong
+        # sentences together. Dropping the column is the safe failure — the app
+        # then falls back to its local vocabulary.
+        benefits_ru = pipe("benefits_ru")
+        benefits_en = pipe("benefits_en")
 
         seed.append(
             {
@@ -231,6 +237,29 @@ def main() -> None:
                 "category": row["category"].strip(),
                 "benefits": benefits,
                 "order": order,
+                # Optional translations. Absent keys are fine — the app reads
+                # them with a fallback, so a half-translated catalogue still
+                # renders.
+                **(
+                    {"subtitle_ru": row["subtitle_ru"].strip()}
+                    if (row.get("subtitle_ru") or "").strip()
+                    else {}
+                ),
+                **(
+                    {"subtitle_en": row["subtitle_en"].strip()}
+                    if (row.get("subtitle_en") or "").strip()
+                    else {}
+                ),
+                **(
+                    {"benefits_ru": benefits_ru}
+                    if len(benefits_ru) == len(benefits)
+                    else {}
+                ),
+                **(
+                    {"benefits_en": benefits_en}
+                    if len(benefits_en) == len(benefits)
+                    else {}
+                ),
             }
         )
 

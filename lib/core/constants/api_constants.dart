@@ -8,4 +8,4 @@ const String privacyPolicyUrl =
 /// A plain constant rather than `package_info_plus`: the plugin costs a
 /// platform channel round trip at every read, and this only ever appears in one
 /// line of small print. Keep it in step with `version:` in pubspec.yaml.
-const String appVersion = '1.1.1';
+const String appVersion = '1.1.2';

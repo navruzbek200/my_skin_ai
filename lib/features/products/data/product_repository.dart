@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:real_beauty_ai/core/l10n/localized_text.dart';
+import 'package:real_beauty_ai/data/product_copy.g.dart';
 import 'package:real_beauty_ai/data/product_vocabulary.dart';
 import 'package:real_beauty_ai/data/products_data.dart';
 
@@ -51,16 +52,25 @@ class ProductRepository {
   static LocalizedText _text(Map<String, dynamic> d, String key) {
     final uz = (d[key] as String? ?? '').trim();
     if (uz.isEmpty) return const LocalizedText.same('');
-    // Beneath the explicit columns: the claim is translated term by term from
-    // the local vocabulary, so the line reads in the interface language even
-    // though the catalogue has no translated columns yet.
-    final fallback = ProductVocabulary.translate(uz);
+    final fallback = _fallbackFor(uz);
     return LocalizedText(
       uz,
       d['${key}_ru'] as String? ?? fallback.ru,
       d['${key}_en'] as String? ?? fallback.en,
     );
   }
+
+  /// What to show when the Firestore document has no translated column.
+  ///
+  /// Two layers, in order. `productCopy` is the catalogue translated in full
+  /// and compiled into the app, which is what makes the shelf read correctly
+  /// before anyone runs the seed upload — and offline, where Firestore is not
+  /// reachable at all. Beneath it, `ProductVocabulary` translates a line term
+  /// by term, which is all that can be done for copy this build has never
+  /// seen. Failing both, the Uzbek stands: wrong language, but readable, and
+  /// never blank.
+  static LocalizedText _fallbackFor(String uz) =>
+      productCopy[uz] ?? ProductVocabulary.translate(uz);
 
   /// The same fallback, for the bulleted benefits.
   ///
@@ -81,7 +91,7 @@ class ProductRepository {
     return [
       for (var i = 0; i < uz.length; i++)
         () {
-          final fallback = ProductVocabulary.translate(uz[i]);
+          final fallback = _fallbackFor(uz[i]);
           return LocalizedText(
               uz[i], ru?[i] ?? fallback.ru, en?[i] ?? fallback.en);
         }(),
