@@ -59,7 +59,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDJl96pKWwHtbEh9sbZI2rxlHbwrqArgDc',
-    appId: '1:211589998133:ios:d9df8ab04bfc9aba44f37c',
+    appId: '1:211589998133:ios:998145e1ca27d20344f37c',
     messagingSenderId: '211589998133',
     projectId: 'real-beauty-2b6b0',
     storageBucket: 'real-beauty-2b6b0.firebasestorage.app',

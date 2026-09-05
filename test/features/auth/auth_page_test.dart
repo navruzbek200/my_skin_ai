@@ -28,6 +28,10 @@ void main() {
     cubit = _MockAuthCubit();
     when(() => cubit.state).thenReturn(AuthInitial());
     when(() => cubit.hasAccountOnDevice).thenReturn(false);
+    // These tests run on the host, where the Apple sheet cannot open, so the
+    // screen is checked in the shape a non-Apple device sees. The Apple button
+    // has its own test below.
+    when(() => cubit.isAppleSignInAvailable()).thenAnswer((_) async => false);
   });
 
   Future<void> pump(WidgetTester tester, {Locale? locale}) async {
@@ -42,6 +46,39 @@ void main() {
     );
     await tester.pump();
   }
+
+  // ── Sign in with Apple ───────────────────────────────────────────────
+
+  testWidgets('the Apple button is offered where the sheet can open',
+      (tester) async {
+    when(() => cubit.isAppleSignInAvailable()).thenAnswer((_) async => true);
+    await pump(tester);
+    // The FutureBuilder resolves a frame after the first build.
+    await tester.pumpAndSettle();
+    expect(find.text(AppLocalizationsUz().authAppleButton), findsOneWidget);
+  });
+
+  testWidgets('no Apple button where the sheet cannot open', (tester) async {
+    // Android, or iOS below 13. A button that fails on tap is worse than one
+    // that was never offered.
+    when(() => cubit.isAppleSignInAvailable()).thenAnswer((_) async => false);
+    await pump(tester);
+    await tester.pumpAndSettle();
+    expect(find.text(AppLocalizationsUz().authAppleButton), findsNothing);
+    // The other two ways in are untouched by the Apple button's absence.
+    expect(find.text(AppLocalizationsUz().authGoogleButton), findsOneWidget);
+    expect(find.text(AppLocalizationsUz().authContinue), findsOneWidget);
+  });
+
+  testWidgets('tapping Apple asks the cubit, once', (tester) async {
+    when(() => cubit.isAppleSignInAvailable()).thenAnswer((_) async => true);
+    when(() => cubit.signInWithApple()).thenAnswer((_) async {});
+    await pump(tester);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(AppLocalizationsUz().authAppleButton));
+    await tester.pump();
+    verify(() => cubit.signInWithApple()).called(1);
+  });
 
   // ── The validator, without a widget ──────────────────────────────────
   //

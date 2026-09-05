@@ -117,7 +117,14 @@ class _AccountScreenState extends State<AccountScreen>
 
   void _showReAuthSheet() {
     final cubit = context.read<AuthCubit>();
-    final isGoogleUser = cubit.isGoogleOnlyUser;
+    // Read here rather than inside the sheet: the sheet is built from a
+    // different context, and by the time it is disposed the session may
+    // already be gone.
+    final method = cubit.isAppleOnlyUser
+        ? _ReAuthMethod.apple
+        : cubit.isGoogleOnlyUser
+            ? _ReAuthMethod.google
+            : _ReAuthMethod.password;
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -125,7 +132,7 @@ class _AccountScreenState extends State<AccountScreen>
       backgroundColor: Colors.transparent,
       builder: (_) => BlocProvider.value(
         value: cubit,
-        child: _ReAuthSheet(isGoogleUser: isGoogleUser),
+        child: _ReAuthSheet(method: method),
       ),
     );
   }
@@ -519,10 +526,22 @@ class _UnverifiedEmailCard extends StatelessWidget {
 
 // ── Re-auth sheet ─────────────────────────────────────────────
 
-class _ReAuthSheet extends StatefulWidget {
-  const _ReAuthSheet({required this.isGoogleUser});
+/// How the person on this account proves it is theirs before it is deleted.
+///
+/// An account has exactly one of these: a password, or a provider that owns
+/// the identity. Modelled as an enum rather than a pair of booleans so adding
+/// Apple could not leave a `!isGoogleUser` branch quietly meaning "password"
+/// when it now also means "Apple".
+enum _ReAuthMethod { password, google, apple }
 
-  final bool isGoogleUser;
+class _ReAuthSheet extends StatefulWidget {
+  const _ReAuthSheet({required this.method});
+
+  final _ReAuthMethod method;
+
+  /// True when the sheet has no password field — the identity is proved by a
+  /// system sheet instead.
+  bool get isProviderUser => method != _ReAuthMethod.password;
 
   @override
   State<_ReAuthSheet> createState() => _ReAuthSheetState();
@@ -548,12 +567,25 @@ class _ReAuthSheetState extends State<_ReAuthSheet> {
     super.dispose();
   }
 
-  void _submitGoogle() {
+  void _submitProvider() {
     setState(() {
       _loading = true;
       _error = null;
     });
-    context.read<AuthCubit>().reauthenticateWithGoogleAndDelete();
+    final cubit = context.read<AuthCubit>();
+    switch (widget.method) {
+      case _ReAuthMethod.google:
+        cubit.reauthenticateWithGoogleAndDelete();
+      case _ReAuthMethod.apple:
+        // Also revokes the Apple token, which Apple requires on deletion —
+        // see [AuthCubit.reauthenticateWithAppleAndDelete].
+        cubit.reauthenticateWithAppleAndDelete();
+      case _ReAuthMethod.password:
+        // Unreachable: this branch has a field and goes through
+        // _submitPassword. Kept exhaustive so a new method cannot be added
+        // without deciding what it does here.
+        break;
+    }
   }
 
   /// Mails a reset link to the signed-in address and stays put.
@@ -596,16 +628,22 @@ class _ReAuthSheetState extends State<_ReAuthSheet> {
   }
 
   void _onPrimaryTap() =>
-      widget.isGoogleUser ? _submitGoogle() : _submitPassword();
+      widget.isProviderUser ? _submitProvider() : _submitPassword();
 
   /// Second step of the email flow: a reset link is out and we are waiting for
   /// the user to come back with the password they set through it.
   bool get _awaitingReset => _resetSentTo != null;
 
   String _subtitle(AppLocalizations l10n) {
-    if (widget.isGoogleUser) return l10n.accountConfirmGoogleBody;
-    if (_awaitingReset) return l10n.accountResetSentBody(_resetSentTo!);
-    return l10n.accountConfirmPasswordBody;
+    switch (widget.method) {
+      case _ReAuthMethod.google:
+        return l10n.accountConfirmGoogleBody;
+      case _ReAuthMethod.apple:
+        return l10n.accountConfirmAppleBody;
+      case _ReAuthMethod.password:
+        if (_awaitingReset) return l10n.accountResetSentBody(_resetSentTo!);
+        return l10n.accountConfirmPasswordBody;
+    }
   }
 
   @override
@@ -631,7 +669,8 @@ class _ReAuthSheetState extends State<_ReAuthSheet> {
             _passwordCtrl.clear();
           });
         } else if (state is AuthInitial) {
-          // Google picker was dismissed — stop the spinner, stay on the sheet.
+          // The Google picker or the Apple sheet was dismissed — stop the
+          // spinner, stay on this sheet.
           setState(() => _loading = false);
         }
       },
@@ -662,7 +701,7 @@ class _ReAuthSheetState extends State<_ReAuthSheet> {
               const SizedBox(height: 6),
               Text(_subtitle(l10n), style: AppText.bodyMuted),
               const SizedBox(height: 20),
-              if (!widget.isGoogleUser) ...[
+              if (!widget.isProviderUser) ...[
                 AuthField(
                   label: _awaitingReset
                       ? l10n.accountNewPassword
@@ -706,11 +745,13 @@ class _ReAuthSheetState extends State<_ReAuthSheet> {
               ],
               const SizedBox(height: 8),
               _DangerButton(
-                label: widget.isGoogleUser
-                    ? l10n.accountConfirmDeleteGoogle
-                    : l10n.accountConfirmDelete,
+                label: switch (widget.method) {
+                  _ReAuthMethod.google => l10n.accountConfirmDeleteGoogle,
+                  _ReAuthMethod.apple => l10n.accountConfirmDeleteApple,
+                  _ReAuthMethod.password => l10n.accountConfirmDelete,
+                },
                 isLoading: _loading,
-                showGoogleMark: widget.isGoogleUser,
+                showGoogleMark: widget.method == _ReAuthMethod.google,
                 onPressed: _loading ? null : _onPrimaryTap,
               ),
             ],

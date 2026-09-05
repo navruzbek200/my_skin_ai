@@ -93,6 +93,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get authGoogleButton => 'Войти через Google';
 
   @override
+  String get authAppleButton => 'Войти через Apple';
+
+  @override
   String get authPasswordHelper => 'Минимум 6 символов';
 
   @override
@@ -167,6 +170,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get authErrorGoogle => 'Ошибка входа через Google';
+
+  @override
+  String get authErrorApple => 'Ошибка входа через Apple';
+
+  @override
+  String get authErrorAccountExists =>
+      'Этот email уже зарегистрирован другим способом. Войдите тем же способом, что и раньше.';
 
   @override
   String get authErrorPasswordRequired => 'Введите пароль';
@@ -336,6 +346,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Подтвердите через аккаунт Google, чтобы удалить аккаунт.';
 
   @override
+  String get accountConfirmAppleBody =>
+      'Подтвердите через аккаунт Apple, чтобы удалить аккаунт.';
+
+  @override
   String accountResetSentBody(String email) {
     return 'Ссылка для сброса отправлена на $email (проверьте и папку «Спам»). Задайте новый пароль в браузере, затем вернитесь сюда и введите его.';
   }
@@ -348,6 +362,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get accountConfirmDeleteGoogle => 'Подтвердить через Google и удалить';
+
+  @override
+  String get accountConfirmDeleteApple => 'Подтвердить через Apple и удалить';
 
   @override
   String accountVersion(String version) {

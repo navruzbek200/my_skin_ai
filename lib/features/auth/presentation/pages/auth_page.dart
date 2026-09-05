@@ -14,6 +14,7 @@ import 'package:real_beauty_ai/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:real_beauty_ai/features/auth/presentation/pages/auth_message_text.dart';
 import 'package:real_beauty_ai/features/auth/presentation/widgets/auth_widgets.dart';
 import 'package:real_beauty_ai/l10n/app_localizations.dart';
+import 'package:real_beauty_ai/widgets/apple_sign_in_button.dart';
 import 'package:real_beauty_ai/widgets/buttons.dart';
 import 'package:real_beauty_ai/widgets/google_sign_in_button.dart';
 
@@ -54,6 +55,13 @@ class _AuthScreenState extends State<AuthScreen> {
   final _passwordFocus = FocusNode();
   bool _obscure = true;
   bool _submitted = false;
+
+  /// Whether this device can show the Apple sheet. Resolved once, in
+  /// [initState], rather than on every rebuild: the answer cannot change while
+  /// the screen is open, and a Future rebuilt inside `build` would re-run the
+  /// platform call on every keystroke in the email field.
+  late final Future<bool> _appleAvailable =
+      context.read<AuthCubit>().isAppleSignInAvailable();
 
   /// The corrected address offered under the field when the domain looks like a
   /// misspelling of one everybody uses. Never applied on its own — a domain
@@ -238,28 +246,41 @@ class _AuthScreenState extends State<AuthScreen> {
                     : AutovalidateMode.disabled,
                 child: AutofillGroup(
                   child: ListView(
-                    padding: EdgeInsets.fromLTRB(24, 12, 24, padding.bottom + 24),
+                    // Trimmed from the old 12/24: the backdrop above already
+                    // gives the top of the screen its own visual weight, and a
+                    // wide gap on top of that read as the content drifting
+                    // rather than sitting anchored to it.
+                    padding: EdgeInsets.fromLTRB(24, 4, 24, padding.bottom + 20),
                     children: [
                       Center(
                         child: Semantics(
                           label: l10n.appName,
                           image: true,
-                          child: Image.asset('assets/splash.png', height: 96),
+                          // 96 read as an afterthought above a display-weight
+                          // heading; this is the size at which the mark reads
+                          // as the screen's anchor rather than a stamp in the
+                          // corner of it.
+                          child: Image.asset('assets/splash.png', height: 120),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 18),
                       Text(
                         returning ? l10n.authWelcomeBack : l10n.authWelcome,
                         style: AppText.display,
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 7),
                       Text(
                         returning
                             ? l10n.authSubtitleReturning
                             : l10n.authSubtitle,
-                        style: AppText.bodyMuted,
+                        // A step heavier than plain [bodyMuted]: the colour
+                        // stays the same AA-checked muted tone, only the
+                        // weight moves, which is what let the line compete
+                        // with the heading instead of fading under it.
+                        style:
+                            AppText.bodyMuted.copyWith(fontWeight: FontWeight.w600),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 22),
                       AuthField(
                         label: l10n.commonEmail,
                         icon: Icons.mail_outline_rounded,
@@ -279,7 +300,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           onTap: _applySuggestion,
                         ),
                       ],
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 12),
                       AuthField(
                         label: l10n.commonPassword,
                         helperText: l10n.authPasswordHelper,
@@ -304,7 +325,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           hideLabel: l10n.authHidePassword,
                         ),
                       ),
-                      const SizedBox(height: 22),
+                      const SizedBox(height: 20),
                       BlocBuilder<AuthCubit, AuthState>(
                         builder: (context, state) {
                           final loading = state is AuthLoading;
@@ -337,11 +358,29 @@ class _AuthScreenState extends State<AuthScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 6),
                       OrDivider(label: l10n.authOr),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 16),
+                      // Above Google, per Apple's Human Interface Guidelines:
+                      // where Sign in with Apple is offered it goes first in
+                      // the list of sign-in options. Hidden entirely on
+                      // Android and on iOS below 13, where the sheet cannot
+                      // open — an option that fails on tap is worse than one
+                      // that was never offered.
+                      FutureBuilder<bool>(
+                        future: _appleAvailable,
+                        builder: (context, snapshot) {
+                          if (snapshot.data != true) {
+                            return const SizedBox.shrink();
+                          }
+                          return const Padding(
+                            padding: EdgeInsets.only(bottom: 10),
+                            child: AppleSignInButton(),
+                          );
+                        },
+                      ),
                       const GoogleSignInButton(),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
                       const _PrivacyNote(),
                     ],
                   ),

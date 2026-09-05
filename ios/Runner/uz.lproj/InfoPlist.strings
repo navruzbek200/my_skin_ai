@@ -1,0 +1,2 @@
+/* Face scan. The frames are analysed on the device and never stored or sent. */
+"NSCameraUsageDescription" = "Teri tahlilini bajarish uchun kamera kerak. Tasvir telefoningizda qayta ishlanadi, saqlanmaydi va hech qayerga yuborilmaydi.";

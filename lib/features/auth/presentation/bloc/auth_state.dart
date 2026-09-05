@@ -24,6 +24,13 @@ enum AuthMessage {
   requiresRecentLogin,
   sessionExpired,
   googleFailed,
+  appleFailed,
+
+  /// Apple returned an address that already belongs to an account created with
+  /// a different provider. Firebase refuses to sign in rather than silently
+  /// merging the two, so the person is pointed back at the way in they already
+  /// have — see [AuthCubit.signInWithApple].
+  accountExistsWithOtherProvider,
   passwordRequired,
   notVerifiedYet,
 
@@ -49,7 +56,7 @@ class AuthInitial extends AuthState {}
 /// without this a tap on "Davom etish" spins the Google button too and the
 /// person cannot tell which one they actually pressed. Named [AuthMethod]
 /// rather than the obvious AuthProvider, which firebase_auth already exports.
-enum AuthMethod { email, google }
+enum AuthMethod { email, google, apple }
 
 class AuthLoading extends AuthState {
   AuthLoading([this.method = AuthMethod.email]);

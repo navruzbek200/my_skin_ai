@@ -50,8 +50,11 @@ class AuthField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // A rounder radius than the app's default `md` — pill buttons already sit
+    // at 30, and a field this close to them read as a different, sharper
+    // component when it used the same corner as a plain card.
     OutlineInputBorder outline(Color color, double width) => OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.md),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
           borderSide: BorderSide(color: color, width: width),
         );
 
@@ -91,7 +94,7 @@ class AuthField extends StatelessWidget {
           color: AppColors.danger,
           fontWeight: FontWeight.w600,
         ),
-        prefixIcon: Icon(icon, color: AppColors.inkFaint, size: 20),
+        prefixIcon: Icon(icon, color: AppColors.cta.withValues(alpha: 0.7), size: 20),
         suffixIcon: suffix,
         filled: true,
         fillColor: AppColors.surfaceAlt,
@@ -100,8 +103,14 @@ class AuthField extends StatelessWidget {
         // button they sit above.
         contentPadding:
             const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-        border: outline(AppColors.borderStrong, 1.4),
-        enabledBorder: outline(AppColors.borderStrong, 1.4),
+        // [AppColors.borderStrong] is tuned to just clear the 3:1 boundary
+        // contrast a UI component needs against this fill — dropping it
+        // entirely would leave a field with no visible edge for anyone who
+        // cannot rely on the faint fill tint alone. A thinner stroke keeps
+        // that floor while reading as a finer line than the 1.4 used on the
+        // heavier outlined buttons.
+        border: outline(AppColors.borderStrong, 1.1),
+        enabledBorder: outline(AppColors.borderStrong, 1.1),
         focusedBorder: outline(AppColors.cta, 2),
         errorBorder: outline(AppColors.danger, 1.5),
         focusedErrorBorder: outline(AppColors.danger, 2),
@@ -147,7 +156,7 @@ class PasswordVisibilityToggle extends StatelessWidget {
   }
 }
 
-/// "or" between the email form and the Google button.
+/// "or" between the email form and the provider buttons.
 class OrDivider extends StatelessWidget {
   const OrDivider({super.key, required this.label});
 
@@ -155,13 +164,28 @@ class OrDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const line = Expanded(child: Divider(color: AppColors.border, height: 1));
+    // Bumped from the hairline [AppColors.border] and [labelMuted]: at that
+    // weight the row sat between two much heavier buttons and disappeared —
+    // decorative dividers can afford to be that quiet, but this one is a
+    // labelled break in the page's one column, and needs to hold its own line.
+    final line = Expanded(
+      child: Divider(
+        color: AppColors.borderStrong.withValues(alpha: 0.55),
+        height: 1,
+      ),
+    );
     return Row(
       children: [
         line,
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14),
-          child: Text(label, style: AppText.labelMuted),
+          child: Text(
+            label,
+            style: AppText.label.copyWith(
+              color: AppColors.muted,
+              letterSpacing: 0.3,
+            ),
+          ),
         ),
         line,
       ],
@@ -172,23 +196,53 @@ class OrDivider extends StatelessWidget {
 /// A soft accent wash behind the top of an auth screen, echoing the splash
 /// bloom so sign-in reads as a continuation of the arrival rather than a
 /// different app.
+///
+/// Two radial blooms rather than one flat linear fade: a single top-to-bottom
+/// gradient reads as a coloured rectangle behind the content, where a pair of
+/// off-centre glows — one from the accent, one from the deeper CTA purple —
+/// reads as light rather than as paint, which is the difference between a
+/// screen that looks tinted and one that looks lit.
 class AuthBackdrop extends StatelessWidget {
   const AuthBackdrop({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.sizeOf(context).height * 0.46;
     return IgnorePointer(
       child: SizedBox(
-        height: MediaQuery.sizeOf(context).height * 0.4,
+        height: height,
         width: double.infinity,
-        child: const DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0x339B7DD4), Color(0x009B7DD4)],
+        child: Stack(
+          children: [
+            Positioned(
+              top: -height * 0.28,
+              left: -60,
+              right: -60,
+              height: height * 0.9,
+              child: const DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [Color(0x3D9B7DD4), Color(0x009B7DD4)],
+                  ),
+                ),
+              ),
             ),
-          ),
+            Positioned(
+              top: -height * 0.1,
+              right: -90,
+              width: height * 0.75,
+              height: height * 0.75,
+              child: const DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [Color(0x224A3A9A), Color(0x004A3A9A)],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

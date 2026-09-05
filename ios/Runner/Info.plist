@@ -14,6 +14,12 @@
     <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
+    <key>CFBundleLocalizations</key>
+    <array>
+       <string>en</string>
+       <string>ru</string>
+       <string>uz</string>
+    </array>
     <key>CFBundleName</key>
     <string>My Skin AI</string>
     <key>CFBundlePackageType</key>
@@ -42,7 +48,7 @@
     <key>LSRequiresIPhoneOS</key>
     <true/>
     <key>NSCameraUsageDescription</key>
-    <string>Teri tahlilini bajarish uchun kamera kerak. Tasvir telefoningizda qayta ishlanadi va saqlanmaydi.</string>
+    <string>Camera access is needed to analyse your skin. The image is processed on your phone and is never saved or uploaded.</string>
     <key>UIApplicationSceneManifest</key>
     <dict>
        <key>UIApplicationSupportsMultipleScenes</key>

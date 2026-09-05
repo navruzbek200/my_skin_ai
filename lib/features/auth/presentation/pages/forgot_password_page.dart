@@ -139,16 +139,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final l10n = context.l10n;
     return [
       const HaloIcon(icon: Icons.lock_reset_rounded, size: 84),
-      const SizedBox(height: 22),
+      const SizedBox(height: 18),
       Text(l10n.forgotTitle,
           textAlign: TextAlign.center, style: AppText.display),
-      const SizedBox(height: 8),
+      const SizedBox(height: 7),
       Text(
         l10n.forgotSubtitle,
         textAlign: TextAlign.center,
-        style: AppText.bodyMuted,
+        // Same bump as the sign-in screen's subtitle: same AA-checked muted
+        // colour, a step heavier so it reads as part of the heading block
+        // rather than fading under it.
+        style: AppText.bodyMuted.copyWith(fontWeight: FontWeight.w600),
       ),
-      const SizedBox(height: 26),
+      const SizedBox(height: 22),
       AuthField(
         label: l10n.commonEmail,
         icon: Icons.mail_outline_rounded,
@@ -204,9 +207,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   List<Widget> _sentBlock(BuildContext context) {
     final l10n = context.l10n;
     return [
-      const SizedBox(height: 8),
+      const SizedBox(height: 6),
       const HaloIcon(icon: Icons.mark_email_read_outlined, size: 84),
-      const SizedBox(height: 22),
+      const SizedBox(height: 18),
       Text(l10n.forgotSentTitle,
           textAlign: TextAlign.center, style: AppText.display),
       const SizedBox(height: 10),

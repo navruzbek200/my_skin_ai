@@ -3,46 +3,313 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Skin AI – Maxfiylik Siyosati</title>
+  <title>My Skin AI – Privacy Policy / Maxfiylik Siyosati / Политика конфиденциальности</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 720px; margin: 40px auto; padding: 0 20px; color: #1a1a1a; line-height: 1.7; }
-    h1 { font-size: 1.8rem; margin-bottom: 0.3em; }
-    h2 { font-size: 1.2rem; margin-top: 2em; }
-    .updated { color: #666; font-size: 0.9rem; margin-bottom: 2em; }
-    .highlight { background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 16px; border-radius: 4px; margin: 1.5em 0; }
-    a { color: #0066cc; }
+    :root {
+      --ink: #2D2050;
+      --muted: #655F85;
+      --cta: #4A3A9A;
+      --surface-alt: #F6F4FC;
+      --border: #E4E0F2;
+      --highlight-bg: #FFF8E6;
+      --highlight-line: #E0A800;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 32px 20px 80px;
+      color: var(--ink);
+      line-height: 1.7;
+      background: #fff;
+    }
+    h1 { font-size: 1.7rem; margin: 0 0 0.3em; line-height: 1.25; }
+    h2 { font-size: 1.15rem; margin-top: 2em; color: var(--cta); }
+    .updated { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5em; }
+    .highlight {
+      background: var(--highlight-bg);
+      border-left: 4px solid var(--highlight-line);
+      padding: 12px 16px;
+      border-radius: 4px;
+      margin: 1.4em 0;
+    }
+    a { color: var(--cta); }
+    table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 0.94rem; }
+    th, td { text-align: left; border-bottom: 1px solid var(--border); padding: 10px 8px; vertical-align: top; }
+    th { color: var(--muted); font-size: 0.85rem; font-weight: 600; }
+    ul { padding-left: 22px; }
+    li { margin-bottom: 0.4em; }
+    /* Language switcher */
+    .langbar {
+      display: flex;
+      gap: 6px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px;
+      width: fit-content;
+      margin-bottom: 26px;
+      position: sticky;
+      top: 12px;
+      z-index: 10;
+    }
+    .langbar button {
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 7px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      min-height: 40px;
+    }
+    .langbar button[aria-selected="true"] {
+      background: #fff;
+      color: var(--cta);
+      box-shadow: 0 1px 3px rgba(45,32,80,0.12);
+    }
+    .langbar button:focus-visible { outline: 2px solid var(--cta); outline-offset: 2px; }
+    section[hidden] { display: none; }
   </style>
 </head>
 <body>
-  <h1>My Skin AI – Maxfiylik Siyosati</h1>
-  <p class="updated">Oxirgi yangilanish: 2026-yil 29-iyul</p>
 
-  <h2>1. Yig'iladigan ma'lumotlar</h2>
-  <p>Ro'yxatdan o'tishda ismingiz va e-pochta manzilingiz Firebase Authentication orqali saqlanadi. Teri tahlili uchun bergan savolnoma javoblaringiz esa faqat qurilmangizda saqlanadi.</p>
+<div class="langbar" role="tablist" aria-label="Language">
+  <button role="tab" data-lang="uz" aria-selected="true">UZ</button>
+  <button role="tab" data-lang="ru" aria-selected="false">RU</button>
+  <button role="tab" data-lang="en" aria-selected="false">EN</button>
+</div>
+
+<!-- ══════════════════ UZBEK ══════════════════ -->
+<section id="uz">
+  <h1>My Skin AI – Maxfiylik Siyosati</h1>
+  <p class="updated">
+    Ilova: <strong>My Skin AI</strong> (<code>uz.realbeauty.app</code>) · Ishlab chiquvchi: Real Beauty<br />
+    Oxirgi yangilanish: 2026-yil 5-sentabr
+  </p>
+
+  <h2>1. Qanday ma'lumot yig'amiz</h2>
+  <table>
+    <thead><tr><th>Ma'lumot</th><th>Qachon</th><th>Nima uchun</th></tr></thead>
+    <tbody>
+      <tr><td>E-pochta manzili</td><td>Ro'yxatdan o'tganda yoki Google/Apple orqali kirganda</td><td>Hisobingizni yaratish va unga kirish</td></tr>
+      <tr><td>Parol</td><td>Faqat e-pochta bilan ro'yxatdan o'tganda</td><td>Firebase Authentication tomonidan shifrlangan holda saqlanadi. Biz uni ochiq ko'rinishda ko'rmaymiz</td></tr>
+      <tr><td>Ism</td><td>Faqat Apple yoki Google uzatsa</td><td>Hisobingiz nomi sifatida. E-pochta bilan ro'yxatdan o'tishda ism umuman so'ralmaydi</td></tr>
+      <tr><td>Hisob identifikatori (uid)</td><td>Hisob yaratilganda</td><td>Hisobingizni ichki tarzda ajratish uchun</td></tr>
+      <tr><td>Nosozlik hisobotlari</td><td>Ilova ishdan chiqqanda</td><td>Firebase Crashlytics. Hisob identifikatoringiz (uid) hisobotga biriktiriladi — e-pochtangiz yoki ismingiz emas</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Biz yig'MAYDIGAN narsalar:</strong> joylashuv, kontaktlar, sog'liq ma'lumotlari, reklama identifikatorlari. Ilovada reklama tarmoqlari, tahlil (analytics) yoki kuzatuv (tracking) vositalari <strong>umuman yo'q</strong>.</p>
 
   <h2>2. Kamera va yuz skaneri</h2>
   <div class="highlight">
-    <strong>Yuz skaneri bosqichida kamera tasviri faqat qurilma ichida, mahalliy tarzda (on-device) yuz holatini aniqlash uchun ishlatiladi. Hech qanday rasm yoki video serverga yoki uchinchi tomon xizmatiga yuborilmaydi va hech qayerda saqlanmaydi.</strong>
+    <strong>Yuz skaneri bosqichida kamera tasviri faqat qurilma ichida, mahalliy tarzda (on-device) yuz holatini aniqlash uchun ishlatiladi. Hech qanday rasm yoki video olinmaydi, saqlanmaydi, serverga yoki uchinchi tomon xizmatiga yuborilmaydi.</strong>
   </div>
-  <p>Teri tahlili natijasi to'liq savolnoma javoblaringiz asosida, qurilmangizning o'zida hisoblanadi.</p>
+  <p>Kamera ruxsati faqat skaner ekranida so'raladi, ilova ochilganda emas. Ruxsat bermasangiz ham ilova to'liq ishlaydi — savolnoma o'zi to'liq teri profilini beradi.</p>
 
-  <h2>3. Ma'lumotlarni saqlash</h2>
-  <p>Yuz rasmlari yoki videolari na bizning serverlarimizda, na Firebase'da saqlanmaydi. Tahlil natijalari (teri turi, tavsiyalar) faqat qurilmangizda ko'rsatiladi va saqlanadi.</p>
+  <h2>3. Qurilmangizda qoladigan ma'lumotlar</h2>
+  <p>Teri profili, savolnoma javoblari, kunlik parvarish rejasi va skanerlar tarixi <strong>faqat telefoningizda</strong> saqlanadi. Bular bizning serverlarimizga yuborilmaydi.</p>
 
-  <h2>4. Natijalar haqida</h2>
+  <h2>4. Kirish usullari</h2>
+  <ul>
+    <li><strong>E-pochta va parol</strong> — Firebase Authentication orqali.</li>
+    <li><strong>Google bilan kirish</strong> — Google sizning e-pochtangizni va (agar mavjud bo'lsa) ismingizni uzatadi.</li>
+    <li><strong>Apple bilan kirish</strong> — Apple sizga e-pochtangizni yashirish imkonini beradi. <em>"Hide My Email"</em> tanlasangiz, biz faqat Apple yaratgan maxsus yo'naltiruvchi manzilni (<code>@privaterelay.appleid.com</code>) olamiz va sizning haqiqiy manzilingizni hech qachon ko'rmaymiz. Ismni Apple faqat birinchi marta kirganda uzatadi.</li>
+  </ul>
+
+  <h2>5. Kim bilan bo'lishamiz</h2>
+  <p>Ma'lumotlaringizni sotmaymiz va reklama uchun ishlatmaymiz. Faqat quyidagi xizmatlardan foydalanamiz:</p>
+  <ul>
+    <li><strong>Google Firebase</strong> (Authentication, Firestore, Crashlytics) — hisob va nosozlik hisobotlari.</li>
+    <li><strong>Apple</strong> — faqat "Apple bilan kirish" ishlatilganda.</li>
+  </ul>
+
+  <h2>6. Natijalar haqida</h2>
   <div class="highlight">
-    <strong>Ilovadagi teri tahlili faqat ma'lumot beruvchi xarakterga ega va tibbiy tashxis hisoblanmaydi. Natija savolnoma javoblaringiz va ilova ichidagi mantiq (algoritm) asosida hisoblanadi — u har doim ham 100% aniq bo'lmasligi mumkin.</strong>
+    <strong>Ilovadagi teri tahlili faqat kosmetik maslahat xarakteriga ega va tibbiy tashxis emas.</strong> Natija savolnoma javoblaringiz va ilova ichidagi mantiq asosida hisoblanadi. Ilova kasallik aniqlamaydi va davolamaydi.
   </div>
-  <p>Terida jiddiy muammo yoki tashvish bo'lsa, iltimos, malakali dermatolog-shifokorga murojaat qiling. Ilova shifokor maslahatini almashtirmaydi.</p>
+  <p>Terida jiddiy muammo bo'lsa, malakali dermatologga murojaat qiling. Ilova shifokor maslahatini almashtirmaydi.</p>
 
-  <h2>5. Akkauntni o'chirish</h2>
-  <p>Ilova ichida istalgan vaqtda hisobingizni butunlay o'chirishingiz mumkin (Hisob → Akkauntni o'chirish). Bu amal Firebase'dagi hisob yozuvingizni va qurilmangizdagi barcha mahalliy ma'lumotlarni butunlay va qaytarib bo'lmas tarzda o'chiradi.</p>
-  <p>Ilovaga kira olmasangiz, o'chirish so'rovini <a href="delete_account.html">Akkauntni o'chirish</a> sahifasi orqali yuborishingiz mumkin.</p>
+  <h2>7. Akkauntni o'chirish</h2>
+  <p>Ilova ichida istalgan vaqtda: <strong>Hisob → Akkauntni o'chirish</strong>. O'chirish darhol va qaytarib bo'lmaydigan tarzda bajariladi va quyidagilarni o'z ichiga oladi:</p>
+  <ul>
+    <li>Firebase Authentication'dagi hisob yozuvingiz;</li>
+    <li>qurilmangizdagi barcha mahalliy ma'lumotlar;</li>
+    <li>Apple bilan kirgan bo'lsangiz — ilovaning Apple ID'ingizga ulanishi ham bekor qilinadi, ya'ni <em>Sozlamalar → Apple Account → Sign in with Apple</em> ro'yxatidan yo'qoladi.</li>
+  </ul>
+  <p>Ilovaga kira olmasangiz: <a href="delete_account.html">Akkauntni o'chirish sahifasi</a>.</p>
 
-  <h2>6. Bolalar maxfiyligi</h2>
-  <p>Ilovamiz 13 yoshdan kichik bolalarga mo'ljallanmagan va ulardan ma'lumot yig'maymiz.</p>
+  <h2>8. Bolalar maxfiyligi</h2>
+  <p>Ilova 13 yoshdan kichik bolalarga mo'ljallanmagan va ulardan bilib turib ma'lumot yig'maymiz.</p>
 
-  <h2>7. Bog'lanish</h2>
-  <p>Savollar uchun: <a href="mailto:navrozbekbektemirov7@gmail.com">navrozbekbektemirov7@gmail.com</a></p>
+  <h2>9. Bog'lanish</h2>
+  <p><a href="mailto:navrozbekbektemirov7@gmail.com">navrozbekbektemirov7@gmail.com</a></p>
+</section>
+
+<!-- ══════════════════ RUSSIAN ══════════════════ -->
+<section id="ru" hidden>
+  <h1>My Skin AI – Политика конфиденциальности</h1>
+  <p class="updated">
+    Приложение: <strong>My Skin AI</strong> (<code>uz.realbeauty.app</code>) · Разработчик: Real Beauty<br />
+    Последнее обновление: 5 сентября 2026 г.
+  </p>
+
+  <h2>1. Какие данные мы собираем</h2>
+  <table>
+    <thead><tr><th>Данные</th><th>Когда</th><th>Зачем</th></tr></thead>
+    <tbody>
+      <tr><td>Адрес электронной почты</td><td>При регистрации или входе через Google/Apple</td><td>Создание аккаунта и вход в него</td></tr>
+      <tr><td>Пароль</td><td>Только при регистрации по email</td><td>Хранится в зашифрованном виде в Firebase Authentication. Мы не видим его в открытом виде</td></tr>
+      <tr><td>Имя</td><td>Только если его передаёт Apple или Google</td><td>Как имя вашего аккаунта. При регистрации по email имя вообще не запрашивается</td></tr>
+      <tr><td>Идентификатор аккаунта (uid)</td><td>При создании аккаунта</td><td>Внутреннее различение аккаунтов</td></tr>
+      <tr><td>Отчёты о сбоях</td><td>При сбое приложения</td><td>Firebase Crashlytics. К отчёту прикрепляется идентификатор аккаунта (uid) — не ваш email и не имя</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Что мы НЕ собираем:</strong> геолокацию, контакты, медицинские данные, рекламные идентификаторы. В приложении <strong>полностью отсутствуют</strong> рекламные сети, аналитика и трекинг.</p>
+
+  <h2>2. Камера и сканер лица</h2>
+  <div class="highlight">
+    <strong>На этапе сканирования изображение с камеры используется только внутри устройства (on-device) для определения положения лица. Никакие фото или видео не сохраняются и не передаются на сервер или третьим лицам.</strong>
+  </div>
+  <p>Доступ к камере запрашивается только на экране сканера, а не при запуске. Если вы откажете, приложение продолжит работать полностью — анкета сама даёт полный профиль кожи.</p>
+
+  <h2>3. Данные, которые остаются на устройстве</h2>
+  <p>Профиль кожи, ответы анкеты, ежедневный план ухода и история сканирований хранятся <strong>только на вашем телефоне</strong> и не передаются на наши серверы.</p>
+
+  <h2>4. Способы входа</h2>
+  <ul>
+    <li><strong>Email и пароль</strong> — через Firebase Authentication.</li>
+    <li><strong>Вход через Google</strong> — Google передаёт ваш email и (при наличии) имя.</li>
+    <li><strong>Вход через Apple</strong> — Apple позволяет скрыть ваш email. При выборе <em>«Скрыть мой e-mail»</em> мы получаем только специальный ретранслирующий адрес (<code>@privaterelay.appleid.com</code>) и никогда не видим ваш настоящий адрес. Имя Apple передаёт только при первом входе.</li>
+  </ul>
+
+  <h2>5. Кому мы передаём данные</h2>
+  <p>Мы не продаём ваши данные и не используем их для рекламы. Мы используем только:</p>
+  <ul>
+    <li><strong>Google Firebase</strong> (Authentication, Firestore, Crashlytics) — аккаунт и отчёты о сбоях.</li>
+    <li><strong>Apple</strong> — только при использовании «Входа через Apple».</li>
+  </ul>
+
+  <h2>6. О результатах</h2>
+  <div class="highlight">
+    <strong>Анализ кожи в приложении носит исключительно косметический рекомендательный характер и не является медицинским диагнозом.</strong> Результат рассчитывается на основе ваших ответов и внутренней логики приложения. Приложение не диагностирует и не лечит заболевания.
+  </div>
+  <p>При серьёзных проблемах с кожей обратитесь к квалифицированному дерматологу. Приложение не заменяет консультацию врача.</p>
+
+  <h2>7. Удаление аккаунта</h2>
+  <p>В любой момент внутри приложения: <strong>Аккаунт → Удалить аккаунт</strong>. Удаление происходит немедленно и необратимо и включает:</p>
+  <ul>
+    <li>вашу запись в Firebase Authentication;</li>
+    <li>все локальные данные на устройстве;</li>
+    <li>если вы входили через Apple — связь приложения с вашим Apple ID также отзывается, и оно исчезает из списка <em>Настройки → Apple Account → Вход с Apple</em>.</li>
+  </ul>
+  <p>Если вы не можете войти: <a href="delete_account.html">страница удаления аккаунта</a>.</p>
+
+  <h2>8. Конфиденциальность детей</h2>
+  <p>Приложение не предназначено для детей младше 13 лет, и мы сознательно не собираем их данные.</p>
+
+  <h2>9. Контакты</h2>
+  <p><a href="mailto:navrozbekbektemirov7@gmail.com">navrozbekbektemirov7@gmail.com</a></p>
+</section>
+
+<!-- ══════════════════ ENGLISH ══════════════════ -->
+<section id="en" hidden>
+  <h1>My Skin AI – Privacy Policy</h1>
+  <p class="updated">
+    App: <strong>My Skin AI</strong> (<code>uz.realbeauty.app</code>) · Developer: Real Beauty<br />
+    Last updated: 5 September 2026
+  </p>
+
+  <h2>1. What we collect</h2>
+  <table>
+    <thead><tr><th>Data</th><th>When</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Email address</td><td>On sign-up, or when signing in with Google or Apple</td><td>To create and access your account</td></tr>
+      <tr><td>Password</td><td>Only when signing up with email</td><td>Stored encrypted by Firebase Authentication. We never see it in plain text</td></tr>
+      <tr><td>Name</td><td>Only when Apple or Google provides one</td><td>As your account's display name. Signing up with email never asks for a name at all</td></tr>
+      <tr><td>Account identifier (uid)</td><td>When the account is created</td><td>To distinguish accounts internally</td></tr>
+      <tr><td>Crash reports</td><td>When the app crashes</td><td>Firebase Crashlytics. Your account identifier (uid) is attached to the report — not your email or name</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>What we do NOT collect:</strong> location, contacts, health data, or advertising identifiers. The app contains <strong>no</strong> advertising networks, analytics, or tracking of any kind.</p>
+
+  <h2>2. Camera and face scan</h2>
+  <div class="highlight">
+    <strong>During the face scan, the camera feed is used only on your device, locally, to detect the position of your face. No photo or video is captured, stored, or sent to any server or third party.</strong>
+  </div>
+  <p>Camera permission is requested only on the scan screen, never at launch. If you decline it, the app still works fully — the questionnaire alone produces a complete skin profile.</p>
+
+  <h2>3. Data that stays on your device</h2>
+  <p>Your skin profile, questionnaire answers, daily routine and scan history are stored <strong>only on your phone</strong>. They are never sent to our servers.</p>
+
+  <h2>4. Sign-in methods</h2>
+  <ul>
+    <li><strong>Email and password</strong> — through Firebase Authentication.</li>
+    <li><strong>Sign in with Google</strong> — Google provides your email address and, if available, your name.</li>
+    <li><strong>Sign in with Apple</strong> — Apple lets you keep your email address private. If you choose <em>Hide My Email</em>, we receive only Apple's private relay address (<code>@privaterelay.appleid.com</code>) and never see your real address. Apple provides your name only on the very first sign-in.</li>
+  </ul>
+
+  <h2>5. Who we share data with</h2>
+  <p>We do not sell your data and never use it for advertising. We use only:</p>
+  <ul>
+    <li><strong>Google Firebase</strong> (Authentication, Firestore, Crashlytics) — for your account and crash reports.</li>
+    <li><strong>Apple</strong> — only when Sign in with Apple is used.</li>
+  </ul>
+
+  <h2>6. About the results</h2>
+  <div class="highlight">
+    <strong>The skin analysis in this app is cosmetic guidance only and is not a medical diagnosis.</strong> The result is calculated from your questionnaire answers and the app's own logic. The app does not diagnose or treat any medical condition.
+  </div>
+  <p>If you have a serious skin concern, please consult a qualified dermatologist. This app is not a substitute for medical advice.</p>
+
+  <h2>7. Deleting your account</h2>
+  <p>At any time, inside the app: <strong>Account → Delete account</strong>. Deletion is immediate and irreversible, and covers:</p>
+  <ul>
+    <li>your Firebase Authentication record;</li>
+    <li>all local data on your device;</li>
+    <li>if you signed in with Apple, the app's authorization is also revoked with Apple, so it disappears from <em>Settings → Apple Account → Sign in with Apple</em>.</li>
+  </ul>
+  <p>If you cannot sign in: <a href="delete_account.html">account deletion page</a>.</p>
+
+  <h2>8. Children's privacy</h2>
+  <p>This app is not intended for children under 13, and we do not knowingly collect their data.</p>
+
+  <h2>9. Contact</h2>
+  <p><a href="mailto:navrozbekbektemirov7@gmail.com">navrozbekbektemirov7@gmail.com</a></p>
+</section>
+
+<script>
+(function () {
+  var buttons = Array.prototype.slice.call(document.querySelectorAll('.langbar button'));
+  var sections = { uz: document.getElementById('uz'), ru: document.getElementById('ru'), en: document.getElementById('en') };
+
+  function show(lang) {
+    Object.keys(sections).forEach(function (k) { sections[k].hidden = (k !== lang); });
+    buttons.forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.lang === lang)); });
+    document.documentElement.lang = lang;
+    try { localStorage.setItem('msai-policy-lang', lang); } catch (e) {}
+  }
+
+  buttons.forEach(function (b) {
+    b.addEventListener('click', function () { show(b.dataset.lang); });
+  });
+
+  // Remembered choice first, then the browser's language, then Uzbek.
+  var initial = null;
+  try { initial = localStorage.getItem('msai-policy-lang'); } catch (e) {}
+  if (!initial) {
+    var nav = (navigator.language || 'uz').slice(0, 2).toLowerCase();
+    initial = sections[nav] ? nav : 'uz';
+  }
+  show(sections[initial] ? initial : 'uz');
+})();
+</script>
+
 </body>
 </html>

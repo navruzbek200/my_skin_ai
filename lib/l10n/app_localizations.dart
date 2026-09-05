@@ -262,6 +262,12 @@ abstract class AppLocalizations {
   /// **'Google bilan kirish'**
   String get authGoogleButton;
 
+  /// No description provided for @authAppleButton.
+  ///
+  /// In uz, this message translates to:
+  /// **'Apple bilan kirish'**
+  String get authAppleButton;
+
   /// No description provided for @authPasswordHelper.
   ///
   /// In uz, this message translates to:
@@ -387,6 +393,18 @@ abstract class AppLocalizations {
   /// In uz, this message translates to:
   /// **'Google orqali kirishda xato yuz berdi'**
   String get authErrorGoogle;
+
+  /// No description provided for @authErrorApple.
+  ///
+  /// In uz, this message translates to:
+  /// **'Apple orqali kirishda xato yuz berdi'**
+  String get authErrorApple;
+
+  /// No description provided for @authErrorAccountExists.
+  ///
+  /// In uz, this message translates to:
+  /// **'Bu email boshqa usul bilan ro\'yxatdan o\'tgan. Avvalgi usulingiz bilan kiring.'**
+  String get authErrorAccountExists;
 
   /// No description provided for @authErrorPasswordRequired.
   ///
@@ -688,6 +706,12 @@ abstract class AppLocalizations {
   /// **'Akkauntni o\'chirish uchun Google hisobingiz orqali tasdiqlang.'**
   String get accountConfirmGoogleBody;
 
+  /// No description provided for @accountConfirmAppleBody.
+  ///
+  /// In uz, this message translates to:
+  /// **'Akkauntni o\'chirish uchun Apple hisobingiz orqali tasdiqlang.'**
+  String get accountConfirmAppleBody;
+
   /// No description provided for @accountResetSentBody.
   ///
   /// In uz, this message translates to:
@@ -711,6 +735,12 @@ abstract class AppLocalizations {
   /// In uz, this message translates to:
   /// **'Google bilan tasdiqlab o\'chirish'**
   String get accountConfirmDeleteGoogle;
+
+  /// No description provided for @accountConfirmDeleteApple.
+  ///
+  /// In uz, this message translates to:
+  /// **'Apple bilan tasdiqlab o\'chirish'**
+  String get accountConfirmDeleteApple;
 
   /// No description provided for @accountVersion.
   ///

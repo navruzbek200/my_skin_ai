@@ -43,6 +43,9 @@ void main() {
     whenListen(cubit, states.stream, initialState: AuthInitial());
     when(() => cubit.needsEmailVerification).thenReturn(false);
     when(() => cubit.isGoogleOnlyUser).thenReturn(false);
+    when(() => cubit.isAppleOnlyUser).thenReturn(false);
+    when(() => cubit.reauthenticateWithAppleAndDelete())
+        .thenAnswer((_) async {});
     when(() => cubit.currentEmail).thenReturn('a@b.com');
     when(() => cubit.logout()).thenAnswer((_) async {});
     when(() => cubit.reauthenticateAndDelete(any())).thenAnswer((_) async {});
@@ -220,6 +223,25 @@ void main() {
     await tester.tap(find.text(l10n.accountConfirmDeleteGoogle));
     await tester.pump();
     verify(() => cubit.reauthenticateWithGoogleAndDelete()).called(1);
+  });
+
+  testWidgets('an Apple account confirms through the Apple sheet',
+      (tester) async {
+    when(() => cubit.isAppleOnlyUser).thenReturn(true);
+    await pump(tester);
+    await openDeleteSheet(tester);
+
+    // No password field: an Apple account has none of ours to check.
+    expect(find.byType(TextFormField), findsNothing);
+    expect(find.text(l10n.accountConfirmAppleBody), findsOneWidget);
+    // And not the Google copy, which the sheet used to show for anyone
+    // without a password.
+    expect(find.text(l10n.accountConfirmGoogleBody), findsNothing);
+
+    await tester.tap(find.text(l10n.accountConfirmDeleteApple));
+    await tester.pump();
+    verify(() => cubit.reauthenticateWithAppleAndDelete()).called(1);
+    verifyNever(() => cubit.reauthenticateWithGoogleAndDelete());
   });
 
   testWidgets('a failed delete says why and keeps the sheet open',

@@ -1,0 +1,2 @@
+/* Face scan. The frames are analysed on the device and never stored or sent. */
+"NSCameraUsageDescription" = "Camera access is needed to analyse your skin. The image is processed on your phone and is never saved or uploaded.";

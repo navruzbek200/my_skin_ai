@@ -93,6 +93,9 @@ class AppLocalizationsUz extends AppLocalizations {
   String get authGoogleButton => 'Google bilan kirish';
 
   @override
+  String get authAppleButton => 'Apple bilan kirish';
+
+  @override
   String get authPasswordHelper => 'Kamida 6 belgi';
 
   @override
@@ -167,6 +170,13 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get authErrorGoogle => 'Google orqali kirishda xato yuz berdi';
+
+  @override
+  String get authErrorApple => 'Apple orqali kirishda xato yuz berdi';
+
+  @override
+  String get authErrorAccountExists =>
+      'Bu email boshqa usul bilan ro\'yxatdan o\'tgan. Avvalgi usulingiz bilan kiring.';
 
   @override
   String get authErrorPasswordRequired => 'Parolni kiriting';
@@ -338,6 +348,10 @@ class AppLocalizationsUz extends AppLocalizations {
       'Akkauntni o\'chirish uchun Google hisobingiz orqali tasdiqlang.';
 
   @override
+  String get accountConfirmAppleBody =>
+      'Akkauntni o\'chirish uchun Apple hisobingiz orqali tasdiqlang.';
+
+  @override
   String accountResetSentBody(String email) {
     return 'Tiklash havolasi $email manziliga yuborildi (spam papkasini ham tekshiring). Brauzerda yangi parol o\'rnating, so\'ng shu yerga qaytib uni kiriting.';
   }
@@ -350,6 +364,9 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get accountConfirmDeleteGoogle => 'Google bilan tasdiqlab o\'chirish';
+
+  @override
+  String get accountConfirmDeleteApple => 'Apple bilan tasdiqlab o\'chirish';
 
   @override
   String accountVersion(String version) {

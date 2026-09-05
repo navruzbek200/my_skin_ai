@@ -118,6 +118,122 @@ void main() {
     expect: () => [isA<AuthLoading>(), isA<AuthInitial>()],
   );
 
+  // ── Apple ────────────────────────────────────────────────────────────
+
+  blocTest<AuthCubit, AuthState>(
+    'signInWithApple success → [Loading(apple), Authenticated]',
+    build: () {
+      when(() => ds.signInWithApple()).thenAnswer((_) async => true);
+      return AuthCubit(ds);
+    },
+    act: (c) => c.signInWithApple(),
+    expect: () => [
+      isA<AuthLoading>().having((s) => s.method, 'method', AuthMethod.apple),
+      isA<AuthAuthenticated>(),
+    ],
+  );
+
+  blocTest<AuthCubit, AuthState>(
+    'a dismissed Apple sheet is not an error',
+    build: () {
+      when(() => ds.signInWithApple()).thenAnswer((_) async => false);
+      return AuthCubit(ds);
+    },
+    act: (c) => c.signInWithApple(),
+    expect: () => [isA<AuthLoading>(), isA<AuthInitial>()],
+  );
+
+  blocTest<AuthCubit, AuthState>(
+    'a shared Apple address that already has a Google account says which door to use',
+    build: () {
+      when(() => ds.signInWithApple()).thenThrow(
+        FirebaseAuthException(code: 'account-exists-with-different-credential'),
+      );
+      return AuthCubit(ds);
+    },
+    act: (c) => c.signInWithApple(),
+    // Not the generic failure: the person has a working way in and needs to be
+    // told which one it is, or they will keep tapping the button that cannot
+    // work for them.
+    expect: () => [
+      isA<AuthLoading>(),
+      isA<AuthError>().having((s) => s.message, 'message',
+          AuthMessage.accountExistsWithOtherProvider),
+    ],
+  );
+
+  blocTest<AuthCubit, AuthState>(
+    'a real Apple failure is shown, never swallowed as a cancel',
+    build: () {
+      // What iOS reports when the entitlement is missing from the signed
+      // build or the profile does not carry the capability. This used to be
+      // treated as a cancel, which left the button visibly doing nothing and
+      // saying nothing — the hardest failure to diagnose from a bug report.
+      when(() => ds.signInWithApple()).thenThrow(Exception('authorization 1000'));
+      return AuthCubit(ds);
+    },
+    act: (c) => c.signInWithApple(),
+    expect: () => [
+      isA<AuthLoading>(),
+      isA<AuthError>()
+          .having((s) => s.message, 'message', AuthMessage.appleFailed),
+    ],
+  );
+
+  // ── Delete via Apple re-auth ─────────────────────────────────────────
+
+  blocTest<AuthCubit, AuthState>(
+    'deleting an Apple account revokes the token before the record goes',
+    build: () {
+      when(() => ds.reauthenticateWithApple())
+          .thenAnswer((_) async => 'auth-code');
+      when(() => ds.revokeAppleToken(any())).thenAnswer((_) async {});
+      when(() => ds.deleteAccount()).thenAnswer((_) async {});
+      return AuthCubit(ds);
+    },
+    act: (c) => c.reauthenticateWithAppleAndDelete(),
+    expect: () => [isA<AuthLoading>(), isA<AuthDeleted>()],
+    verify: (_) {
+      // Apple requires this on deletion — without it the app stays listed
+      // under Settings → Apple ID long after the account has gone.
+      verifyInOrder([
+        () => ds.revokeAppleToken('auth-code'),
+        () => ds.deleteAccount(),
+      ]);
+    },
+  );
+
+  blocTest<AuthCubit, AuthState>(
+    'a dismissed Apple sheet deletes nothing',
+    build: () {
+      when(() => ds.reauthenticateWithApple()).thenAnswer((_) async => null);
+      return AuthCubit(ds);
+    },
+    act: (c) => c.reauthenticateWithAppleAndDelete(),
+    expect: () => [isA<AuthLoading>(), isA<AuthInitial>()],
+    verify: (_) {
+      verifyNever(() => ds.deleteAccount());
+      verifyNever(() => ds.revokeAppleToken(any()));
+    },
+  );
+
+  blocTest<AuthCubit, AuthState>(
+    'a failed revocation still deletes the account',
+    build: () {
+      when(() => ds.reauthenticateWithApple())
+          .thenAnswer((_) async => 'auth-code');
+      when(() => ds.revokeAppleToken(any())).thenThrow(Exception('offline'));
+      when(() => ds.deleteAccount()).thenAnswer((_) async {});
+      return AuthCubit(ds);
+    },
+    act: (c) => c.reauthenticateWithAppleAndDelete(),
+    // Stranding somebody with an account they have asked twice to be rid of is
+    // worse than a stale entry in their Apple ID settings, which they can
+    // clear themselves.
+    expect: () => [isA<AuthLoading>(), isA<AuthDeleted>()],
+    verify: (_) => verify(() => ds.deleteAccount()).called(1),
+  );
+
   // ── Password reset ───────────────────────────────────────────────────
 
   blocTest<AuthCubit, AuthState>(

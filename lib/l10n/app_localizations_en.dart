@@ -93,6 +93,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authGoogleButton => 'Continue with Google';
 
   @override
+  String get authAppleButton => 'Continue with Apple';
+
+  @override
   String get authPasswordHelper => 'At least 6 characters';
 
   @override
@@ -166,6 +169,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authErrorGoogle => 'Google sign-in failed';
+
+  @override
+  String get authErrorApple => 'Apple sign-in failed';
+
+  @override
+  String get authErrorAccountExists =>
+      'This email is already registered with a different sign-in method. Please use the one you signed up with.';
 
   @override
   String get authErrorPasswordRequired => 'Enter your password';
@@ -336,6 +346,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Confirm with your Google account to delete the account.';
 
   @override
+  String get accountConfirmAppleBody =>
+      'Confirm with your Apple account to delete the account.';
+
+  @override
   String accountResetSentBody(String email) {
     return 'A reset link was sent to $email (check your spam folder too). Set a new password in the browser, then come back here and enter it.';
   }
@@ -348,6 +362,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountConfirmDeleteGoogle => 'Confirm with Google and delete';
+
+  @override
+  String get accountConfirmDeleteApple => 'Confirm with Apple and delete';
 
   @override
   String accountVersion(String version) {

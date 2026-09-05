@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:real_beauty_ai/core/l10n/app_language.dart';
 import 'package:real_beauty_ai/core/l10n/locale_cubit.dart';
 import 'package:real_beauty_ai/core/router/app_router.dart';
 import 'package:real_beauty_ai/core/theme/colors.dart';
+import 'package:real_beauty_ai/core/utils/logger.dart';
 import 'package:real_beauty_ai/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:real_beauty_ai/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:real_beauty_ai/l10n/app_localizations.dart';
@@ -20,7 +22,7 @@ class App extends StatefulWidget {
   State<App> createState() => _AppState();
 }
 
-class _AppState extends State<App> {
+class _AppState extends State<App> with WidgetsBindingObserver {
   // Seeded from the phone's language, so a first run on a Russian phone opens
   // in Russian rather than in the template language. A stored choice wins over
   // that — see [LocaleCubit].
@@ -29,9 +31,55 @@ class _AppState extends State<App> {
   );
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // `didChangeAppLifecycleState` only fires on a *transition* — backgrounded
+    // then resumed. A revocation made in Settings while the app was fully
+    // closed would otherwise go unnoticed until the person happened to
+    // background and foreground the app again after reopening it. Checking
+    // once here as well closes that gap: cold start is a transition too, just
+    // one the observer cannot see for itself.
+    unawaited(_signOutIfAppleRevoked());
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _locale.close();
     super.dispose();
+  }
+
+  /// Catches a Sign in with Apple authorisation the person revoked while the
+  /// app was closed or backgrounded.
+  ///
+  /// Revoking happens in iOS Settings, not in the app, and Apple pushes
+  /// nothing to the device when it does — the Firebase session carries on
+  /// working indefinitely, so somebody who has told iOS they no longer want
+  /// this app connected to their Apple ID would stay silently signed in.
+  /// Checked from two places: [initState], for a revocation made while the
+  /// app was fully closed, and here, for one made while it sat in the
+  /// background — `didChangeAppLifecycleState` only fires on that second
+  /// transition, so cold start would otherwise go unchecked until the app
+  /// happened to be backgrounded and resumed once after reopening.
+  ///
+  /// Only an explicit `revoked` answer signs anybody out; a failed check or an
+  /// unknown state leaves the session alone, so a network blip cannot log
+  /// somebody out of a working account.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    unawaited(_signOutIfAppleRevoked());
+  }
+
+  Future<void> _signOutIfAppleRevoked() async {
+    final auth = sl<AuthBloc>();
+    if (!auth.state.isAuthenticated) return;
+    final cubit = sl<AuthCubit>();
+    if (!cubit.isAppleOnlyUser) return;
+    if (!await cubit.isAppleCredentialRevoked()) return;
+    AppLogger.info('Apple authorisation revoked — signing out');
+    await cubit.logout();
   }
 
   @override

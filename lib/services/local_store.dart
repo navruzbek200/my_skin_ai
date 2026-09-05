@@ -189,6 +189,40 @@ class LocalStore {
     } catch (_) {}
   }
 
+  // ── Apple user identifier ─────────────────────────────────────
+  //
+  // Apple's stable per-app user id, kept so the app can ask iOS whether the
+  // person has since revoked us in Settings → Apple ID → Sign in with Apple.
+  // That check needs the identifier, and Firebase does not expose it: the uid
+  // it issues is its own, and `providerData` carries Apple's only as an opaque
+  // `uid` we would be guessing at. Storing it is also the only way to notice a
+  // revocation at all — Apple pushes nothing to the device.
+  //
+  // Not a secret: it is an opaque id that identifies nobody outside this app,
+  // which is why plain preferences are enough.
+
+  static const _appleUserIdKey = 'apple_user_id_v1';
+
+  String? get appleUserId {
+    try {
+      return _prefs.getString(_appleUserIdKey);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> setAppleUserId(String id) async {
+    try {
+      await _prefs.setString(_appleUserIdKey, id);
+    } catch (_) {}
+  }
+
+  Future<void> clearAppleUserId() async {
+    try {
+      await _prefs.remove(_appleUserIdKey);
+    } catch (_) {}
+  }
+
   // ── Sign-ups that must confirm their address ──────────────────
   //
   // The verification gate grandfathers in accounts created before a cut-off

@@ -24,6 +24,9 @@ extension AuthMessageText on AuthMessage {
         AuthMessage.requiresRecentLogin => l10n.authErrorRequiresRecentLogin,
         AuthMessage.sessionExpired => l10n.authErrorSessionExpired,
         AuthMessage.googleFailed => l10n.authErrorGoogle,
+        AuthMessage.appleFailed => l10n.authErrorApple,
+        AuthMessage.accountExistsWithOtherProvider =>
+          l10n.authErrorAccountExists,
         AuthMessage.passwordRequired => l10n.authErrorPasswordRequired,
         AuthMessage.notVerifiedYet => l10n.authErrorNotVerifiedYet,
         AuthMessage.disposableEmail => l10n.authErrorDisposableEmail,
