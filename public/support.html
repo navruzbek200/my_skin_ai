@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Skin AI – Support / Yordam / Поддержка</title>
+  <style>
+    :root {
+      --ink: #2D2050;
+      --muted: #655F85;
+      --cta: #4A3A9A;
+      --surface-alt: #F6F4FC;
+      --border: #E4E0F2;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 32px 20px 80px;
+      color: var(--ink);
+      line-height: 1.7;
+      background: #fff;
+    }
+    h1 { font-size: 1.7rem; margin: 0 0 0.3em; line-height: 1.25; }
+    h2 { font-size: 1.15rem; margin-top: 2em; color: var(--cta); }
+    .updated { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5em; }
+    a { color: var(--cta); }
+    .contact {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin: 1.4em 0;
+    }
+    .contact a { font-weight: 600; }
+    ul { padding-left: 22px; }
+    li { margin-bottom: 0.4em; }
+    dt { font-weight: 600; margin-top: 1.1em; }
+    dd { margin: 0.25em 0 0; color: var(--muted); }
+    .langbar {
+      display: flex;
+      gap: 6px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px;
+      width: fit-content;
+      margin-bottom: 26px;
+      position: sticky;
+      top: 12px;
+      z-index: 10;
+    }
+    .langbar button {
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--muted);
+      background: none;
+      border: 0;
+      border-radius: 999px;
+      padding: 6px 16px;
+      cursor: pointer;
+    }
+    .langbar button[aria-selected="true"] {
+      background: #fff;
+      color: var(--cta);
+      box-shadow: 0 1px 3px rgba(45, 32, 80, 0.12);
+    }
+    .langbar button:focus-visible { outline: 2px solid var(--cta); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+
+<div class="langbar" role="tablist" aria-label="Language">
+  <button role="tab" data-lang="uz" aria-selected="true">UZ</button>
+  <button role="tab" data-lang="ru" aria-selected="false">RU</button>
+  <button role="tab" data-lang="en" aria-selected="false">EN</button>
+</div>
+
+<!-- ══════════════════ UZBEK ══════════════════ -->
+<section id="uz">
+  <h1>My Skin AI – Yordam</h1>
+  <p class="updated">
+    Ilova: <strong>My Skin AI</strong> (<code>uz.realbeauty.app</code>) · Real Beauty
+  </p>
+
+  <p>Savolingiz, taklifingiz yoki muammoyingiz bo'lsa — yozing. Odatda bir ish kuni ichida javob beramiz.</p>
+
+  <div class="contact">
+    E-pochta:
+    <a href="mailto:navrozbekbektemirov7@gmail.com">navrozbekbektemirov7@gmail.com</a><br />
+    E-pochta:
+    <a href="mailto:navruzbekbektemirov@icloud.com">navruzbekbektemirov@icloud.com</a>
+  </div>
+
+  <p>Tezroq yordam berishimiz uchun xatingizda telefon modeli, iOS yoki Android versiyasi va muammo qanday yuz berganini yozib qoldiring.</p>
+
+  <h2>Ko'p so'raladigan savollar</h2>
+  <dl>
+    <dt>Hisobimni qanday o'chiraman?</dt>
+    <dd>Ilovada: Profil → Hisob → Hisobni o'chirish. Hisob va unga bog'liq barcha ma'lumot butunlay o'chiriladi. Ilovasiz o'chirish uchun <a href="/delete_account.html">shu sahifadan</a> foydalaning.</dd>
+
+    <dt>Parolimni unutdim.</dt>
+    <dd>Kirish ekranidagi «Parolni unutdingizmi?» tugmasini bosing va e-pochtangizni kiriting — tiklash havolasi yuboriladi. Agar Apple yoki Google orqali kirgan bo'lsangiz, sizda bizning parolimiz yo'q: o'sha tugma orqali kiring.</dd>
+
+    <dt>Tasdiqlash xati kelmadi.</dt>
+    <dd>Spam papkasini tekshiring. Xat <code>realbeauty.uz</code> nomidan keladi. Baribir kelmasa, bizga yozing.</dd>
+
+    <dt>Skanerlangan suratlarim qayerda saqlanadi?</dt>
+    <dd>Hech qayerda. Surat telefoningizning o'zida qayta ishlanadi va serverga yuborilmaydi — ilovada surat yuklash imkoniyati umuman yo'q. Batafsil: <a href="/privacy_policy.html">Maxfiylik siyosati</a>.</dd>
+  </dl>
+
+  <p><a href="/privacy_policy.html">Maxfiylik siyosati</a> · <a href="/delete_account.html">Hisobni o'chirish</a></p>
+</section>
+
+<!-- ══════════════════ RUSSIAN ══════════════════ -->
+<section id="ru" hidden>
+  <h1>My Skin AI – Поддержка</h1>
+  <p class="updated">
+    Приложение: <strong>My Skin AI</strong> (<code>uz.realbeauty.app</code>) · Real Beauty
+  </p>
+
+  <p>Есть вопрос, предложение или проблема — напишите нам. Обычно отвечаем в течение одного рабочего дня.</p>
+
+  <div class="contact">
+    Эл. почта:
+    <a href="mailto:navrozbekbektemirov7@gmail.com">navrozbekbektemirov7@gmail.com</a><br />
+    Эл. почта:
+    <a href="mailto:navruzbekbektemirov@icloud.com">navruzbekbektemirov@icloud.com</a>
+  </div>
+
+  <p>Чтобы мы помогли быстрее, укажите модель телефона, версию iOS или Android и как именно возникла проблема.</p>
+
+  <h2>Частые вопросы</h2>
+  <dl>
+    <dt>Как удалить аккаунт?</dt>
+    <dd>В приложении: Профиль → Аккаунт → Удалить аккаунт. Аккаунт и все связанные с ним данные удаляются полностью. Без приложения это можно сделать <a href="/delete_account.html">на этой странице</a>.</dd>
+
+    <dt>Забыл пароль.</dt>
+    <dd>На экране входа нажмите «Забыли пароль?» и введите адрес почты — придёт ссылка для сброса. Если вы входили через Apple или Google, у вас нет нашего пароля: войдите той же кнопкой.</dd>
+
+    <dt>Не пришло письмо с подтверждением.</dt>
+    <dd>Проверьте папку «Спам». Письмо приходит от <code>realbeauty.uz</code>. Если письма всё равно нет — напишите нам.</dd>
+
+    <dt>Где хранятся снимки лица?</dt>
+    <dd>Нигде. Снимок обрабатывается прямо на телефоне и не отправляется на сервер — в приложении вообще нет загрузки изображений. Подробнее: <a href="/privacy_policy.html">Политика конфиденциальности</a>.</dd>
+  </dl>
+
+  <p><a href="/privacy_policy.html">Политика конфиденциальности</a> · <a href="/delete_account.html">Удаление аккаунта</a></p>
+</section>
+
+<!-- ══════════════════ ENGLISH ══════════════════ -->
+<section id="en" hidden>
+  <h1>My Skin AI – Support</h1>
+  <p class="updated">
+    App: <strong>My Skin AI</strong> (<code>uz.realbeauty.app</code>) · Real Beauty
+  </p>
+
+  <p>If you have a question, a suggestion, or something is not working, write to us. We normally reply within one business day.</p>
+
+  <div class="contact">
+    Email:
+    <a href="mailto:navrozbekbektemirov7@gmail.com">navrozbekbektemirov7@gmail.com</a><br />
+    Email:
+    <a href="mailto:navruzbekbektemirov@icloud.com">navruzbekbektemirov@icloud.com</a>
+  </div>
+
+  <p>To help us answer faster, please include your phone model, your iOS or Android version, and what you were doing when the problem appeared.</p>
+
+  <h2>Frequently asked questions</h2>
+  <dl>
+    <dt>How do I delete my account?</dt>
+    <dd>In the app: Profile → Account → Delete account. The account and everything tied to it is removed. You can also do it without the app on <a href="/delete_account.html">this page</a>.</dd>
+
+    <dt>I forgot my password.</dt>
+    <dd>On the sign-in screen tap “Forgot password?” and enter your email address — a reset link will be sent. If you signed in with Apple or Google you have no password with us: use that same button to get back in.</dd>
+
+    <dt>The verification email never arrived.</dt>
+    <dd>Check your spam folder. The message is sent from <code>realbeauty.uz</code>. If it still has not arrived, write to us.</dd>
+
+    <dt>Where are my face scans stored?</dt>
+    <dd>Nowhere. The image is processed entirely on your phone and is never uploaded — the app has no image upload path at all. See the <a href="/privacy_policy.html">Privacy Policy</a> for details.</dd>
+  </dl>
+
+  <p><a href="/privacy_policy.html">Privacy Policy</a> · <a href="/delete_account.html">Delete account</a></p>
+</section>
+
+<script>
+(function () {
+  var sections = {
+    uz: document.getElementById('uz'),
+    ru: document.getElementById('ru'),
+    en: document.getElementById('en')
+  };
+  var buttons = Array.prototype.slice.call(document.querySelectorAll('.langbar button'));
+
+  function show(lang) {
+    Object.keys(sections).forEach(function (k) { sections[k].hidden = (k !== lang); });
+    buttons.forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.lang === lang)); });
+    document.documentElement.lang = lang;
+    try { localStorage.setItem('msai-support-lang', lang); } catch (e) {}
+  }
+
+  buttons.forEach(function (b) {
+    b.addEventListener('click', function () { show(b.dataset.lang); });
+  });
+
+  var initial = null;
+  try { initial = localStorage.getItem('msai-support-lang'); } catch (e) {}
+  if (!initial) {
+    var nav = (navigator.language || '').slice(0, 2);
+    initial = sections[nav] ? nav : 'uz';
+  }
+  show(sections[initial] ? initial : 'uz');
+})();
+</script>
+
+</body>
+</html>
