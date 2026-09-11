@@ -13,8 +13,12 @@ class CosmetologistsCubit extends Cubit<CosmetologistsState> {
     emit(CosmetologistsLoading());
     try {
       final items = await _repo.getCosmetologists();
+      // Same race as ProductsCubit.load: a Firestore read outliving the tab
+      // that asked for it.
+      if (isClosed) return;
       emit(CosmetologistsLoaded(items));
     } catch (_) {
+      if (isClosed) return;
       emit(CosmetologistsError());
     }
   }

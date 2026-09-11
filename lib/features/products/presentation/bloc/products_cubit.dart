@@ -15,8 +15,15 @@ class ProductsCubit extends Cubit<ProductsState> {
     emit(ProductsLoading());
     try {
       final items = await _repo.getProducts();
+      // The catalogue is a network read, and the tab it feeds can be left
+      // before it lands — closing the cubit mid-flight. Emitting then throws
+      // "Cannot emit new states after calling close", which surfaced in
+      // Crashlytics as a crash on a screen the person had already walked away
+      // from.
+      if (isClosed) return;
       emit(ProductsLoaded(items));
     } catch (_) {
+      if (isClosed) return;
       emit(ProductsError());
     }
   }
