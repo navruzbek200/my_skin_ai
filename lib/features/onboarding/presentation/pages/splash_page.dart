@@ -7,7 +7,15 @@ import 'package:real_beauty_ai/features/auth/presentation/bloc/auth_bloc.dart';
 
 /// The brand moment.
 ///
-/// A baby-blue bloom opens behind the lockup and the wordmark settles into it —
+/// The logo is drawn at exactly the size and place the native launch screen
+/// draws it (86% of the width, centred — see LaunchScreen.storyboard), and it
+/// is fully visible from the first frame. The hand-off from the OS launch
+/// screen to Flutter is therefore invisible: the mark never jumps, shrinks or
+/// blinks out, and only the bloom behind it moves. It used to fade in from
+/// nothing at 90% scale, which on a cold start read as small logo → blank
+/// screen → big logo.
+///
+/// A baby-blue bloom opens behind the lockup —
 /// the ramp is taken off the brand's packaging, where a bright tiffany core
 /// fades through teal into white. Nothing is written under the mark: the logo
 /// already carries the tagline, and a second line of type only delays the app
@@ -32,19 +40,6 @@ class _SplashScreenState extends State<SplashScreen>
     vsync: this,
     duration: const Duration(milliseconds: 1800),
   );
-
-  late final Animation<double> _logoOpacity = CurvedAnimation(
-    parent: _controller,
-    curve: const Interval(0.0, 0.28, curve: Curves.easeOut),
-  );
-
-  late final Animation<double> _logoScale =
-      Tween<double>(begin: 0.9, end: 1.0).animate(CurvedAnimation(
-    parent: _controller,
-    // easeOutCubic rather than a linear ramp: the mark decelerates into place
-    // instead of arriving and stopping dead.
-    curve: const Interval(0.0, 0.42, curve: Curves.easeOutCubic),
-  ));
 
   late final Animation<double> _bloom = CurvedAnimation(
     parent: _controller,
@@ -72,6 +67,16 @@ class _SplashScreenState extends State<SplashScreen>
       // redirect — but it would flash the shell for a frame first.
       context.go(session.needsVerificationGate ? '/verify-email' : '/home');
     });
+  }
+
+  /// Must match the width multiplier in ios/Runner/Base.lproj/
+  /// LaunchScreen.storyboard, or the logo jumps on the hand-off.
+  static const _logoWidthFraction = 0.86;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    precacheImage(const AssetImage('assets/splash.png'), context);
   }
 
   @override
@@ -115,20 +120,19 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
               ),
               Center(
-                child: Opacity(
-                  opacity:
-                      reduceMotion ? 1 : _logoOpacity.value.clamp(0.0, 1.0),
-                  child: Transform.scale(
-                    scale: reduceMotion ? 1 : _logoScale.value,
-                    child: Semantics(
-                      label: 'My Skin AI',
-                      image: true,
-                      child: Image.asset(
-                        'assets/splash.png',
-                        width: size.width * 0.86,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
+                child: Semantics(
+                  label: 'My Skin AI',
+                  image: true,
+                  // Same box as the launch screen's image view: a square,
+                  // 86% of the width. gaplessPlayback plus the precache in
+                  // didChangeDependencies keep the first frame from being
+                  // drawn without it.
+                  child: Image.asset(
+                    'assets/splash.png',
+                    width: size.width * _logoWidthFraction,
+                    height: size.width * _logoWidthFraction,
+                    fit: BoxFit.contain,
+                    gaplessPlayback: true,
                   ),
                 ),
               ),
