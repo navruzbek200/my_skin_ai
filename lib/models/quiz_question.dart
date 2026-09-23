@@ -1,4 +1,5 @@
 import 'package:real_beauty_ai/core/l10n/localized_text.dart';
+import 'package:real_beauty_ai/models/source.dart';
 
 enum QuestionType { scale, textarea, choice }
 
@@ -28,6 +29,7 @@ class QuizQuestion {
     this.options,
     this.scaleLabels,
     this.hint,
+    this.sources = const [],
   });
 
   final int index;
@@ -43,4 +45,7 @@ class QuizQuestion {
   final List<LocalizedText>? options;
   final List<LocalizedText>? scaleLabels;
   final LocalizedText? hint;
+
+  /// References explaining a term the question uses, linked under it.
+  final List<Source> sources;
 }

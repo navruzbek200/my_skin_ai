@@ -10,6 +10,7 @@ import 'package:real_beauty_ai/services/local_store.dart';
 import 'package:go_router/go_router.dart';
 import 'package:real_beauty_ai/core/l10n/localized_text.dart';
 import 'package:real_beauty_ai/logic/skin_copy.dart';
+import 'package:real_beauty_ai/widgets/sources_section.dart';
 
 class ScannerScreen extends StatelessWidget {
   const ScannerScreen({super.key});
@@ -705,6 +706,13 @@ class SkinProblemDetailPage extends StatelessWidget {
                           ),
                         ],
                       ),
+                    ),
+                  ],
+                  if (problem.sources.isNotEmpty) ...[
+                    const SizedBox(height: 14),
+                    SourcesSection(
+                      sources: problem.sources,
+                      onSeeAll: () => context.push('/sources'),
                     ),
                   ],
                 ],

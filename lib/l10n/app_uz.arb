@@ -409,5 +409,19 @@
   "cosmoFilterDermatologist": "Dermatolog",
   "cosmoFilterAesthetician": "Estetik",
   "cosmoFilterInjection": "Injeksion",
-  "cosmoPhone": "Telefon"
+  "cosmoPhone": "Telefon",
+  "quizNext": "Keyingi",
+  "quizFinish": "Yakunlash",
+  "sourcesTitle": "Manbalar",
+  "sourcesSeeAll": "Barcha manbalar va metodologiya",
+  "sourcesOpenFailed": "Havolani ochib bo'lmadi",
+  "sourcesScreenTitle": "Manbalar va metodologiya",
+  "sourcesMethodologyTitle": "Tahlil qanday ishlaydi",
+  "sourcesMethodologyBody": "Teri turi va tavsiyalar so'rovnomadagi javoblaringiz asosida hisoblanadi: birinchi savol teri turini belgilaydi, qolganlari esa qo'shimcha parvarish bloklarini qo'shadi.\n\nBu kosmetik tahlil, tibbiy tashxis emas. Ilovadagi parvarish tavsiyalari umumiy ma'lumot bo'lib, quyidagi nashr etilgan manbalarga tayanadi. Teri kasalligi, kuchli yallig'lanish yoki og'riq bo'lsa, dermatologga murojaat qiling.",
+  "sourcesByTopic": "Mavzular bo'yicha manbalar",
+  "sourcesShowMore": "Yana {count} ta manba",
+  "sourcesShowLess": "Yig'ish",
+  "sourcesCheckedOn": "Havolalar tekshirilgan: {date}",
+  "@sourcesShowMore": {"placeholders": {"count": {"type": "int"}}},
+  "@sourcesCheckedOn": {"placeholders": {"date": {"type": "String"}}}
 }

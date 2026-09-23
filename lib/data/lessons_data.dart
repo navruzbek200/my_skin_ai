@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
 
 import 'package:real_beauty_ai/core/l10n/localized_text.dart';
+import 'package:real_beauty_ai/data/sources_data.dart';
 
 import '../models/lesson.dart';
 
 // Repeated labels, held once so the wording cannot drift between lessons.
-const _ingredient =
-    LocalizedText('Ingrediyent', 'Ингредиент', 'Ingredient');
-const _beginner =
-    LocalizedText("Boshlang'ich", 'Начальный', 'Beginner');
+const _ingredient = LocalizedText('Ingrediyent', 'Ингредиент', 'Ingredient');
+const _beginner = LocalizedText("Boshlang'ich", 'Начальный', 'Beginner');
 const _summary = LocalizedText('Xulosa', 'Итог', 'In short');
-const _keyBenefits =
-    LocalizedText('Asosiy foydalar', 'Основная польза', 'Key benefits');
+const _keyBenefits = LocalizedText(
+  'Asosiy foydalar',
+  'Основная польза',
+  'Key benefits',
+);
 const _tip = LocalizedText('Maslahat', 'Совет', 'Tip');
 
-LocalizedText _minutes(int n) => LocalizedText(
-      '$n daqiqa',
-      '$n минут',
-      '$n min',
-    );
+LocalizedText _minutes(int n) =>
+    LocalizedText('$n daqiqa', '$n минут', '$n min');
 
 final List<Lesson> lessons = [
   Lesson(
     id: 'niacinamide',
+    sources: Sources.niacinamide,
     title: const LocalizedText('Niatsinamid', 'Ниацинамид', 'Niacinamide'),
     subtitle: const LocalizedText(
       "Poralar va yog'lilikni nazorat qilish",
@@ -36,8 +36,11 @@ final List<Lesson> lessons = [
     steps: [
       LessonStep(
         type: LessonStepType.intro,
-        title: const LocalizedText('Niatsinamid nima?', 'Что такое ниацинамид?',
-            'What is niacinamide?'),
+        title: const LocalizedText(
+          'Niatsinamid nima?',
+          'Что такое ниацинамид?',
+          'What is niacinamide?',
+        ),
         body: const LocalizedText(
           "Niatsinamid — B3 vitaminining shakli bo'lib, teri g'amxo'rligida eng ko'p ishlatiladigan ingrediyentlardan biridir. U poralar, yog'lilik va pigmentatsiya kabi muammolarni hal qilishda yordam beradi.",
           'Ниацинамид — форма витамина B3 и один из самых применяемых ингредиентов в уходе за кожей. Он помогает с порами, жирностью и пигментацией.',
@@ -46,17 +49,16 @@ final List<Lesson> lessons = [
       ),
       LessonStep(
         type: LessonStepType.fact,
-        title: const LocalizedText(
-            'Ilmiy fakt', 'Научный факт', 'The science'),
+        title: const LocalizedText('Ilmiy fakt', 'Научный факт', 'The science'),
         keyword: const LocalizedText(
           "Teri to'sig'ini mustahkamlaydi",
           'Укрепляет барьер кожи',
           'Strengthens the skin barrier',
         ),
         body: const LocalizedText(
-          "Tadqiqotlar niatsinamid ceramide ishlab chiqarishni 34% ga oshirishini ko'rsatdi. Bu teri to'sig'ini kuchaytiradi va namlikni saqlashga yordam beradi.",
-          'Исследования показали, что ниацинамид повышает выработку церамидов на 34%. Это укрепляет барьер кожи и помогает удерживать влагу.',
-          'Studies found that niacinamide raises ceramide production by 34%. That strengthens the skin barrier and helps it hold on to moisture.',
+          "Tadqiqotlar niatsinamid teridagi seramidlar ishlab chiqarilishini oshirishini ko'rsatdi. Bu teri to'sig'ini kuchaytiradi va namlikni saqlashga yordam beradi.",
+          "Исследования показали, что ниацинамид повышает выработку церамидов в коже. Это укрепляет барьер и помогает удерживать влагу.",
+          "Studies show niacinamide increases ceramide production in the skin. That strengthens the barrier and helps it hold on to moisture.",
         ),
       ),
       LessonStep(
@@ -93,8 +95,11 @@ final List<Lesson> lessons = [
       ),
       LessonStep(
         type: LessonStepType.tip,
-        title: const LocalizedText('Foydalanish maslahati',
-            'Как применять', 'How to use it'),
+        title: const LocalizedText(
+          'Foydalanish maslahati',
+          'Как применять',
+          'How to use it',
+        ),
         body: const LocalizedText(
           "Niatsinamidni 5–10% konsentratsiyada ishlating. Retinol bilan birgalikda ishlatish mumkin, lekin C vitaminidan oldin qo'llang. Har kuni ertalab va kechqurun tozalangan yuzga surting.",
           'Используйте ниацинамид в концентрации 5–10%. Его можно сочетать с ретинолом, но наносить следует до витамина C. Наносите утром и вечером на очищенную кожу.',
@@ -114,8 +119,12 @@ final List<Lesson> lessons = [
   ),
   Lesson(
     id: 'spf',
-    title: const LocalizedText('SPF tanlash', 'Как выбрать SPF',
-        'Choosing an SPF'),
+    sources: Sources.sunscreen,
+    title: const LocalizedText(
+      'SPF tanlash',
+      'Как выбрать SPF',
+      'Choosing an SPF',
+    ),
     subtitle: const LocalizedText(
       "Quyoshdan to'g'ri himoya",
       'Правильная защита от солнца',
@@ -128,8 +137,11 @@ final List<Lesson> lessons = [
     steps: [
       LessonStep(
         type: LessonStepType.intro,
-        title: const LocalizedText('Nima uchun SPF muhim?',
-            'Почему SPF так важен?', 'Why SPF matters'),
+        title: const LocalizedText(
+          'Nima uchun SPF muhim?',
+          'Почему SPF так важен?',
+          'Why SPF matters',
+        ),
         body: const LocalizedText(
           "Quyosh nurlari (UVA va UVB) teriga eng katta zarar yetkazuvchi omildir. SPF (Sun Protection Factor) siz uchun eng muhim kundalik parvarish qadamidir — hatto bulutli havoda ham.",
           'Солнечные лучи (UVA и UVB) — главный фактор повреждения кожи. SPF (Sun Protection Factor) — самый важный ежедневный шаг ухода, даже в пасмурную погоду.',
@@ -152,8 +164,11 @@ final List<Lesson> lessons = [
       ),
       LessonStep(
         type: LessonStepType.list,
-        title: const LocalizedText('SPF tanlash mezonlari',
-            'На что смотреть при выборе', 'What to look for'),
+        title: const LocalizedText(
+          'SPF tanlash mezonlari',
+          'На что смотреть при выборе',
+          'What to look for',
+        ),
         body: const LocalizedText.same(''),
         items: const [
           LocalizedText(
@@ -185,8 +200,11 @@ final List<Lesson> lessons = [
       ),
       LessonStep(
         type: LessonStepType.tip,
-        title: const LocalizedText('Muhim eslatma', 'Важное замечание',
-            'One thing people get wrong'),
+        title: const LocalizedText(
+          'Muhim eslatma',
+          'Важное замечание',
+          'One thing people get wrong',
+        ),
         body: const LocalizedText(
           "Ko'pchilik SPF ni yetarli miqdorda ishlatmaydi. To'g'ri himoya uchun yuzga 2 barmoq (taxminan 1/4 choy qoshiq) SPF krem surting. Kamroq surtsangiz, himoya darajasi keskin tushadi.",
           'Большинство наносит слишком мало SPF. Для заявленной защиты нужно два пальца средства (примерно четверть чайной ложки) на лицо. Меньше — и уровень защиты резко падает.',
@@ -206,6 +224,7 @@ final List<Lesson> lessons = [
   ),
   Lesson(
     id: 'vitamin_c',
+    sources: Sources.vitaminC,
     title: const LocalizedText('C vitamini', 'Витамин C', 'Vitamin C'),
     subtitle: const LocalizedText(
       'Yorqinlik va antioksidant himoya',
@@ -219,8 +238,11 @@ final List<Lesson> lessons = [
     steps: [
       LessonStep(
         type: LessonStepType.intro,
-        title: const LocalizedText('C vitamini nima?', 'Что такое витамин C?',
-            'What is vitamin C?'),
+        title: const LocalizedText(
+          'C vitamini nima?',
+          'Что такое витамин C?',
+          'What is vitamin C?',
+        ),
         body: const LocalizedText(
           "C vitamini (askorbin kislota) — teri parvarishidagi eng ko'p o'rganilgan uchta ingrediyentdan biri. U ikki ish qiladi: kunduzi teriga tushayotgan zararni to'xtatadi va allaqachon paydo bo'lgan dog'larni ochadi. Shu sababli u ertalabki parvarishning asosiy qadami hisoblanadi.",
           'Витамин C (аскорбиновая кислота) — один из трёх самых изученных ингредиентов в уходе. Он делает две вещи: останавливает повреждение, которое кожа получает днём, и осветляет уже появившиеся пятна. Поэтому его место — в утреннем уходе.',
@@ -229,8 +251,11 @@ final List<Lesson> lessons = [
       ),
       LessonStep(
         type: LessonStepType.fact,
-        title: const LocalizedText('Nima uchun ertalab?', 'Почему утром?',
-            'Why in the morning?'),
+        title: const LocalizedText(
+          'Nima uchun ertalab?',
+          'Почему утром?',
+          'Why in the morning?',
+        ),
         keyword: const LocalizedText(
           'SPF himoyasini kuchaytiradi',
           'Усиливает защиту SPF',
@@ -276,8 +301,11 @@ final List<Lesson> lessons = [
       ),
       LessonStep(
         type: LessonStepType.tip,
-        title: const LocalizedText("To'g'ri tanlash va saqlash",
-            'Как выбрать и хранить', 'Choosing and storing it'),
+        title: const LocalizedText(
+          "To'g'ri tanlash va saqlash",
+          'Как выбрать и хранить',
+          'Choosing and storing it',
+        ),
         body: const LocalizedText(
           "Boshlash uchun 10–15% konsentratsiya yetarli; 20% sezgir terini bezovta qiladi. C vitamini havo va yorug'likdan buziladi — shishasi to'q rangli va og'zi tor bo'lsin. Suyuqlik sariqdan jigarrangga o'tgan bo'lsa, u ishlamaydi, tashlang. Ertalab tozalangandan keyin, SPF dan oldin surting.",
           'Для начала хватит 10–15%; 20% раздражает чувствительную кожу. Витамин C разрушается от воздуха и света — флакон должен быть тёмным и с узким горлышком. Если жидкость из жёлтой стала коричневой, средство не работает, выбросьте. Наносите утром на очищенную кожу, до SPF.',
@@ -297,6 +325,7 @@ final List<Lesson> lessons = [
   ),
   Lesson(
     id: 'retinol',
+    sources: Sources.retinol,
     title: const LocalizedText('Retinol', 'Ретинол', 'Retinol'),
     subtitle: const LocalizedText(
       'Anti-agingning oltin standarti',
@@ -304,7 +333,10 @@ final List<Lesson> lessons = [
       'The gold standard of anti-ageing',
     ),
     category: const LocalizedText(
-        'Anti-aging', 'Антивозрастной уход', 'Anti-ageing'),
+      'Anti-aging',
+      'Антивозрастной уход',
+      'Anti-ageing',
+    ),
     duration: _minutes(10),
     level: const LocalizedText("Ilg'or", 'Продвинутый', 'Advanced'),
     color: const Color(0xFFFF6B6B),
@@ -312,7 +344,10 @@ final List<Lesson> lessons = [
       LessonStep(
         type: LessonStepType.intro,
         title: const LocalizedText(
-            'Retinol nima?', 'Что такое ретинол?', 'What is retinol?'),
+          'Retinol nima?',
+          'Что такое ретинол?',
+          'What is retinol?',
+        ),
         body: const LocalizedText(
           "Retinol — A vitaminining shakli va teri g'amxo'rligida eng ko'p ilmiy isbot qilingan ingrediyent. U ajinlarni, pigmentatsiyani va akne muammolarini hal qilishda kuchli ta'sir ko'rsatadi.",
           'Ретинол — форма витамина A и самый доказанный ингредиент в уходе за кожей. Он сильно работает с морщинами, пигментацией и высыпаниями.',
@@ -322,22 +357,28 @@ final List<Lesson> lessons = [
       LessonStep(
         type: LessonStepType.fact,
         title: const LocalizedText(
-            'Ilmiy isbot', 'Доказательства', 'The evidence'),
+          'Ilmiy isbot',
+          'Доказательства',
+          'The evidence',
+        ),
         keyword: const LocalizedText(
           'Kollagen ishlab chiqarishni oshiradi',
           'Повышает выработку коллагена',
           'It raises collagen production',
         ),
         body: const LocalizedText(
-          "Retinol hujayralar aylanishini tezlashtiradi va kollagen sintezini stimulyatsiya qiladi. Tadqiqotlar 12 hafta davomida ishlatilinganda ajinlar chuqurligi 27–37% kamayishini ko'rsatdi.",
-          'Ретинол ускоряет обновление клеток и стимулирует синтез коллагена. Исследования показали, что за 12 недель применения глубина морщин снижается на 27–37%.',
-          'Retinol speeds up cell turnover and stimulates collagen synthesis. Studies found wrinkle depth falls by 27–37% over twelve weeks of use.',
+          "Retinol hujayralar yangilanishini tezlashtiradi va kollagen sintezini rag'batlantiradi. Klinik tadqiqotlarda muntazam qo'llash mayda ajinlarni sezilarli kamaytirgan.",
+          "Ретинол ускоряет обновление клеток и стимулирует синтез коллагена. В клинических исследованиях регулярное применение заметно уменьшало мелкие морщины.",
+          "Retinol speeds up cell turnover and stimulates collagen synthesis. In clinical studies, regular use visibly reduced fine lines.",
         ),
       ),
       LessonStep(
         type: LessonStepType.list,
-        title: const LocalizedText('Bosqichli boshlash qoidasi',
-            'Как вводить постепенно', 'How to ramp up'),
+        title: const LocalizedText(
+          'Bosqichli boshlash qoidasi',
+          'Как вводить постепенно',
+          'How to ramp up',
+        ),
         body: const LocalizedText.same(''),
         items: const [
           LocalizedText(
@@ -369,8 +410,11 @@ final List<Lesson> lessons = [
       ),
       LessonStep(
         type: LessonStepType.tip,
-        title: const LocalizedText('Muhim ogohlantirishlar', 'Важные предупреждения',
-            'Important warnings'),
+        title: const LocalizedText(
+          'Muhim ogohlantirishlar',
+          'Важные предупреждения',
+          'Important warnings',
+        ),
         body: const LocalizedText(
           "Retinol boshida teriyi quritishi yoki qizartirishi mumkin — bu \"purging\" jarayoni. 2–4 hafta o'tgach yaxshilanadi. Homiladorlik va emizishda ISHLATMANG. Vitamin C bilan bir kechada ishlatmang.",
           'Вначале ретинол может сушить кожу или вызывать покраснение — это период адаптации. Через 2–4 недели становится легче. НЕ применяйте при беременности и грудном вскармливании. Не сочетайте с витамином C в один вечер.',
@@ -390,8 +434,12 @@ final List<Lesson> lessons = [
   ),
   Lesson(
     id: 'hyaluronic',
-    title: const LocalizedText('Gialuron kislota', 'Гиалуроновая кислота',
-        'Hyaluronic acid'),
+    sources: Sources.hyaluronicAcid,
+    title: const LocalizedText(
+      'Gialuron kislota',
+      'Гиалуроновая кислота',
+      'Hyaluronic acid',
+    ),
     subtitle: const LocalizedText(
       'Terini ichidan namlash',
       'Увлажнение изнутри',
@@ -404,33 +452,42 @@ final List<Lesson> lessons = [
     steps: [
       LessonStep(
         type: LessonStepType.intro,
-        title: const LocalizedText('Gialuron kislota nima?',
-            'Что такое гиалуроновая кислота?', 'What is hyaluronic acid?'),
+        title: const LocalizedText(
+          'Gialuron kislota nima?',
+          'Что такое гиалуроновая кислота?',
+          'What is hyaluronic acid?',
+        ),
         body: const LocalizedText(
-          "Gialuron kislota organizmda tabiiy mavjud bo'lgan molekula bo'lib, 1 gram suv 6 litr namlikni ushlab turishi mumkin. Teri g'amxo'rligidagi eng samarali namlash ingrediyenti hisoblanadi.",
-          'Гиалуроновая кислота — молекула, которая есть в организме от природы: 1 грамм удерживает до 6 литров влаги. Это самый эффективный увлажняющий ингредиент в уходе.',
-          'Hyaluronic acid is a molecule the body already makes: one gram can hold up to six litres of water. It is the most effective hydrating ingredient in skincare.',
+          "Gialuron kislota organizmda tabiiy mavjud bo'lgan molekula bo'lib, o'z og'irligidan ko'p marta ko'p suvni bog'lay oladi. Shuning uchun u eng mashhur namlovchi ingrediyentlardan biri.",
+          "Гиалуроновая кислота — молекула, которая есть в организме от природы: она связывает воду во много раз больше собственного веса. Поэтому это один из самых популярных увлажняющих ингредиентов.",
+          "Hyaluronic acid is a molecule the body already makes, and it binds many times its own weight in water. That is why it is one of the most popular hydrating ingredients.",
         ),
       ),
       LessonStep(
         type: LessonStepType.fact,
-        title: const LocalizedText('Molekula hajmi muhim',
-            'Размер молекулы важен', 'Molecule size matters'),
+        title: const LocalizedText(
+          'Molekula hajmi muhim',
+          'Размер молекулы важен',
+          'Molecule size matters',
+        ),
         keyword: const LocalizedText(
           'Turli hajmdagi molekulalar',
           'Молекулы разного размера',
           'Molecules of different sizes',
         ),
         body: const LocalizedText(
-          "Kichik molekulalar (nano-HA) teri qatlamlariga chuqur kirib, ichki namlikni ta'minlaydi. Katta molekulalar yuzada qolib, himoya plyonka hosil qiladi. Eng yaxshi mahsulotlar ikkalasini o'z ichiga oladi.",
-          'Мелкие молекулы (нано-HA) проникают в глубокие слои и увлажняют изнутри. Крупные остаются на поверхности и образуют защитную плёнку. Лучшие средства содержат и те, и другие.',
-          'Small molecules (nano-HA) reach the deeper layers and hydrate from inside. Large ones stay on the surface and form a protective film. The best products contain both.',
+          "Kichik molekulyar gialuron kislota terining yuza qatlamlariga chuqurroq kiradi, katta molekulalar esa yuzada qolib, namlikni ushlab turuvchi plyonka hosil qiladi. Ko'p mahsulotlar ikkalasini o'z ichiga oladi.",
+          "Низкомолекулярная гиалуроновая кислота глубже проникает в поверхностные слои кожи, а высокомолекулярная остаётся на поверхности и образует плёнку, удерживающую влагу. Многие средства содержат обе формы.",
+          "Low-molecular-weight hyaluronic acid gets further into the upper layers of the skin, while high-molecular-weight HA stays on the surface and forms a moisture-holding film. Many products contain both.",
         ),
       ),
       LessonStep(
         type: LessonStepType.list,
-        title: const LocalizedText("To'g'ri foydalanish",
-            'Как применять правильно', 'Using it properly'),
+        title: const LocalizedText(
+          "To'g'ri foydalanish",
+          'Как применять правильно',
+          'Using it properly',
+        ),
         body: const LocalizedText.same(''),
         items: const [
           LocalizedText(
@@ -482,6 +539,7 @@ final List<Lesson> lessons = [
   ),
   Lesson(
     id: 'ceramides',
+    sources: [...Sources.ceramides, ...Sources.skinCareBasics],
     title: const LocalizedText('Seramidlar', 'Церамиды', 'Ceramides'),
     subtitle: const LocalizedText(
       "Teri to'sig'ining g'ishtlari",
@@ -495,8 +553,11 @@ final List<Lesson> lessons = [
     steps: [
       LessonStep(
         type: LessonStepType.intro,
-        title: const LocalizedText('Seramidlar nima?', 'Что такое церамиды?',
-            'What are ceramides?'),
+        title: const LocalizedText(
+          'Seramidlar nima?',
+          'Что такое церамиды?',
+          'What are ceramides?',
+        ),
         body: const LocalizedText(
           "Terining eng tashqi qatlamini devorga o'xshating: hujayralar — g'isht, seramidlar — ularni ushlab turgan qorishma. Seramidlar terining o'zida bor moddalar va to'siqning yarmidan ko'pini tashkil qiladi. Ular kamayganda devorda yoriq paydo bo'ladi: namlik chiqib ketadi, bezovta qiluvchi narsalar ichkariga kiradi.",
           'Представьте верхний слой кожи как стену: клетки — кирпичи, церамиды — раствор между ними. Церамиды есть в коже от природы и составляют больше половины барьера. Когда их не хватает, в стене появляются трещины: влага уходит, раздражители заходят.',
@@ -505,8 +566,11 @@ final List<Lesson> lessons = [
       ),
       LessonStep(
         type: LessonStepType.fact,
-        title: const LocalizedText('Nega ular kamayadi?',
-            'Почему их становится меньше?', 'Why they run low'),
+        title: const LocalizedText(
+          'Nega ular kamayadi?',
+          'Почему их становится меньше?',
+          'Why they run low',
+        ),
         keyword: const LocalizedText(
           "Buzilgan to'siq — ko'p muammoning sababi",
           'Повреждённый барьер — причина многих проблем',
@@ -520,8 +584,11 @@ final List<Lesson> lessons = [
       ),
       LessonStep(
         type: LessonStepType.list,
-        title: const LocalizedText("To'siqni tiklash qoidalari",
-            'Как восстановить барьер', 'Rebuilding the barrier'),
+        title: const LocalizedText(
+          "To'siqni tiklash qoidalari",
+          'Как восстановить барьер',
+          'Rebuilding the barrier',
+        ),
         body: const LocalizedText.same(''),
         items: const [
           LocalizedText(
@@ -573,8 +640,12 @@ final List<Lesson> lessons = [
   ),
   Lesson(
     id: 'peeling',
+    sources: [...Sources.exfoliation, ...Sources.salicylicAcid],
     title: const LocalizedText(
-        'Piling nima?', 'Что такое пилинг?', 'What is a peel?'),
+      'Piling nima?',
+      'Что такое пилинг?',
+      'What is a peel?',
+    ),
     subtitle: const LocalizedText(
       "Qora nuqtalar va o'lik hujayralarni tozalash",
       'Очищение от чёрных точек и отмерших клеток',
@@ -588,7 +659,10 @@ final List<Lesson> lessons = [
       LessonStep(
         type: LessonStepType.intro,
         title: const LocalizedText(
-            'Piling nima?', 'Что такое пилинг?', 'What is a peel?'),
+          'Piling nima?',
+          'Что такое пилинг?',
+          'What is a peel?',
+        ),
         body: const LocalizedText(
           "Piling — teri yuzasidagi o'lik hujayralarni va poralar ichidagi iflosliklarni eritib tozalaydigan vosita. U skrabdan farq qiladi: skrab mexanik (ishqalaydi), piling esa kimyoviy (eritadi) ishlaydi. Shu sababli piling nozikroq va ko'proq nazorat ostida.",
           'Пилинг растворяет отмершие клетки на поверхности кожи и загрязнения в порах. От скраба он отличается принципом: скраб работает механически (трёт), пилинг — химически (растворяет). Поэтому пилинг мягче и его действие лучше контролируется.',
@@ -598,7 +672,10 @@ final List<Lesson> lessons = [
       LessonStep(
         type: LessonStepType.fact,
         title: const LocalizedText(
-            'Ikki asosiy turi', 'Два основных типа', 'The two main kinds'),
+          'Ikki asosiy turi',
+          'Два основных типа',
+          'The two main kinds',
+        ),
         keyword: const LocalizedText.same('AHA / BHA'),
         body: const LocalizedText(
           "AHA (alfa-gidroksi kislota) — tabiiy manbalardan olinadi: glikolik kislota shakar qamishidan, limon kislota limon va apelsindan, laktik kislota sutdan, mandel kislota bodom danagidan. Teri yuzasini yorqinlashtiradi, dog'larni yo'qotadi, tekislaydi. BHA (beta-gidroksi kislota) — salitsilik kislota, temir daraxt po'stlog'idan olinadi. Poraga chuqur kirib, yog' va qora nuqtalarni eritadi.",
@@ -608,8 +685,11 @@ final List<Lesson> lessons = [
       ),
       LessonStep(
         type: LessonStepType.list,
-        title: const LocalizedText('Piling nimalarga foydali?',
-            'Чем полезен пилинг', 'What a peel is good for'),
+        title: const LocalizedText(
+          'Piling nimalarga foydali?',
+          'Чем полезен пилинг',
+          'What a peel is good for',
+        ),
         body: const LocalizedText.same(''),
         items: const [
           LocalizedText(
@@ -641,8 +721,11 @@ final List<Lesson> lessons = [
       ),
       LessonStep(
         type: LessonStepType.tip,
-        title: const LocalizedText('Qachon va qanday ishlating?',
-            'Когда и как применять', 'When and how to use it'),
+        title: const LocalizedText(
+          'Qachon va qanday ishlating?',
+          'Когда и как применять',
+          'When and how to use it',
+        ),
         body: const LocalizedText(
           "Faqat kechqurun ishlating — piling teri fotosensitiv qiladi, quyoshda yuz qizaradi. Haftada 1–2 martadan ko'p ishlatmang — aks holda teri qizaradi va quruq bo'ladi. Retinol bilan bir kechada ishlatmang — juda kuchli bo'ladi. Ertasi kuni albatta SPF surting.",
           'Только вечером — пилинг делает кожу фоточувствительной, на солнце лицо краснеет. Не чаще 1–2 раз в неделю, иначе кожа покраснеет и пересохнет. Не сочетайте с ретинолом в один вечер — слишком сильно. На следующий день SPF обязателен.',

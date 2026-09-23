@@ -10,6 +10,7 @@ import 'package:real_beauty_ai/models/quiz_question.dart';
 import 'package:go_router/go_router.dart';
 import 'package:real_beauty_ai/services/local_store.dart';
 import 'package:real_beauty_ai/core/l10n/localized_text.dart';
+import 'package:real_beauty_ai/widgets/sources_section.dart';
 
 class QuizScreen extends StatelessWidget {
   const QuizScreen({super.key});
@@ -456,7 +457,34 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
               height: 1.45,
             ),
           ),
+          if (question.sources.isNotEmpty) _buildSourcesLink(question),
         ],
+      ),
+    );
+  }
+
+  /// A quiet link under a question that uses a term worth explaining; opens
+  /// its references in a sheet rather than pushing the quiz off screen.
+  Widget _buildSourcesLink(QuizQuestion question) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: TextButton.icon(
+        onPressed: () => showSourcesSheet(context, question.sources),
+        style: TextButton.styleFrom(
+          foregroundColor: _accent,
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          minimumSize: const Size(0, 44),
+        ),
+        icon: const Icon(Icons.menu_book_outlined, size: 16),
+        label: Text(
+          context.l10n.sourcesTitle,
+          style: GoogleFonts.nunito(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            decoration: TextDecoration.underline,
+            decorationColor: _accent.withValues(alpha: 0.5),
+          ),
+        ),
       ),
     );
   }
@@ -579,7 +607,7 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
         onTap: _goNext,
         color: _accent,
         child: Text(
-          isLast ? 'Yakunlash' : 'Keyingi',
+          isLast ? context.l10n.quizFinish : context.l10n.quizNext,
           style: GoogleFonts.nunito(
             fontSize: 15,
             fontWeight: FontWeight.w700,

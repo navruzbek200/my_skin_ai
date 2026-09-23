@@ -1641,6 +1641,78 @@ abstract class AppLocalizations {
   /// In uz, this message translates to:
   /// **'Telefon'**
   String get cosmoPhone;
+
+  /// No description provided for @quizNext.
+  ///
+  /// In uz, this message translates to:
+  /// **'Keyingi'**
+  String get quizNext;
+
+  /// No description provided for @quizFinish.
+  ///
+  /// In uz, this message translates to:
+  /// **'Yakunlash'**
+  String get quizFinish;
+
+  /// No description provided for @sourcesTitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Manbalar'**
+  String get sourcesTitle;
+
+  /// No description provided for @sourcesSeeAll.
+  ///
+  /// In uz, this message translates to:
+  /// **'Barcha manbalar va metodologiya'**
+  String get sourcesSeeAll;
+
+  /// No description provided for @sourcesOpenFailed.
+  ///
+  /// In uz, this message translates to:
+  /// **'Havolani ochib bo\'lmadi'**
+  String get sourcesOpenFailed;
+
+  /// No description provided for @sourcesScreenTitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Manbalar va metodologiya'**
+  String get sourcesScreenTitle;
+
+  /// No description provided for @sourcesMethodologyTitle.
+  ///
+  /// In uz, this message translates to:
+  /// **'Tahlil qanday ishlaydi'**
+  String get sourcesMethodologyTitle;
+
+  /// No description provided for @sourcesMethodologyBody.
+  ///
+  /// In uz, this message translates to:
+  /// **'Teri turi va tavsiyalar so\'rovnomadagi javoblaringiz asosida hisoblanadi: birinchi savol teri turini belgilaydi, qolganlari esa qo\'shimcha parvarish bloklarini qo\'shadi.\n\nBu kosmetik tahlil, tibbiy tashxis emas. Ilovadagi parvarish tavsiyalari umumiy ma\'lumot bo\'lib, quyidagi nashr etilgan manbalarga tayanadi. Teri kasalligi, kuchli yallig\'lanish yoki og\'riq bo\'lsa, dermatologga murojaat qiling.'**
+  String get sourcesMethodologyBody;
+
+  /// No description provided for @sourcesByTopic.
+  ///
+  /// In uz, this message translates to:
+  /// **'Mavzular bo\'yicha manbalar'**
+  String get sourcesByTopic;
+
+  /// No description provided for @sourcesShowMore.
+  ///
+  /// In uz, this message translates to:
+  /// **'Yana {count} ta manba'**
+  String sourcesShowMore(int count);
+
+  /// No description provided for @sourcesShowLess.
+  ///
+  /// In uz, this message translates to:
+  /// **'Yig\'ish'**
+  String get sourcesShowLess;
+
+  /// No description provided for @sourcesCheckedOn.
+  ///
+  /// In uz, this message translates to:
+  /// **'Havolalar tekshirilgan: {date}'**
+  String sourcesCheckedOn(String date);
 }
 
 class _AppLocalizationsDelegate

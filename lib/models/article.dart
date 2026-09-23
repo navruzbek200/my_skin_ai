@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:real_beauty_ai/core/l10n/localized_text.dart';
+import 'package:real_beauty_ai/models/source.dart';
 
 class ArticleSection {
   const ArticleSection({required this.heading, required this.body});
@@ -18,6 +19,7 @@ class Article {
     required this.duration,
     required this.summary,
     required this.sections,
+    this.sources = const [],
   });
 
   /// Stable across languages and rewordings — used for the hero tag between
@@ -32,4 +34,7 @@ class Article {
   final LocalizedText duration;
   final LocalizedText summary;
   final List<ArticleSection> sections;
+
+  /// References for the claims above, listed at the end of the article.
+  final List<Source> sources;
 }

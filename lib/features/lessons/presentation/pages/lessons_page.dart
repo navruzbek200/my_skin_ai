@@ -10,6 +10,9 @@ import 'package:real_beauty_ai/widgets/lessons/lesson_card.dart';
 import 'package:real_beauty_ai/widgets/lessons/section_header.dart';
 import 'package:real_beauty_ai/widgets/lessons/yoga_section_header.dart';
 import 'package:real_beauty_ai/widgets/lessons/yoga_video_card.dart';
+import 'package:go_router/go_router.dart';
+import 'package:real_beauty_ai/widgets/sources_section.dart';
+import 'package:real_beauty_ai/data/sources_data.dart';
 import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
 
 class LessonsScreen extends StatefulWidget {
@@ -149,6 +152,19 @@ class _LessonsScreenState extends State<LessonsScreen> {
               ],
             ),
           ),
+
+          // What the exercises are claimed to do is cited as soon as either
+          // list is open — the one place the claims are on screen.
+          if (_yogaExpanded || _yogaVoiceExpanded)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+                child: SourcesSection(
+                  sources: Sources.faceExercise,
+                  onSeeAll: () => context.push('/sources'),
+                ),
+              ),
+            ),
 
           const SliverToBoxAdapter(child: SizedBox(height: 26)),
 

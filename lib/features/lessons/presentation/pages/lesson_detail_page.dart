@@ -11,6 +11,9 @@ import 'package:real_beauty_ai/widgets/lessons/steps/tip_step.dart';
 import 'package:real_beauty_ai/widgets/primary_button.dart';
 import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
 import 'package:real_beauty_ai/core/l10n/localized_text.dart';
+import 'package:real_beauty_ai/models/source.dart';
+import 'package:real_beauty_ai/widgets/sources_section.dart';
+import 'package:go_router/go_router.dart';
 
 /// Width of the strip along the left edge reserved for the system back
 /// gesture. Matches Cupertino's own `_kBackGestureWidth`.
@@ -112,6 +115,9 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
                     key: ValueKey(_stepIndex),
                     step: _step,
                     color: _lesson.color,
+                    // The references close the lesson, under its summary —
+                    // the one step everybody who finishes it sees.
+                    sources: _isLast ? _lesson.sources : const [],
                   ),
                 ),
               ),
@@ -254,20 +260,40 @@ class _ProgressDots extends StatelessWidget {
 class _StepContent extends StatelessWidget {
   final LessonStep step;
   final Color color;
+  final List<Source> sources;
 
-  const _StepContent({super.key, required this.step, required this.color});
+  const _StepContent({
+    super.key,
+    required this.step,
+    required this.color,
+    this.sources = const [],
+  });
 
   @override
   Widget build(BuildContext context) {
+    final body = switch (step.type) {
+      LessonStepType.intro => IntroStep(step: step, color: color),
+      LessonStepType.fact => FactStep(step: step, color: color),
+      LessonStepType.list => ListStep(step: step, color: color),
+      LessonStepType.tip => TipStep(step: step, color: color),
+    };
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-      child: switch (step.type) {
-        LessonStepType.intro => IntroStep(step: step, color: color),
-        LessonStepType.fact => FactStep(step: step, color: color),
-        LessonStepType.list => ListStep(step: step, color: color),
-        LessonStepType.tip => TipStep(step: step, color: color),
-      },
+      child: sources.isEmpty
+          ? body
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                body,
+                const SizedBox(height: 20),
+                SourcesSection(
+                  sources: sources,
+                  onSeeAll: () => context.push('/sources'),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
     );
   }
 }

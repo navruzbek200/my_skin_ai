@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 
 import 'package:real_beauty_ai/core/l10n/localized_text.dart';
+import 'package:real_beauty_ai/data/sources_data.dart';
+import 'package:real_beauty_ai/models/source.dart';
 
 /// Every sentence the analysis can produce, keyed by the code the engine
 /// works in.
@@ -120,8 +122,7 @@ A mild chemical exfoliation (AHA/BHA) once or twice a week also helps keep the p
       ),
     ),
     'S': (
-      title: LocalizedText(
-          "Ta'sirchanlik", 'Чувствительность', 'Sensitivity'),
+      title: LocalizedText("Ta'sirchanlik", 'Чувствительность', 'Sensitivity'),
       text: LocalizedText(
         '''Teringizda ta'sirchanlik bor.
 
@@ -141,8 +142,7 @@ Harsh scrubs, high-concentration acids and alcohol-based cosmetics make skin mor
       ),
     ),
     'Bh': (
-      title: LocalizedText(
-          'Qora nuqtalar', 'Чёрные точки', 'Blackheads'),
+      title: LocalizedText('Qora nuqtalar', 'Чёрные точки', 'Blackheads'),
       text: LocalizedText(
         '''Yuzingizda qora nuqtalar bor.
 
@@ -162,29 +162,31 @@ An AHA/BHA exfoliation or a mild peel mask once or twice a week cleans the pores
       ),
     ),
     'Wh': (
-      title: LocalizedText('Oq nuqtalar (jiroviklar)',
-          'Белые точки (милиумы)', 'Whiteheads (milia)'),
+      title: LocalizedText('Oq nuqtalar', 'Белые точки', 'Whiteheads'),
       text: LocalizedText(
-        '''Yuzingizda oq nuqtalar (jiroviklar) bor.
+        '''Yuzingizda mayda oq nuqtalar bor.
 
-Jiroviklar — teri ostida to'plangan keratin bo'lib, ularni mexanik yo'l bilan siqib chiqarish tavsiya etilmaydi. Tarkibida salitsil kislotasi, niatsinamid yoki retinol bo'lgan vositalar poralarning tiqilib qolishini kamaytiradi va jiroviklarni asta-sekin yo'qotishga yordam beradi.
+Ular ikki xil bo'ladi: yopiq komedonlar (tiqilib qolgan poralar) va miliumlar (teri ostidagi mayda keratin kistalari). Yopiq komedonlarda salitsil kislotasi yoki retinoidli vositalar poralarni tozalashga yordam beradi. Miliumlar ko'pincha o'z-o'zidan yo'qoladi; ularni siqib chiqarmang — kerak bo'lsa, dermatolog xavfsiz olib tashlaydi.
 
-Yuzni kuniga 2 marta yengil gel teksturali penka bilan tozalang. Haftasiga 1–2 marta AHA/BHA eksfoliatsiya poralarni chuqur tozalaydi. Komedogen (poralarni berkituvchi) og'ir kremlardan saqlaning.''',
-        '''У вас есть белые точки (милиумы).
+Yuzni kuniga 2 marta yengil gel teksturali penka bilan tozalang va komedogen (poralarni berkituvchi) og'ir kremlardan saqlaning.''',
+        '''У вас есть мелкие белые точки.
 
-Милиумы — это кератин, скопившийся под кожей; выдавливать их механически не стоит. Средства с салициловой кислотой, ниацинамидом или ретинолом реже дают порам забиваться и убирают милиумы постепенно.
+Они бывают двух видов: закрытые комедоны (забитые поры) и милиумы (мелкие кератиновые кисты под кожей). Закрытым комедонам помогают средства с салициловой кислотой или ретиноидами — они очищают поры. Милиумы часто проходят сами; не выдавливайте их — при необходимости дерматолог удалит их безопасно.
 
-Умывайтесь дважды в день лёгкой гелевой пенкой. Эксфолиация AHA/BHA 1–2 раза в неделю очищает поры глубже. Избегайте комедогенных плотных кремов.''',
-        '''You have whiteheads (milia).
+Умывайтесь дважды в день лёгкой гелевой пенкой и избегайте плотных комедогенных кремов.''',
+        '''You have small white bumps.
 
-Milia are keratin trapped under the skin, and squeezing them out mechanically is not advised. Products with salicylic acid, niacinamide or retinol keep the pores from clogging and clear milia gradually.
+They come in two kinds: closed comedones (clogged pores) and milia (tiny keratin cysts under the skin). For closed comedones, products with salicylic acid or a retinoid help clear the pores. Milia often clear on their own; do not squeeze them — if needed, a dermatologist can remove them safely.
 
-Wash twice a day with a light gel foam. An AHA/BHA exfoliation once or twice a week cleans the pores more deeply. Avoid heavy, comedogenic creams.''',
+Wash twice a day with a light gel foam and avoid heavy, comedogenic creams.''',
       ),
     ),
     'P': (
       title: LocalizedText(
-          "Dog', sepkillar", 'Пятна и веснушки', 'Spots and freckles'),
+        "Dog', sepkillar",
+        'Пятна и веснушки',
+        'Spots and freckles',
+      ),
       text: LocalizedText(
         '''Teringiz dog'ga, pigmentatsiyaga moyil.
 
@@ -204,8 +206,11 @@ A mild exfoliation (AHA/BHA) once or twice a week also evens out the tone. With 
       ),
     ),
     'Ew': (
-      title: LocalizedText("Ko'z atrofidagi ajinlar",
-          'Морщины вокруг глаз', 'Lines around the eyes'),
+      title: LocalizedText(
+        "Ko'z atrofidagi ajinlar",
+        'Морщины вокруг глаз',
+        'Lines around the eyes',
+      ),
       text: LocalizedText(
         '''Ko'z atrofida mayda ajinlar aniqlandi.
 
@@ -225,29 +230,35 @@ Gentle massage around the eyes, enough sleep and regular breaks from the screen 
       ),
     ),
     'Ed': (
-      title: LocalizedText("Ko'z tagidagi qorayishlar",
-          'Тёмные круги под глазами', 'Dark circles'),
+      title: LocalizedText(
+        "Ko'z tagidagi qorayishlar",
+        'Тёмные круги под глазами',
+        'Dark circles',
+      ),
       text: LocalizedText(
         '''Ko'z tagida qorayishlar bor.
 
-Ko'z atrofidagi nozik teri uchun maxsus ko'z krem ishlatish muhim. Tarkibida vitamin C, kofein yoki niatsinamid bo'lgan kremlar teri rangini yorqinlashtirishga va qorayishni kamaytirishga yordam beradi.
+Ko'z atrofidagi nozik teri uchun maxsus ko'z krem ishlatish muhim. Tarkibida vitamin C yoki niatsinamid bo'lgan kremlar teri rangini yorqinlashtirishga va qorayishni kamaytirishga yordam beradi.
 
-Yetarli uyqu, ko'proq suv ichish va ko'z atrofini yumshoq parvarish qilish ham muhim — uyqu yetishmasligi qorayishning eng keng tarqalgan sababi.''',
+Yetarli uyqu, ko'proq suv ichish va ko'z atrofini yumshoq parvarish qilish ham muhim — uyqu yetishmasligi qorayishning keng tarqalgan sabablaridan biri.''',
         '''Под глазами есть тёмные круги.
 
-Для тонкой кожи вокруг глаз важен отдельный крем. Кремы с витамином C, кофеином или ниацинамидом осветляют кожу и уменьшают темноту.
+Для тонкой кожи вокруг глаз важен отдельный крем. Кремы с витамином C или ниацинамидом осветляют кожу и уменьшают темноту.
 
-Достаточный сон, больше воды и бережный уход за зоной вокруг глаз тоже важны — недосып самая частая причина кругов.''',
+Достаточный сон, больше воды и бережный уход за зоной вокруг глаз тоже важны — недосып — одна из частых причин кругов.''',
         '''You have dark circles under your eyes.
 
-The thin skin around the eyes needs its own cream. Creams with vitamin C, caffeine or niacinamide brighten the area and reduce the darkness.
+The thin skin around the eyes needs its own cream. Creams with vitamin C or niacinamide brighten the area and reduce the darkness.
 
-Enough sleep, more water and gentle care around the eyes matter too — lack of sleep is the most common cause.''',
+Enough sleep, more water and gentle care around the eyes matter too — lack of sleep is one of the common causes.''',
       ),
     ),
     'W': (
-      title: LocalizedText('Ajinli, osilgan yuz',
-          'Морщины и потеря упругости', 'Lines and lost firmness'),
+      title: LocalizedText(
+        'Ajinli, osilgan yuz',
+        'Морщины и потеря упругости',
+        'Lines and lost firmness',
+      ),
       text: LocalizedText(
         '''Teringiz elastikligini yo'qotgan, ajinlar va terida osilish kuzatilmoqda.
 
@@ -267,8 +278,11 @@ Hydrating and repairing masks once or twice a week, plus facial massage or face 
       ),
     ),
     'Ao': (
-      title: LocalizedText("Husnbuzarlar (yog'li teri)",
-          'Высыпания (жирная кожа)', 'Breakouts (oily skin)'),
+      title: LocalizedText(
+        "Husnbuzarlar (yog'li teri)",
+        'Высыпания (жирная кожа)',
+        'Breakouts (oily skin)',
+      ),
       text: LocalizedText(
         '''Husnbuzarlar bilan ham ishlash kerak.
 
@@ -294,8 +308,11 @@ Important: breakouts usually come from the inside — hormonal changes, diet, di
       ),
     ),
     'Ad': (
-      title: LocalizedText('Husnbuzarlar (quruq teri)',
-          'Высыпания (сухая кожа)', 'Breakouts (dry skin)'),
+      title: LocalizedText(
+        'Husnbuzarlar (quruq teri)',
+        'Высыпания (сухая кожа)',
+        'Breakouts (dry skin)',
+      ),
       text: LocalizedText(
         '''Quruq terida ham husnbuzar paydo bo'lishi mumkin, shuning uchun parvarish juda yumshoq va namlovchi bo'lishi kerak.
 
@@ -321,6 +338,107 @@ Important: breakouts usually come from the inside — hormonal changes, diet, di
       ),
     ),
   };
+
+  /// References behind the copy above, by the same codes — skin types and
+  /// concern blocks share one table because their codes never collide.
+  ///
+  /// Kept here, keyed by code, rather than written into the stored result: a
+  /// profile saved by an older build picks up the citations the moment it is
+  /// read, and a source can be added without touching anything on disk.
+  /// A code with no entry has no citation yet — see the "needs source" list in
+  /// the 1.4.1 notes before adding one.
+  static const sources = <String, List<Source>>{
+    'D': [
+      ...Sources.drySkin,
+      ...Sources.hyaluronicAcid,
+      ...Sources.panthenol,
+      ...Sources.ceramides,
+      ...Sources.niacinamide,
+    ],
+    'C': [
+      ...Sources.oilySkin,
+      ...Sources.niacinamide,
+      ...Sources.hyaluronicAcid,
+      ...Sources.exfoliation,
+    ],
+    'N': [...Sources.vitaminC, ...Sources.niacinamide, ...Sources.sunscreen],
+    'O': [
+      ...Sources.oilySkin,
+      ...Sources.niacinamide,
+      ...Sources.salicylicAcid,
+      ...Sources.sunscreen,
+    ],
+    'P0': [
+      ...Sources.pores,
+      ...Sources.niacinamide,
+      ...Sources.salicylicAcid,
+      ...Sources.exfoliation,
+      ...Sources.sunscreen,
+    ],
+    'S': [
+      ...Sources.redness,
+      ...Sources.panthenol,
+      ...Sources.centella,
+      ...Sources.aloeVera,
+      ...Sources.ceramides,
+      ...Sources.niacinamide,
+      ...Sources.sunscreen,
+    ],
+    'Bh': [
+      ...Sources.comedones,
+      ...Sources.salicylicAcid,
+      ...Sources.niacinamide,
+      ...Sources.retinol,
+      ...Sources.exfoliation,
+    ],
+    'Wh': [...Sources.comedones, ...Sources.milia, ...Sources.salicylicAcid],
+    'P': [
+      ...Sources.pigmentation,
+      ...Sources.vitaminC,
+      ...Sources.niacinamide,
+      ...Sources.licorice,
+      ...Sources.exfoliation,
+      ...Sources.sunscreen,
+    ],
+    'Ew': [...Sources.hyaluronicAcid, ...Sources.peptides],
+    'Ed': [...Sources.darkCircles, ...Sources.vitaminC, ...Sources.niacinamide],
+    'W': [
+      ...Sources.retinol,
+      ...Sources.peptides,
+      ...Sources.hyaluronicAcid,
+      ...Sources.skinAging,
+      ...Sources.faceExercise,
+      ...Sources.sunscreen,
+    ],
+    'Ao': [
+      ...Sources.acne,
+      ...Sources.acneDiet,
+      ...Sources.salicylicAcid,
+      ...Sources.niacinamide,
+      ...Sources.polyphenols,
+    ],
+    'Ad': [
+      ...Sources.acne,
+      ...Sources.salicylicAcid,
+      ...Sources.niacinamide,
+      ...Sources.hyaluronicAcid,
+    ],
+  };
+
+  /// Every reference behind one result, in the order the screen shows its
+  /// parts and with duplicates dropped — niacinamide is cited by almost every
+  /// block, and listing it five times would bury the rest.
+  static List<Source> sourcesFor(
+    String skinTypeCode,
+    Iterable<String> concernCodes,
+  ) {
+    final seen = <String>{};
+    return [
+      for (final code in [skinTypeCode, ...concernCodes])
+        for (final s in sources[code] ?? const <Source>[])
+          if (seen.add(s.url)) s,
+    ];
+  }
 }
 
 /// Reads a stored analysis back in whichever language is on now.

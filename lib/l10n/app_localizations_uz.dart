@@ -902,4 +902,45 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get cosmoPhone => 'Telefon';
+
+  @override
+  String get quizNext => 'Keyingi';
+
+  @override
+  String get quizFinish => 'Yakunlash';
+
+  @override
+  String get sourcesTitle => 'Manbalar';
+
+  @override
+  String get sourcesSeeAll => 'Barcha manbalar va metodologiya';
+
+  @override
+  String get sourcesOpenFailed => 'Havolani ochib bo\'lmadi';
+
+  @override
+  String get sourcesScreenTitle => 'Manbalar va metodologiya';
+
+  @override
+  String get sourcesMethodologyTitle => 'Tahlil qanday ishlaydi';
+
+  @override
+  String get sourcesMethodologyBody =>
+      'Teri turi va tavsiyalar so\'rovnomadagi javoblaringiz asosida hisoblanadi: birinchi savol teri turini belgilaydi, qolganlari esa qo\'shimcha parvarish bloklarini qo\'shadi.\n\nBu kosmetik tahlil, tibbiy tashxis emas. Ilovadagi parvarish tavsiyalari umumiy ma\'lumot bo\'lib, quyidagi nashr etilgan manbalarga tayanadi. Teri kasalligi, kuchli yallig\'lanish yoki og\'riq bo\'lsa, dermatologga murojaat qiling.';
+
+  @override
+  String get sourcesByTopic => 'Mavzular bo\'yicha manbalar';
+
+  @override
+  String sourcesShowMore(int count) {
+    return 'Yana $count ta manba';
+  }
+
+  @override
+  String get sourcesShowLess => 'Yig\'ish';
+
+  @override
+  String sourcesCheckedOn(String date) {
+    return 'Havolalar tekshirilgan: $date';
+  }
 }

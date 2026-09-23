@@ -84,6 +84,10 @@ void main() {
 
   /// Opens the delete confirmation and then the re-auth sheet behind it.
   Future<void> openDeleteSheet(WidgetTester tester) async {
+    // The last control on the screen, and below the fold of the test
+    // viewport now that Settings has a sources row.
+    await tester.ensureVisible(find.text(l10n.accountDeleteAccount));
+    await tester.pumpAndSettle();
     await tester.tap(find.text(l10n.accountDeleteAccount));
     await tester.pumpAndSettle();
     await tester.tap(find.text(l10n.commonDelete));
@@ -150,6 +154,10 @@ void main() {
       (tester) async {
     await pump(tester);
 
+    // The last control on the screen, and below the fold of the test
+    // viewport now that Settings has a sources row.
+    await tester.ensureVisible(find.text(l10n.accountDeleteAccount));
+    await tester.pumpAndSettle();
     await tester.tap(find.text(l10n.accountDeleteAccount));
     await tester.pumpAndSettle();
 

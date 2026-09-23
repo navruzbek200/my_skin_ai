@@ -18,6 +18,7 @@ import 'package:real_beauty_ai/features/onboarding/presentation/pages/splash_pag
 import 'package:real_beauty_ai/features/shell/main_shell.dart';
 import 'package:real_beauty_ai/features/skin_scan/presentation/pages/face_scan_page.dart';
 import 'package:real_beauty_ai/features/skin_scan/presentation/pages/scan_instructions_page.dart';
+import 'package:real_beauty_ai/features/sources/presentation/pages/sources_page.dart';
 import 'package:real_beauty_ai/models/article.dart';
 import 'package:real_beauty_ai/models/cosmetolog.dart';
 import 'package:real_beauty_ai/models/lesson.dart';
@@ -176,6 +177,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/account',
       pageBuilder: (context, state) => _fade(state, const AccountScreen()),
+    ),
+    GoRoute(
+      path: '/sources',
+      pageBuilder: (context, state) => _fade(state, const SourcesScreen()),
     ),
   ],
 );

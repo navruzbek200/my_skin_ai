@@ -8,6 +8,7 @@ import 'package:real_beauty_ai/models/skin_analysis_result.dart';
 import 'package:real_beauty_ai/services/local_store.dart';
 import 'package:go_router/go_router.dart';
 import 'package:real_beauty_ai/logic/skin_copy.dart';
+import 'package:real_beauty_ai/widgets/sources_section.dart';
 
 class ResultsScreen extends StatefulWidget {
   final SkinAnalysisResult result;
@@ -72,6 +73,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
                   _buildAdditionalSection(),
                 ],
                 const SizedBox(height: 24),
+                _buildSources(context),
+                const SizedBox(height: 12),
                 _buildDisclaimer(),
                 const SizedBox(height: 32),
                 _buildCta(context),
@@ -253,6 +256,19 @@ class _ResultsScreenState extends State<ResultsScreen> {
     );
   }
 
+  // Citations for everything above — the base recommendation and each concern
+  // block — plus the way into the full sources and methodology screen. Sits
+  // right above the disclaimer so the two read together.
+  Widget _buildSources(BuildContext context) {
+    return SourcesSection(
+      sources: SkinCopy.sourcesFor(
+        _result.skinTypeCode,
+        _result.additionalBlocks.map((b) => b['code'] ?? ''),
+      ),
+      onSeeAll: () => context.push('/sources'),
+    ).animate().fadeIn(delay: 600.ms);
+  }
+
   Widget _buildDisclaimer() {
     return Container(
       padding: const EdgeInsets.all(14),
@@ -332,12 +348,16 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(
-          text,
-          style: GoogleFonts.nunito(
-            fontSize: 17,
-            fontWeight: FontWeight.w800,
-            color: const Color(0xFF2D2050),
+        // Flexible so a long label — Russian at a large text size — wraps
+        // instead of pushing the count badge off the screen.
+        Flexible(
+          child: Text(
+            text,
+            style: GoogleFonts.nunito(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF2D2050),
+            ),
           ),
         ),
         const SizedBox(width: 8),

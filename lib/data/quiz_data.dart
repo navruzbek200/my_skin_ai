@@ -1,4 +1,5 @@
 import 'package:real_beauty_ai/core/l10n/localized_text.dart';
+import 'package:real_beauty_ai/data/sources_data.dart';
 import 'package:real_beauty_ai/models/quiz_question.dart';
 
 /// The questionnaire, in uz / ru / en.
@@ -30,16 +31,28 @@ final List<QuizQuestion> quizQuestions = [
       'An hour after washing your face, with no cream applied — how does your skin feel?',
     ),
     scaleLabels: [
-      LocalizedText('Juda quruq, tortiladi', 'Очень сухая, стягивает',
-          'Very dry, tight'),
+      LocalizedText(
+        'Juda quruq, tortiladi',
+        'Очень сухая, стягивает',
+        'Very dry, tight',
+      ),
       LocalizedText('Biroz quruq', 'Слегка сухая', 'Slightly dry'),
-      LocalizedText("Yanoqlar quruq, T-zona yog'li",
-          'Щёки сухие, Т-зона жирная', 'Dry cheeks, oily T-zone'),
-      LocalizedText('Normal va qulay', 'Нормальная и комфортная',
-          'Normal and comfortable'),
+      LocalizedText(
+        "Yanoqlar quruq, T-zona yog'li",
+        'Щёки сухие, Т-зона жирная',
+        'Dry cheeks, oily T-zone',
+      ),
+      LocalizedText(
+        'Normal va qulay',
+        'Нормальная и комфортная',
+        'Normal and comfortable',
+      ),
       LocalizedText("Yog'lanadi", 'Жирнеет', 'Gets oily'),
-      LocalizedText("Juda tez yog'lanadi", 'Очень быстро жирнеет',
-          'Gets oily very quickly'),
+      LocalizedText(
+        "Juda tez yog'lanadi",
+        'Очень быстро жирнеет',
+        'Gets oily very quickly',
+      ),
     ],
   ),
   // 1 — pores (q4)
@@ -53,15 +66,24 @@ final List<QuizQuestion> quizQuestions = [
       'How large do the pores on your face look?',
     ),
     scaleLabels: [
-      LocalizedText('Umuman sezilmaydi', 'Совсем не заметны',
-          'Not noticeable at all'),
+      LocalizedText(
+        'Umuman sezilmaydi',
+        'Совсем не заметны',
+        'Not noticeable at all',
+      ),
       LocalizedText('Juda kichik', 'Очень мелкие', 'Very small'),
       LocalizedText('Biroz seziladi', 'Слегка заметны', 'Slightly noticeable'),
       LocalizedText('Ancha kattaroq', 'Заметно крупнее', 'Noticeably larger'),
-      LocalizedText("Katta va aniq ko'rinadi", 'Крупные и заметные',
-          'Large and clearly visible'),
-      LocalizedText("Juda katta va aniq ko'rinadi", 'Очень крупные и заметные',
-          'Very large and obvious'),
+      LocalizedText(
+        "Katta va aniq ko'rinadi",
+        'Крупные и заметные',
+        'Large and clearly visible',
+      ),
+      LocalizedText(
+        "Juda katta va aniq ko'rinadi",
+        'Очень крупные и заметные',
+        'Very large and obvious',
+      ),
     ],
   ),
   // 2 — sensitivity (q13)
@@ -76,8 +98,11 @@ final List<QuizQuestion> quizQuestions = [
     ),
     scaleLabels: [
       LocalizedText("Umuman bo'lmagan", 'Никогда не было', 'Never'),
-      LocalizedText('Juda kam (yiliga 1-2)', 'Очень редко (1–2 раза в год)',
-          'Very rarely (1–2 a year)'),
+      LocalizedText(
+        'Juda kam (yiliga 1-2)',
+        'Очень редко (1–2 раза в год)',
+        'Very rarely (1–2 a year)',
+      ),
       LocalizedText("Ba'zan uchraydi", 'Иногда бывает', 'Sometimes'),
       LocalizedText('Tez-tez uchraydi', 'Довольно часто', 'Fairly often'),
       LocalizedText("Ko'pincha uchraydi", 'Часто', 'Often'),
@@ -96,14 +121,26 @@ final List<QuizQuestion> quizQuestions = [
     ),
     scaleLabels: [
       LocalizedText('Umuman chiqmaydi', 'Совсем не появляются', 'Never'),
-      LocalizedText('Juda kam (yiliga 1-2)', 'Очень редко (1–2 раза в год)',
-          'Very rarely (1–2 a year)'),
-      LocalizedText("Ba'zan (oyda 1-2)", 'Иногда (1–2 раза в месяц)',
-          'Sometimes (1–2 a month)'),
-      LocalizedText('Tez-tez (oyda 3-5)', 'Часто (3–5 раз в месяц)',
-          'Often (3–5 a month)'),
-      LocalizedText("Ko'p (haftada 1-2)", 'Много (1–2 раза в неделю)',
-          'A lot (1–2 a week)'),
+      LocalizedText(
+        'Juda kam (yiliga 1-2)',
+        'Очень редко (1–2 раза в год)',
+        'Very rarely (1–2 a year)',
+      ),
+      LocalizedText(
+        "Ba'zan (oyda 1-2)",
+        'Иногда (1–2 раза в месяц)',
+        'Sometimes (1–2 a month)',
+      ),
+      LocalizedText(
+        'Tez-tez (oyda 3-5)',
+        'Часто (3–5 раз в месяц)',
+        'Often (3–5 a month)',
+      ),
+      LocalizedText(
+        "Ko'p (haftada 1-2)",
+        'Много (1–2 раза в неделю)',
+        'A lot (1–2 a week)',
+      ),
       LocalizedText('Har doim chiqadi', 'Постоянно', 'Constantly'),
     ],
   ),
@@ -125,11 +162,12 @@ final List<QuizQuestion> quizQuestions = [
     id: 'q19',
     type: QuestionType.scale,
     text: LocalizedText(
-      "Yuzingizda oq nuqtalar (jiroviklar) qanchalik ko'p?",
-      'Много ли на лице белых точек (милиумов)?',
-      'How many whiteheads (milia) do you have?',
+      "Yuzingizda mayda oq nuqtalar ko'pmi?",
+      'Много ли на лице мелких белых точек?',
+      'Do you have many small white bumps on your face?',
     ),
     scaleLabels: _amountScale,
+    sources: Sources.milia,
   ),
   // 6 — pigmentation (q23)
   const QuizQuestion(
@@ -199,15 +237,20 @@ final List<QuizQuestion> quizQuestions = [
       'How much firmness has your facial skin lost?',
     ),
     scaleLabels: [
-      LocalizedText("Umuman yo'qotmagan", 'Совсем не потеряла',
-          'None at all'),
-      LocalizedText("Juda oz yo'qotgan", 'Потеряла совсем немного',
-          'Very little'),
+      LocalizedText("Umuman yo'qotmagan", 'Совсем не потеряла', 'None at all'),
+      LocalizedText(
+        "Juda oz yo'qotgan",
+        'Потеряла совсем немного',
+        'Very little',
+      ),
       LocalizedText("Biroz yo'qotgan", 'Немного потеряла', 'A little'),
       LocalizedText("Ancha yo'qotgan", 'Заметно потеряла', 'Noticeably'),
       LocalizedText("Ko'p yo'qotgan", 'Сильно потеряла', 'A lot'),
-      LocalizedText("Juda ko'p yo'qotgan", 'Очень сильно потеряла',
-          'A great deal'),
+      LocalizedText(
+        "Juda ko'p yo'qotgan",
+        'Очень сильно потеряла',
+        'A great deal',
+      ),
     ],
   ),
 ];

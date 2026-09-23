@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:real_beauty_ai/core/l10n/localized_text.dart';
+import 'package:real_beauty_ai/models/source.dart';
 
 enum LessonStepType { intro, fact, list, tip }
 
@@ -34,6 +35,7 @@ class Lesson {
     required this.level,
     required this.color,
     required this.steps,
+    this.sources = const [],
   });
 
   /// Stable across languages and rewordings.
@@ -45,4 +47,7 @@ class Lesson {
   final LocalizedText level;
   final Color color;
   final List<LessonStep> steps;
+
+  /// References for the lesson, shown under its last step.
+  final List<Source> sources;
 }

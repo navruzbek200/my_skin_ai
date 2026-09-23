@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:real_beauty_ai/core/l10n/localized_text.dart';
+import 'package:real_beauty_ai/data/sources_data.dart';
+import 'package:real_beauty_ai/models/source.dart';
 
 /// One skin concern, with its cause and what to do about it.
 ///
@@ -18,6 +20,7 @@ class SkinProblem {
     required this.color,
     required this.icon,
     this.imagePath,
+    this.sources = const [],
   });
 
   /// Stable across languages and rewordings — this is what the hero animation
@@ -34,6 +37,9 @@ class SkinProblem {
   final Color color;
   final IconData icon;
   final String? imagePath;
+
+  /// References for the cause and the advice, listed under "What helps".
+  final List<Source> sources;
 }
 
 const List<SkinProblem> skinProblems = [
@@ -53,6 +59,12 @@ const List<SkinProblem> skinProblems = [
     color: Color(0xFF7060AA),
     icon: Icons.face_retouching_natural_outlined,
     imagePath: 'assets/skin_problems/acne.jpg',
+    sources: [
+      ...Sources.acne,
+      ...Sources.acneDiet,
+      ...Sources.salicylicAcid,
+      ...Sources.benzoylPeroxide,
+    ],
   ),
   SkinProblem(
     id: 'dry',
@@ -63,13 +75,14 @@ const List<SkinProblem> skinProblems = [
       'The skin loses moisture: dry air, washing with hot water, alcohol-based products.',
     ),
     solution: LocalizedText(
-      "Yuz yuvgandan keyin zudlik bilan gialuron kislota va squalane asosidagi krem surting. Suv ko'proq iching.",
-      'Сразу после умывания нанесите крем с гиалуроновой кислотой и скваланом. Пейте больше воды.',
-      'Apply a hyaluronic acid and squalane cream straight after washing. Drink more water.',
+      "Yuz yuvgandan keyin darhol, teri hali nam paytida, gialuron kislotali namlovchi krem surting. Issiq suv o'rniga iliq suvdan foydalaning.",
+      "Сразу после умывания, пока кожа влажная, нанесите увлажняющий крем с гиалуроновой кислотой. Умывайтесь тёплой, а не горячей водой.",
+      "Straight after washing, while the skin is still damp, apply a moisturiser with hyaluronic acid. Wash with warm water, not hot.",
     ),
     color: Color(0xFF0284C7),
     icon: Icons.water_drop_outlined,
     imagePath: 'assets/skin_problems/dry.jpg',
+    sources: [...Sources.drySkin, ...Sources.hyaluronicAcid],
   ),
   SkinProblem(
     id: 'oily',
@@ -85,13 +98,14 @@ const List<SkinProblem> skinProblems = [
       'A light gel moisturiser and a niacinamide toner. Do not strip the skin — it only produces more oil in reply!',
     ),
     note: LocalizedText(
-      "Yog'li teri bir jihatdan foydali — qarilik belgilari ko'pincha kechroq paydo bo'ladi.",
-      'У жирной кожи есть плюс — признаки старения на ней обычно появляются позже.',
-      'Oily skin has one advantage — signs of ageing usually show up later on it.',
+      "Yog'li teriga ham namlantirish kerak — faqat yengil, yog'siz (oil-free) vositalarni tanlang.",
+      "Жирной коже тоже нужно увлажнение — просто выбирайте лёгкие средства без масел (oil-free).",
+      "Oily skin still needs moisturiser — just choose light, oil-free products.",
     ),
     color: Color(0xFF16A34A),
     icon: Icons.spa_outlined,
     imagePath: 'assets/skin_problems/oily.jpg',
+    sources: [...Sources.oilySkin, ...Sources.niacinamide],
   ),
   SkinProblem(
     id: 'sensitivity',
@@ -102,23 +116,23 @@ const List<SkinProblem> skinProblems = [
       'The skin barrier is weak and overreacts to anything outside. Allergenic ingredients, wind and cold all make it worse.',
     ),
     solution: LocalizedText(
-      "Minimal ingredientli, parfyumersiz vositalar. Sentin 5 asosidagi krem, azelain kislota. Yangi vositani asta sinab ko'ring.",
+      "Minimal ingredientli, parfyumersiz vositalar. Pantenolli krem, azelain kislota. Yangi vositani asta sinab ko'ring.",
       'Средства с коротким составом и без отдушек. Крем с пантенолом, азелаиновая кислота. Новое средство вводите постепенно.',
       'Short ingredient lists, no fragrance. A panthenol cream, azelaic acid. Introduce anything new slowly.',
     ),
     note: LocalizedText(
-      "Sezgir teri — teri tipi emas, holat. Parvarish bilan yaxshilanishi mumkin.",
-      'Чувствительность — это состояние, а не тип кожи. При правильном уходе она проходит.',
-      'Sensitivity is a state, not a skin type. With the right care it can improve.',
+      "Qizarish ko'pincha zaiflashgan teri to'sig'i bilan bog'liq; yumshoq parvarish uni kamaytirishi mumkin. Qizarish o'tmasa, dermatologga ko'rining.",
+      "Покраснение часто связано с ослабленным барьером кожи, и бережный уход может его уменьшить. Если покраснение не проходит, покажитесь дерматологу.",
+      "Redness is often linked to a weakened skin barrier, and gentle care can reduce it. If it does not settle, see a dermatologist.",
     ),
     color: Color(0xFFE11D48),
     icon: Icons.favorite_border_rounded,
     imagePath: 'assets/skin_problems/Redness.jpg',
+    sources: [...Sources.redness, ...Sources.panthenol],
   ),
   SkinProblem(
     id: 'wrinkles',
-    name: LocalizedText(
-        'Peshona ajinlari', 'Морщины на лбу', 'Forehead lines'),
+    name: LocalizedText('Peshona ajinlari', 'Морщины на лбу', 'Forehead lines'),
     cause: LocalizedText(
       "Mimika (qosh ko'tarish, chiyillatish) + quruqlik + quyosh. Peshona eng tez ajinlanadigan hudud.",
       'Мимика (поднятые брови, прищур) плюс сухость и солнце. Лоб — зона, где морщины появляются раньше всего.',
@@ -132,6 +146,12 @@ const List<SkinProblem> skinProblems = [
     color: Color(0xFFB45309),
     icon: Icons.auto_awesome_outlined,
     imagePath: 'assets/skin_problems/forehead wrinkles.jpg',
+    sources: [
+      ...Sources.retinol,
+      ...Sources.peptides,
+      ...Sources.sunscreen,
+      ...Sources.skinAging,
+    ],
   ),
   SkinProblem(
     id: 'freckles',
@@ -154,5 +174,6 @@ const List<SkinProblem> skinProblems = [
     color: Color(0xFFDB2777),
     icon: Icons.grain_outlined,
     imagePath: 'assets/skin_problems/freckles.jpg',
+    sources: [...Sources.freckles, ...Sources.vitaminC, ...Sources.sunscreen],
   ),
 ];

@@ -904,4 +904,51 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cosmoPhone => 'Phone';
+
+  @override
+  String get quizNext => 'Next';
+
+  @override
+  String get quizFinish => 'Finish';
+
+  @override
+  String get sourcesTitle => 'Sources';
+
+  @override
+  String get sourcesSeeAll => 'All sources & methodology';
+
+  @override
+  String get sourcesOpenFailed => 'Could not open the link';
+
+  @override
+  String get sourcesScreenTitle => 'Sources & methodology';
+
+  @override
+  String get sourcesMethodologyTitle => 'How the analysis works';
+
+  @override
+  String get sourcesMethodologyBody =>
+      'Your skin type and recommendations are calculated from your questionnaire answers: the first question sets the skin type, and the others add extra care blocks.\n\nThis is a cosmetic analysis, not a medical diagnosis. The care advice in this app is general information based on the published sources below. If you have a skin condition, severe inflammation or pain, see a dermatologist.';
+
+  @override
+  String get sourcesByTopic => 'Sources by topic';
+
+  @override
+  String sourcesShowMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more sources',
+      one: '$count more source',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sourcesShowLess => 'Show less';
+
+  @override
+  String sourcesCheckedOn(String date) {
+    return 'Links checked: $date';
+  }
 }

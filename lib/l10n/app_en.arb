@@ -256,5 +256,17 @@
   "cosmoFilterDermatologist": "Dermatologist",
   "cosmoFilterAesthetician": "Aesthetician",
   "cosmoFilterInjection": "Injectables",
-  "cosmoPhone": "Phone"
+  "cosmoPhone": "Phone",
+  "quizNext": "Next",
+  "quizFinish": "Finish",
+  "sourcesTitle": "Sources",
+  "sourcesSeeAll": "All sources & methodology",
+  "sourcesOpenFailed": "Could not open the link",
+  "sourcesScreenTitle": "Sources & methodology",
+  "sourcesMethodologyTitle": "How the analysis works",
+  "sourcesMethodologyBody": "Your skin type and recommendations are calculated from your questionnaire answers: the first question sets the skin type, and the others add extra care blocks.\n\nThis is a cosmetic analysis, not a medical diagnosis. The care advice in this app is general information based on the published sources below. If you have a skin condition, severe inflammation or pain, see a dermatologist.",
+  "sourcesByTopic": "Sources by topic",
+  "sourcesShowMore": "{count, plural, one{{count} more source} other{{count} more sources}}",
+  "sourcesShowLess": "Show less",
+  "sourcesCheckedOn": "Links checked: {date}"
 }

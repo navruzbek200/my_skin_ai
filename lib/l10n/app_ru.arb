@@ -256,5 +256,17 @@
   "cosmoFilterDermatologist": "Дерматолог",
   "cosmoFilterAesthetician": "Эстетист",
   "cosmoFilterInjection": "Инъекционный",
-  "cosmoPhone": "Телефон"
+  "cosmoPhone": "Телефон",
+  "quizNext": "Далее",
+  "quizFinish": "Завершить",
+  "sourcesTitle": "Источники",
+  "sourcesSeeAll": "Все источники и методология",
+  "sourcesOpenFailed": "Не удалось открыть ссылку",
+  "sourcesScreenTitle": "Источники и методология",
+  "sourcesMethodologyTitle": "Как работает анализ",
+  "sourcesMethodologyBody": "Тип кожи и рекомендации рассчитываются по вашим ответам в анкете: первый вопрос определяет тип кожи, остальные добавляют дополнительные блоки ухода.\n\nЭто косметический анализ, а не медицинский диагноз. Рекомендации по уходу в приложении — общая информация, основанная на опубликованных источниках ниже. При кожных заболеваниях, сильном воспалении или боли обратитесь к дерматологу.",
+  "sourcesByTopic": "Источники по темам",
+  "sourcesShowMore": "{count, plural, one{Ещё {count} источник} few{Ещё {count} источника} other{Ещё {count} источников}}",
+  "sourcesShowLess": "Свернуть",
+  "sourcesCheckedOn": "Ссылки проверены: {date}"
 }

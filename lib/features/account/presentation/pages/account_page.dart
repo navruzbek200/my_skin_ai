@@ -252,6 +252,12 @@ class _AccountScreenState extends State<AccountScreen>
                         ),
                         const _RowDivider(),
                         _ActionRow(
+                          icon: Icons.menu_book_outlined,
+                          label: l10n.sourcesScreenTitle,
+                          onTap: () => context.push('/sources'),
+                        ),
+                        const _RowDivider(),
+                        _ActionRow(
                           icon: Icons.privacy_tip_outlined,
                           label: l10n.commonPrivacyPolicy,
                           onTap: () => launchUrl(

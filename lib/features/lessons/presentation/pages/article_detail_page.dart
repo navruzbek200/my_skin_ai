@@ -6,6 +6,8 @@ import 'package:real_beauty_ai/core/theme/colors.dart';
 import 'package:real_beauty_ai/models/article.dart';
 import 'package:real_beauty_ai/core/l10n/localized_text.dart';
 import 'package:real_beauty_ai/core/l10n/l10n_extension.dart';
+import 'package:real_beauty_ai/widgets/sources_section.dart';
+import 'package:go_router/go_router.dart';
 
 class ArticleDetailScreen extends StatefulWidget {
   final Article article;
@@ -66,6 +68,10 @@ class _ArticleDetailScreenState extends State<ArticleDetailScreen> {
                           const SizedBox(height: 24),
                           ...widget.article.sections.map(
                             (s) => _SectionBlock(section: s),
+                          ),
+                          SourcesSection(
+                            sources: widget.article.sources,
+                            onSeeAll: () => context.push('/sources'),
                           ),
                         ],
                       )

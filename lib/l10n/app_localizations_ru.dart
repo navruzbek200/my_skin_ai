@@ -920,4 +920,52 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get cosmoPhone => 'Телефон';
+
+  @override
+  String get quizNext => 'Далее';
+
+  @override
+  String get quizFinish => 'Завершить';
+
+  @override
+  String get sourcesTitle => 'Источники';
+
+  @override
+  String get sourcesSeeAll => 'Все источники и методология';
+
+  @override
+  String get sourcesOpenFailed => 'Не удалось открыть ссылку';
+
+  @override
+  String get sourcesScreenTitle => 'Источники и методология';
+
+  @override
+  String get sourcesMethodologyTitle => 'Как работает анализ';
+
+  @override
+  String get sourcesMethodologyBody =>
+      'Тип кожи и рекомендации рассчитываются по вашим ответам в анкете: первый вопрос определяет тип кожи, остальные добавляют дополнительные блоки ухода.\n\nЭто косметический анализ, а не медицинский диагноз. Рекомендации по уходу в приложении — общая информация, основанная на опубликованных источниках ниже. При кожных заболеваниях, сильном воспалении или боли обратитесь к дерматологу.';
+
+  @override
+  String get sourcesByTopic => 'Источники по темам';
+
+  @override
+  String sourcesShowMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Ещё $count источников',
+      few: 'Ещё $count источника',
+      one: 'Ещё $count источник',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sourcesShowLess => 'Свернуть';
+
+  @override
+  String sourcesCheckedOn(String date) {
+    return 'Ссылки проверены: $date';
+  }
 }
