@@ -7,7 +7,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:real_beauty_ai/core/constants/api_constants.dart';
 import 'package:real_beauty_ai/core/theme/colors.dart';
 import 'package:real_beauty_ai/features/auth/presentation/bloc/auth_cubit.dart';
-import 'package:real_beauty_ai/widgets/google_sign_in_button.dart';
 
 void _openPrivacyPolicy() {
   launchUrl(Uri.parse(privacyPolicyUrl), mode: LaunchMode.externalApplication);
@@ -192,11 +191,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  const _OrDivider(),
-                  const SizedBox(height: 18),
-                  const GoogleSignInButton(),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                   const _PrivacyLink(),
                 ],
               ),
@@ -349,34 +344,6 @@ class _AuthButton extends StatelessWidget {
                 ),
               ),
       ),
-    );
-  }
-}
-
-class _OrDivider extends StatelessWidget {
-  const _OrDivider();
-
-  @override
-  Widget build(BuildContext context) {
-    final line = Expanded(
-      child: Container(height: 1, color: const Color(0xFFEAE8F5)),
-    );
-    return Row(
-      children: [
-        line,
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          child: Text(
-            'yoki',
-            style: GoogleFonts.nunito(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFFB3AFC7),
-            ),
-          ),
-        ),
-        line,
-      ],
     );
   }
 }
