@@ -48,7 +48,7 @@ final List<QuizQuestion> quizQuestions = [
   // 3 — acne (q15)
   QuizQuestion(
     index: 3, id: 'q15', type: QuestionType.scale,
-    text: "Yuzingizda husnbuzarlar qanchalik tez-tez paydo bo'ladi?",
+    text: "Yuzingizda toshmalar qanchalik tez-tez paydo bo'ladi?",
     scaleLabels: [
       'Umuman chiqmaydi',
       'Juda kam (yiliga 1-2)',
@@ -74,7 +74,7 @@ final List<QuizQuestion> quizQuestions = [
   // 5 — whiteheads (q19)
   QuizQuestion(
     index: 5, id: 'q19', type: QuestionType.scale,
-    text: "Yuzingizda oq nuqtalar (jiroviklar) qanchalik ko'p?",
+    text: "Yuzingizda oq nuqtalar qanchalik ko'p?",
     scaleLabels: [
       "Umuman yo'q",
       'Juda kam',

@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:async' show unawaited;
+import 'package:real_beauty_ai/data/sources_data.dart';
+import 'package:real_beauty_ai/features/sources/presentation/pages/sources_page.dart';
 import 'package:real_beauty_ai/models/skin_analysis_result.dart';
 import 'package:real_beauty_ai/services/local_store.dart';
 import 'package:go_router/go_router.dart';
@@ -66,6 +68,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
                   _buildAdditionalSection(),
                 ],
                 const SizedBox(height: 24),
+                _buildSourcesCard(context),
+                const SizedBox(height: 16),
                 _buildDisclaimer(),
                 const SizedBox(height: 32),
                 _buildCta(context),
@@ -103,11 +107,11 @@ class _ResultsScreenState extends State<ResultsScreen> {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.45),
-                    Colors.black.withValues(alpha: 0.72),
+                    Colors.black.withValues(alpha: 0.18),
+                    Colors.black.withValues(alpha: 0.62),
+                    Colors.black.withValues(alpha: 0.86),
                   ],
-                  stops: const [0.0, 0.45, 0.75, 1.0],
+                  stops: const [0.0, 0.32, 0.62, 1.0],
                 ),
               ),
             ),
@@ -123,7 +127,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                     style: GoogleFonts.nunito(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white.withValues(alpha: 0.85),
+                      color: Colors.white.withValues(alpha: 0.95),
                     ),
                   ).animate().fadeIn(delay: 100.ms),
                   const SizedBox(height: 6),
@@ -169,7 +173,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                       if (_result.additionalBlocks.isNotEmpty)
                         _HeaderBadge(
                           label: '+${_result.additionalBlocks.length} tavsiya',
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: Colors.black.withValues(alpha: 0.42),
                         ),
                     ],
                   ).animate().fadeIn(delay: 350.ms),
@@ -187,13 +191,19 @@ class _ResultsScreenState extends State<ResultsScreen> {
       title: 'Asosiy tavsiya',
       icon: Icons.auto_awesome_outlined,
       iconColor: _typeColor,
-      child: Text(
-        _result.baseRecommendation,
-        style: GoogleFonts.nunito(
-          fontSize: 14,
-          color: _textDark,
-          height: 1.65,
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _result.baseRecommendation,
+            style: GoogleFonts.nunito(
+              fontSize: 14,
+              color: _textDark,
+              height: 1.65,
+            ),
+          ),
+          _SourceFooter(ids: _result.baseSources),
+        ],
       ),
     ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.12);
   }
@@ -213,6 +223,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           return _AdditionalCard(
             title: block['title'] ?? '',
             text: block['text'] ?? '',
+            sources: block['sources'] ?? '',
             expanded: expanded,
             delay: 400 + i * 80,
             onToggle: () => setState(() {
@@ -226,6 +237,69 @@ class _ResultsScreenState extends State<ResultsScreen> {
         }),
       ],
     );
+  }
+
+  /// Guideline 1.4.1: the citations behind the notes above have to be easy
+  /// to find, so they get their own card here as well as a line under each
+  /// note — not only a row buried in the account screen.
+  Widget _buildSourcesCard(BuildContext context) {
+    return Semantics(
+      link: true,
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          context.push('/sources');
+        },
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: _accent.withValues(alpha: 0.22)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: _accent.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.menu_book_outlined,
+                    color: _accent, size: 18),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Manbalar',
+                      style: GoogleFonts.nunito(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: _textDark,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      "Yuqoridagi maslahatlar qaysi manbalarga tayanishini ko'ring",
+                      style: GoogleFonts.nunito(
+                        fontSize: 12,
+                        color: const Color(0xFF9490B0),
+                        height: 1.45,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.arrow_forward_ios_rounded,
+                  size: 13, color: Color(0xFF9490B0)),
+            ],
+          ),
+        ),
+      ),
+    ).animate().fadeIn(delay: 620.ms);
   }
 
   Widget _buildDisclaimer() {
@@ -400,6 +474,7 @@ class _SectionCard extends StatelessWidget {
 class _AdditionalCard extends StatelessWidget {
   final String title;
   final String text;
+  final String sources;
   final bool expanded;
   final int delay;
   final VoidCallback onToggle;
@@ -407,6 +482,7 @@ class _AdditionalCard extends StatelessWidget {
   const _AdditionalCard({
     required this.title,
     required this.text,
+    required this.sources,
     required this.expanded,
     required this.delay,
     required this.onToggle,
@@ -468,13 +544,19 @@ class _AdditionalCard extends StatelessWidget {
             if (expanded)
               Padding(
                 padding: const EdgeInsets.fromLTRB(32, 0, 16, 14),
-                child: Text(
-                  text,
-                  style: GoogleFonts.nunito(
-                    fontSize: 13,
-                    color: const Color(0xFF4A4070),
-                    height: 1.6,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      text,
+                      style: GoogleFonts.nunito(
+                        fontSize: 13,
+                        color: const Color(0xFF4A4070),
+                        height: 1.6,
+                      ),
+                    ),
+                    _SourceFooter(ids: sources),
+                  ],
                 ),
               ).animate().fadeIn(duration: 200.ms).slideY(begin: -0.05),
           ],
@@ -534,6 +616,73 @@ class _ResultsCtaState extends State<_ResultsCta> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// The citation line printed under a care note: publisher names, each one a
+/// link out to the page it came from. Renders nothing for a result persisted
+/// before citations shipped, which is why every call site can pass blind.
+class _SourceFooter extends StatelessWidget {
+  final String ids;
+  const _SourceFooter({required this.ids});
+
+  @override
+  Widget build(BuildContext context) {
+    final sources = sourcesByIds(ids);
+    if (sources.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Manbalar',
+            style: GoogleFonts.nunito(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.4,
+              color: const Color(0xFF9490B0),
+            ),
+          ),
+          const SizedBox(height: 6),
+          for (final s in sources)
+            Semantics(
+              link: true,
+              label: '${s.title} — ${s.publisher}',
+              child: GestureDetector(
+                onTap: () => SourcesScreen.open(context, s.url),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 5),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(top: 2, right: 6),
+                        child: Icon(Icons.open_in_new_rounded,
+                            size: 12, color: Color(0xFF7060AA)),
+                      ),
+                      Expanded(
+                        child: Text(
+                          '${s.publisher} — ${s.title}',
+                          style: GoogleFonts.nunito(
+                            fontSize: 11.5,
+                            color: const Color(0xFF7060AA),
+                            height: 1.45,
+                            decoration: TextDecoration.underline,
+                            decorationColor:
+                                const Color(0xFF7060AA).withValues(alpha: 0.5),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

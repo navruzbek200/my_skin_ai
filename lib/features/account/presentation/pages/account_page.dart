@@ -15,7 +15,12 @@ import 'package:real_beauty_ai/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:real_beauty_ai/services/local_store.dart';
 
 class AccountScreen extends StatefulWidget {
-  const AccountScreen({super.key});
+  /// True when the screen is a tab inside [MainShell] rather than a pushed
+  /// route: there is nothing to pop back to, and the floating nav bar needs
+  /// clearance under the last card.
+  final bool embedded;
+
+  const AccountScreen({super.key, this.embedded = false});
 
   @override
   State<AccountScreen> createState() => _AccountScreenState();
@@ -195,7 +200,7 @@ class _AccountScreenState extends State<AccountScreen>
                           color: AppColors.text,
                         ),
                       ),
-                      Positioned(
+                      if (!widget.embedded) Positioned(
                         left: 0,
                         child: GestureDetector(
                           onTap: () => Navigator.of(context).pop(),
@@ -394,6 +399,15 @@ class _AccountScreenState extends State<AccountScreen>
                   child: Column(
                     children: [
                       _ActionRow(
+                        icon: Icons.menu_book_outlined,
+                        label: 'Manbalar',
+                        onTap: () => context.push('/sources'),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 4),
+                        child: Divider(height: 1, color: Color(0xFFF0ECF8)),
+                      ),
+                      _ActionRow(
                         icon: Icons.privacy_tip_outlined,
                         label: 'Maxfiylik siyosati',
                         onTap: () => launchUrl(
@@ -426,7 +440,9 @@ class _AccountScreenState extends State<AccountScreen>
               ),
             ),
 
-            SliverToBoxAdapter(child: SizedBox(height: bottom + 40)),
+            SliverToBoxAdapter(
+              child: SizedBox(height: bottom + (widget.embedded ? 110 : 40)),
+            ),
           ],
         ),
       ),

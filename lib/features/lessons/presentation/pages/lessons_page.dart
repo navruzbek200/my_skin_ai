@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:real_beauty_ai/core/theme/colors.dart';
-import 'package:real_beauty_ai/data/articles_data.dart';
-import 'package:real_beauty_ai/data/lessons_data.dart';
 import 'package:real_beauty_ai/data/yoga_data.dart'
     show yogaExercises, yogaVoiceExercises;
-import 'package:real_beauty_ai/widgets/lessons/article_card.dart';
-import 'package:real_beauty_ai/widgets/lessons/lesson_card.dart';
-import 'package:real_beauty_ai/widgets/lessons/section_header.dart';
 import 'package:real_beauty_ai/widgets/lessons/yoga_section_header.dart';
 import 'package:real_beauty_ai/widgets/lessons/yoga_video_card.dart';
 
@@ -19,7 +14,11 @@ class LessonsScreen extends StatefulWidget {
 }
 
 class _LessonsScreenState extends State<LessonsScreen> {
-  bool _yogaExpanded = false;
+  // Open on arrival. Collapsed-by-default left the tab showing two bars and
+  // a screen of empty background, which reads as an unfinished section; the
+  // accordion still builds its cards lazily, so this costs one section's
+  // worth of video thumbs, not both.
+  bool _yogaExpanded = true;
   bool _yogaVoiceExpanded = false;
 
   void _toggleYoga() => setState(() => _yogaExpanded = !_yogaExpanded);
@@ -91,7 +90,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      "Yuz yogasi, ingrediyentlar va maqolalar",
+                      'Kuniga bir necha daqiqa yuz mashqlari',
                       style: GoogleFonts.nunito(
                         fontSize: 13,
                         color: AppColors.muted,
@@ -103,6 +102,10 @@ class _LessonsScreenState extends State<LessonsScreen> {
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 14)),
+
+          const SliverToBoxAdapter(child: _YogaIntroCard()),
+
+          const SliverToBoxAdapter(child: SizedBox(height: 18)),
 
           // ── Yuz Yoga accordion ─────────────────────────────
           SliverToBoxAdapter(
@@ -149,40 +152,120 @@ class _LessonsScreenState extends State<LessonsScreen> {
             ),
           ),
 
-          const SliverToBoxAdapter(child: SizedBox(height: 26)),
+          SliverToBoxAdapter(child: SizedBox(height: bottomPad)),
+        ],
+      ),
+    );
+  }
+}
 
-          // ── Ingrediyentlar ────────────────────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-              child: SectionHeader(
-                title: 'Ingrediyentlar',
-                count: lessons.length,
+
+/// Sits above the accordions so the tab opens with something to read instead
+/// of two collapsed bars on an empty background.
+class _YogaIntroCard extends StatelessWidget {
+  const _YogaIntroCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF8B72CC), Color(0xFF5F4CA8)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF5040A0).withValues(alpha: 0.26),
+              blurRadius: 18,
+              offset: const Offset(0, 7),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(9),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.self_improvement_rounded,
+                      color: Colors.white, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Yuz yogasi nima?',
+                    style: GoogleFonts.nunito(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              "Yuz yogasi — yuz va bo'yin mushaklari uchun oddiy mashqlar "
+              "to'plami. Har bir videoni takrorlab boring: mashqlar qisqa, "
+              "jihoz talab qilmaydi va kundalik parvarishingizga osongina "
+              "qo'shiladi.",
+              style: GoogleFonts.nunito(
+                fontSize: 13.5,
+                color: Colors.white.withValues(alpha: 0.9),
+                height: 1.6,
               ),
             ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-            sliver: SliverList.builder(
-              itemCount: lessons.length,
-              itemBuilder: (_, i) => LessonCard(lesson: lessons[i]),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                _IntroChip(icon: Icons.schedule_rounded, label: '3–5 daqiqa'),
+                const SizedBox(width: 8),
+                _IntroChip(
+                    icon: Icons.play_circle_outline_rounded,
+                    label: '${yogaExercises.length + yogaVoiceExercises.length} ta video'),
+              ],
             ),
-          ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-          const SliverToBoxAdapter(child: SizedBox(height: 26)),
+class _IntroChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _IntroChip({required this.icon, required this.label});
 
-          // ── Maqolalar ─────────────────────────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-              child: SectionHeader(title: 'Maqolalar', count: articles.length),
-            ),
-          ),
-          SliverPadding(
-            padding: EdgeInsets.fromLTRB(16, 0, 16, bottomPad),
-            sliver: SliverList.builder(
-              itemCount: articles.length,
-              itemBuilder: (_, i) => ArticleCard(article: articles[i]),
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: Colors.white.withValues(alpha: 0.95)),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: GoogleFonts.nunito(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
             ),
           ),
         ],

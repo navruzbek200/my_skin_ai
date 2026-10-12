@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:real_beauty_ai/core/theme/colors.dart';
-import 'package:real_beauty_ai/data/skin_problems_data.dart';
 import 'package:real_beauty_ai/models/skin_analysis_result.dart';
+import 'package:real_beauty_ai/models/skin_result.dart';
 import 'package:real_beauty_ai/services/local_store.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,6 +13,7 @@ class ScannerScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final history = LocalStore.instance.getAnalysisHistory();
+    final profile = LocalStore.instance.getSkinProfile();
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -26,7 +27,9 @@ class ScannerScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Teri tahlilini boshlang',
+                    profile == null
+                        ? 'Teri tahlilini boshlang'
+                        : 'Teri tahlili',
                     style: GoogleFonts.nunito(
                       fontSize: 32,
                       fontWeight: FontWeight.w800,
@@ -40,7 +43,11 @@ class ScannerScreen extends StatelessWidget {
                       color: AppColors.muted,
                     ),
                   ).animate().fadeIn(delay: 100.ms),
-                  const SizedBox(height: 36),
+                  const SizedBox(height: 28),
+                  if (profile != null) ...[
+                    _ProfileSummaryCard(profile: profile),
+                    const SizedBox(height: 18),
+                  ],
                   _buildScanCard(context),
                   const SizedBox(height: 10),
                   const _AiDisclaimer().animate().fadeIn(delay: 200.ms),
@@ -48,8 +55,9 @@ class ScannerScreen extends StatelessWidget {
                     const SizedBox(height: 28),
                     _ScanHistorySection(history: history),
                   ],
-                  const SizedBox(height: 32),
-                  const _SkinProblemsSection(),
+                  const SizedBox(height: 30),
+                  const _HowItWorksSection(),
+                  const SizedBox(height: 110),
                 ],
               ),
             ),
@@ -230,7 +238,7 @@ class _EmptyStateCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Birinchi skaningiz saqlandi',
+                  'Birinchi tahlilingiz saqlandi',
                   style: GoogleFonts.nunito(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
@@ -239,7 +247,7 @@ class _EmptyStateCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  "O'zgarishni ko'rish uchun yana skan qiling",
+                  "O'zgarishni ko'rish uchun yana tahlil qiling",
                   style: GoogleFonts.nunito(
                     fontSize: 13,
                     color: const Color(0xFF9490B0),
@@ -305,7 +313,7 @@ class _ComparisonCard extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  "So'nggi vs oldingi skan",
+                  "So'nggi vs oldingi tahlil",
                   style: GoogleFonts.nunito(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
@@ -408,57 +416,29 @@ class _AiDisclaimer extends StatelessWidget {
         ),
         const SizedBox(width: 5),
         Text(
-          'AI tahlili — tibbiy tashxis emas',
+          'Teri tahlili — tibbiy tashxis emas',
           style: GoogleFonts.nunito(
             fontSize: 11,
             color: const Color(0xFFB8A8D8),
           ),
         ),
-      ],
-    );
-  }
-}
-
-// ── Skin problems section ─────────────────────────────────────
-
-class _SkinProblemsSection extends StatelessWidget {
-  const _SkinProblemsSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Teri muammolari',
-          style: GoogleFonts.nunito(
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-            color: const Color(0xFF2D2050),
-          ),
-        ).animate().fadeIn(delay: 150.ms),
-        const SizedBox(height: 4),
-        Text(
-          'Sabablari va yechimlari',
-          style: GoogleFonts.nunito(
-            fontSize: 13,
-            color: const Color(0xFF9490B0),
-          ),
-        ).animate().fadeIn(delay: 200.ms),
-        const SizedBox(height: 16),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 0.82,
-          ),
-          itemCount: skinProblems.length,
-          itemBuilder: (context, i) => _SkinProblemCard(
-            problem: skinProblems[i],
-            index: i,
+        const SizedBox(width: 6),
+        Text('·', style: GoogleFonts.nunito(fontSize: 11, color: const Color(0xFFB8A8D8))),
+        const SizedBox(width: 6),
+        Semantics(
+          link: true,
+          child: GestureDetector(
+            onTap: () => context.push('/sources'),
+            child: Text(
+              'Manbalar',
+              style: GoogleFonts.nunito(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFF7060AA),
+                decoration: TextDecoration.underline,
+                decorationColor: const Color(0xFF7060AA),
+              ),
+            ),
           ),
         ),
       ],
@@ -466,279 +446,45 @@ class _SkinProblemsSection extends StatelessWidget {
   }
 }
 
-class _SkinProblemCard extends StatefulWidget {
-  final SkinProblem problem;
-  final int index;
+// ── Current profile ───────────────────────────────────────────
 
-  const _SkinProblemCard({required this.problem, required this.index});
+/// What the last analysis concluded, shown at the top of the tab once there
+/// is a profile. Without it the tab was a title, one button and a screenful
+/// of gradient — the result lived only on a screen the user had already
+/// dismissed.
+class _ProfileSummaryCard extends StatelessWidget {
+  final SkinResult profile;
+  const _ProfileSummaryCard({required this.profile});
 
-  @override
-  State<_SkinProblemCard> createState() => _SkinProblemCardState();
-}
-
-class _SkinProblemCardState extends State<_SkinProblemCard> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final p = widget.problem;
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) {
-        setState(() => _pressed = false);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => SkinProblemDetailPage(problem: p),
-          ),
-        );
-      },
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedScale(
-        scale: _pressed ? 0.95 : 1.0,
-        duration: const Duration(milliseconds: 120),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Hero(
-                tag: 'skin_problem_${p.id}',
-                child: p.imagePath != null
-                    ? Image.asset(
-                        p.imagePath!,
-                        fit: BoxFit.cover,
-                        cacheWidth: 360,
-                        errorBuilder: (_, _, _) =>
-                            _GradientPlaceholder(problem: p),
-                      )
-                    : _GradientPlaceholder(problem: p),
-              ),
-              Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Color(0xCC000000)],
-                    stops: [0.38, 1.0],
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 12,
-                right: 12,
-                bottom: 12,
-                child: Text(
-                  p.name,
-                  style: GoogleFonts.nunito(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    shadows: const [
-                      Shadow(blurRadius: 6, color: Colors.black45),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    )
-        .animate(delay: Duration(milliseconds: 100 + widget.index * 50))
-        .fadeIn(duration: const Duration(milliseconds: 300));
-  }
-}
-
-class _GradientPlaceholder extends StatelessWidget {
-  final SkinProblem problem;
-  const _GradientPlaceholder({required this.problem});
+  static const _typeIcons = <String, IconData>{
+    'Quruq': Icons.water_drop_outlined,
+    'Aralash': Icons.water_outlined,
+    'Normal': Icons.auto_awesome_outlined,
+    "Yog'li": Icons.grass_outlined,
+  };
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            problem.color.withValues(alpha: 0.85),
-            problem.color.withValues(alpha: 0.55),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Center(
-        child: Icon(
-          problem.icon,
-          size: 52,
-          color: Colors.white.withValues(alpha: 0.9),
-        ),
-      ),
-    );
-  }
-}
+    final concerns = profile.additionalBlocks
+        .map((b) => b['title'] ?? '')
+        .where((t) => t.isNotEmpty)
+        .toList();
 
-// ── Skin problem detail page ──────────────────────────────────
-
-class SkinProblemDetailPage extends StatelessWidget {
-  final SkinProblem problem;
-  const SkinProblemDetailPage({super.key, required this.problem});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F6FC),
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 300,
-            pinned: true,
-            backgroundColor: const Color(0xFFF8F6FC),
-            foregroundColor: const Color(0xFF2D2050),
-            surfaceTintColor: Colors.transparent,
-            leading: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.28),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.arrow_back_ios_new_rounded,
-                    size: 18,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-            flexibleSpace: FlexibleSpaceBar(
-              background: Hero(
-                tag: 'skin_problem_${problem.id}',
-                child: problem.imagePath != null
-                    ? Image.asset(
-                        problem.imagePath!,
-                        fit: BoxFit.cover,
-                        cacheWidth: 800,
-                        errorBuilder: (_, _, _) =>
-                            _GradientPlaceholder(problem: problem),
-                      )
-                    : _GradientPlaceholder(problem: problem),
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 48),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    problem.name,
-                    style: GoogleFonts.nunito(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w800,
-                      color: const Color(0xFF2D2050),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: problem.color,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  _DetailCard(
-                    icon: Icons.help_outline_rounded,
-                    label: 'Sababi',
-                    text: problem.cause,
-                    accentColor: const Color(0xFF7060AA),
-                  ),
-                  const SizedBox(height: 14),
-                  _DetailCard(
-                    icon: Icons.check_circle_outline_rounded,
-                    label: 'Yechimi',
-                    text: problem.solution,
-                    accentColor: const Color(0xFF16A34A),
-                  ),
-                  if (problem.note != null) ...[
-                    const SizedBox(height: 14),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: problem.color.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: problem.color.withValues(alpha: 0.18),
-                        ),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.lightbulb_outline_rounded,
-                            size: 18,
-                            color: problem.color,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              problem.note!,
-                              style: GoogleFonts.nunito(
-                                fontSize: 13,
-                                color: problem.color,
-                                fontWeight: FontWeight.w600,
-                                height: 1.5,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DetailCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String text;
-  final Color accentColor;
-
-  const _DetailCard({
-    required this.icon,
-    required this.label,
-    required this.text,
-    required this.accentColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        color: Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: const Color(0xFF9B7DD4).withValues(alpha: 0.25),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
+            color: const Color(0xFF7060AA).withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -748,31 +494,182 @@ class _DetailCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(7),
+                padding: const EdgeInsets.all(11),
                 decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(10),
+                  color: const Color(0xFF7060AA).withValues(alpha: 0.10),
+                  shape: BoxShape.circle,
                 ),
-                child: Icon(icon, size: 16, color: accentColor),
+                child: Icon(
+                  _typeIcons[profile.skinType] ?? Icons.auto_awesome_outlined,
+                  size: 22,
+                  color: const Color(0xFF7060AA),
+                ),
               ),
-              const SizedBox(width: 10),
-              Text(
-                label,
-                style: GoogleFonts.nunito(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                  color: accentColor,
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Teri tipingiz',
+                      style: GoogleFonts.nunito(
+                        fontSize: 12,
+                        color: AppColors.muted,
+                      ),
+                    ),
+                    Text(
+                      '${profile.skinType} teri',
+                      style: GoogleFonts.nunito(
+                        fontSize: 21,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF2D2050),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            text,
-            style: GoogleFonts.nunito(
-              fontSize: 14,
-              color: const Color(0xFF2D2050),
-              height: 1.65,
+          if (concerns.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Text(
+              "E'tibor talab qiladigan jihatlar",
+              style: GoogleFonts.nunito(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.3,
+                color: AppColors.muted,
+              ),
+            ),
+            const SizedBox(height: 9),
+            Wrap(
+              spacing: 7,
+              runSpacing: 7,
+              children: [
+                for (final c in concerns)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF7060AA).withValues(alpha: 0.09),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      c,
+                      style: GoogleFonts.nunito(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF5F4CA8),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    ).animate().fadeIn(delay: 120.ms).slideY(begin: 0.08);
+  }
+}
+
+// ── How it works ──────────────────────────────────────────────
+
+class _HowItWorksSection extends StatelessWidget {
+  const _HowItWorksSection();
+
+  static const _steps = [
+    (
+      icon: Icons.checklist_rounded,
+      title: 'Savolnomaga javob bering',
+      body: "Teringiz haqida 10 ta qisqa savol — bir necha daqiqa vaqt oladi.",
+    ),
+    (
+      icon: Icons.auto_awesome_outlined,
+      title: 'Teri tipingizni oling',
+      body:
+          "Javoblaringiz asosida teri tipi va e'tibor talab qiladigan jihatlar aniqlanadi.",
+    ),
+    (
+      icon: Icons.event_available_outlined,
+      title: 'Kunlik rejani bajaring',
+      body:
+          "Natijaga mos ertalabki va kechki parvarish qadamlari «Bugun» bo'limida paydo bo'ladi.",
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Qanday ishlaydi',
+          style: GoogleFonts.nunito(
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF2D2050),
+          ),
+        ),
+        const SizedBox(height: 14),
+        for (var i = 0; i < _steps.length; i++) ...[
+          _StepRow(index: i + 1, step: _steps[i]),
+          if (i != _steps.length - 1) const SizedBox(height: 12),
+        ],
+      ],
+    ).animate().fadeIn(delay: 260.ms).slideY(begin: 0.06);
+  }
+}
+
+class _StepRow extends StatelessWidget {
+  final int index;
+  final ({IconData icon, String title, String body}) step;
+
+  const _StepRow({required this.index, required this.step});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.75),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: const Color(0xFF7060AA).withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(11),
+            ),
+            child: Icon(step.icon, size: 17, color: const Color(0xFF7060AA)),
+          ),
+          const SizedBox(width: 13),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$index. ${step.title}',
+                  style: GoogleFonts.nunito(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF2D2050),
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  step.body,
+                  style: GoogleFonts.nunito(
+                    fontSize: 12.5,
+                    color: AppColors.muted,
+                    height: 1.55,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

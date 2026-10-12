@@ -5,6 +5,10 @@ class SkinAnalysisResult {
   final String skinType;
   final String skinTypeCode;
   final String baseRecommendation;
+
+  /// Comma-joined ids into `skinSources`, backing the note above.
+  /// Empty on results persisted before citations shipped.
+  final String baseSources;
   final List<Map<String, String>> additionalBlocks;
   final DateTime takenAt;
 
@@ -13,6 +17,7 @@ class SkinAnalysisResult {
     required this.skinTypeCode,
     required this.baseRecommendation,
     required this.additionalBlocks,
+    this.baseSources = '',
     DateTime? takenAt,
   }) : takenAt = takenAt ?? DateTime.now();
 
@@ -25,6 +30,7 @@ class SkinAnalysisResult {
         skinType: skinType,
         skinTypeCode: skinTypeCode,
         baseRecommendation: baseRecommendation,
+        baseSources: baseSources,
         additionalBlocks: additionalBlocks,
       );
 
@@ -32,6 +38,7 @@ class SkinAnalysisResult {
         'skinType': skinType,
         'skinTypeCode': skinTypeCode,
         'baseRecommendation': baseRecommendation,
+        'baseSources': baseSources,
         'additionalBlocks': additionalBlocks,
         'takenAt': takenAt.toIso8601String(),
       };
@@ -42,6 +49,7 @@ class SkinAnalysisResult {
       skinType: j['skinType'] as String? ?? '',
       skinTypeCode: j['skinTypeCode'] as String? ?? '',
       baseRecommendation: j['baseRecommendation'] as String? ?? '',
+      baseSources: j['baseSources'] as String? ?? '',
       additionalBlocks: rawBlocks
               ?.map((e) => Map<String, String>.from(e as Map))
               .toList() ??

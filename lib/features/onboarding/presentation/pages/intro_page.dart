@@ -52,7 +52,14 @@ class IntroScreen extends StatelessWidget {
                 filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.08),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: 0.32),
+                        Colors.black.withValues(alpha: 0.58),
+                      ],
+                    ),
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
                     border: Border(
                       top: BorderSide(color: Colors.white.withValues(alpha: 0.20), width: 1),
@@ -81,7 +88,7 @@ class IntroScreen extends StatelessWidget {
                         'Shaxsiy teri tahlili va koreya parvarish tavsiyalari',
                         style: GoogleFonts.nunito(
                           fontSize: 14,
-                          color: Colors.white.withValues(alpha: 0.65),
+                          color: Colors.white.withValues(alpha: 0.86),
                           height: 1.45,
                         ),
                       ).animate().fadeIn(delay: 300.ms),

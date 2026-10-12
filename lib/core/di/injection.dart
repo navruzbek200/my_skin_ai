@@ -10,7 +10,7 @@ final sl = GetIt.instance;
 ///
 /// Scope guide:
 ///   app-level  → registered here as lazySingleton (AuthBloc, AuthCubit, source)
-///   page-level → created inline in BlocProvider (CosmetologistsCubit, ProductsCubit)
+///   page-level → created inline in BlocProvider (ProductsCubit)
 void configureDependencies() {
   sl.registerLazySingleton<AuthDataSource>(() => FirebaseAuthDataSource());
 

@@ -78,6 +78,7 @@ class _ProductsBodyState extends State<_ProductsBody> {
             // Build and start fetching roughly a screen ahead of the viewport,
             // so a fast flick lands on cards whose images are already in
             // flight rather than on empty ones.
+            // ignore: deprecated_member_use
             cacheExtent: 1200,
             slivers: [
               SliverToBoxAdapter(

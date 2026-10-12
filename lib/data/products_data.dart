@@ -156,7 +156,7 @@ final List<Product> products = [
     benefits: [
       'pH balansi saqlab yuzni yumshoq tozalaydi',
       'Gipoallergen formula — sezgir teri uchun ideal',
-      'Akne va qizarishni oldini oladi',
+      'Teri muvozanatini saqlaydi',
       'Teri namligini saqlab qoladi',
     ],
   ),

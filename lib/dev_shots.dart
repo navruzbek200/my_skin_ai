@@ -59,10 +59,6 @@ final _router = GoRouter(
     GoRoute(path: '/home', builder: (_, _) => const _Cycler()),
     GoRoute(path: '/quiz', builder: (_, _) => const SizedBox()),
     GoRoute(path: '/account', builder: (_, _) => const SizedBox()),
-    GoRoute(path: '/lesson-detail', builder: (_, _) => const SizedBox()),
-    GoRoute(path: '/article-detail', builder: (_, _) => const SizedBox()),
-    GoRoute(path: '/cosmetolog-detail', builder: (_, _) => const SizedBox()),
-    GoRoute(path: '/scan-instructions', builder: (_, _) => const SizedBox()),
   ],
 );
 

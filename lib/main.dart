@@ -47,7 +47,7 @@ Future<void> _bootstrap() async {
 /// start over — so it is logged and stepped past rather than rethrown.
 Future<void> _configureChrome() async {
   try {
-    // Portrait-only: face scan camera math and all layouts assume portrait.
+    // Portrait-only: every layout in the app assumes portrait.
     await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     // Every screen is light, and from Android 15 the status bar is always
     // transparent over the app. Without this the system keeps its default

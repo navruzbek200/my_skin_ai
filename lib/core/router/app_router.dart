@@ -6,26 +6,18 @@ import 'package:real_beauty_ai/features/account/presentation/pages/account_page.
 import 'package:real_beauty_ai/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:real_beauty_ai/features/auth/presentation/pages/auth_page.dart';
 import 'package:real_beauty_ai/features/auth/presentation/pages/forgot_password_page.dart';
-import 'package:real_beauty_ai/features/cosmetologists/presentation/pages/cosmetologist_detail_page.dart';
-import 'package:real_beauty_ai/features/lessons/presentation/pages/article_detail_page.dart';
-import 'package:real_beauty_ai/features/lessons/presentation/pages/lesson_detail_page.dart';
 import 'package:real_beauty_ai/features/onboarding/presentation/pages/analysis_page.dart';
 import 'package:real_beauty_ai/features/onboarding/presentation/pages/intro_page.dart';
 import 'package:real_beauty_ai/features/onboarding/presentation/pages/quiz_page.dart';
 import 'package:real_beauty_ai/features/onboarding/presentation/pages/results_page.dart';
 import 'package:real_beauty_ai/features/onboarding/presentation/pages/splash_page.dart';
 import 'package:real_beauty_ai/features/shell/main_shell.dart';
-import 'package:real_beauty_ai/features/skin_scan/presentation/pages/face_scan_page.dart';
-import 'package:real_beauty_ai/features/skin_scan/presentation/pages/scan_instructions_page.dart';
-import 'package:real_beauty_ai/models/article.dart';
-import 'package:real_beauty_ai/models/cosmetolog.dart';
-import 'package:real_beauty_ai/models/lesson.dart';
+import 'package:real_beauty_ai/features/sources/presentation/pages/sources_page.dart';
 import 'package:real_beauty_ai/core/router/route_args.dart';
 import 'package:real_beauty_ai/models/skin_analysis_result.dart';
 
 final _protectedPaths = {
-  '/home', '/quiz', '/scan-instructions', '/face-scan',
-  '/analysis', '/results', '/account',
+  '/home', '/quiz', '/analysis', '/results', '/account',
 };
 final _authOnlyPaths = {'/auth', '/intro'};
 
@@ -40,15 +32,8 @@ final GoRouter appRouter = GoRouter(
     final path = state.matchedLocation;
     if (!loggedIn && _protectedPaths.contains(path)) return '/auth';
     if (loggedIn && _authOnlyPaths.contains(path)) return '/home';
-    if (const {'/scan-instructions', '/face-scan'}.contains(path) &&
-        state.extra is! List) {
-      return '/home';
-    }
     if (path == '/analysis' && state.extra is! AnalysisArgs) { return '/home'; }
     if (path == '/results' && state.extra is! SkinAnalysisResult) { return '/home'; }
-    if (path == '/lesson-detail' && state.extra is! Lesson) { return '/home'; }
-    if (path == '/article-detail' && state.extra is! Article) { return '/home'; }
-    if (path == '/cosmetolog-detail' && state.extra is! Cosmetolog) { return '/home'; }
     return null;
   },
   routes: [
@@ -81,22 +66,6 @@ final GoRouter appRouter = GoRouter(
       pageBuilder: (context, state) => _fade(state, const QuizScreen()),
     ),
     GoRoute(
-      path: '/scan-instructions',
-      pageBuilder: (context, state) {
-        final extra = state.extra;
-        if (extra is! List) return _fade(state, const SplashScreen());
-        return _fade(state, ScanInstructionsScreen(quizAnswers: extra));
-      },
-    ),
-    GoRoute(
-      path: '/face-scan',
-      pageBuilder: (context, state) {
-        final extra = state.extra;
-        if (extra is! List) return _fade(state, const SplashScreen());
-        return _fade(state, FaceScanScreen(quizAnswers: extra));
-      },
-    ),
-    GoRoute(
       path: '/analysis',
       pageBuilder: (context, state) {
         final extra = state.extra;
@@ -113,28 +82,8 @@ final GoRouter appRouter = GoRouter(
       },
     ),
     GoRoute(
-      path: '/lesson-detail',
-      pageBuilder: (context, state) {
-        final extra = state.extra;
-        if (extra is! Lesson) return _fade(state, const SplashScreen());
-        return _fade(state, LessonDetailScreen(lesson: extra));
-      },
-    ),
-    GoRoute(
-      path: '/article-detail',
-      pageBuilder: (context, state) {
-        final extra = state.extra;
-        if (extra is! Article) return _fade(state, const SplashScreen());
-        return _fade(state, ArticleDetailScreen(article: extra));
-      },
-    ),
-    GoRoute(
-      path: '/cosmetolog-detail',
-      pageBuilder: (context, state) {
-        final extra = state.extra;
-        if (extra is! Cosmetolog) return _fade(state, const SplashScreen());
-        return _fade(state, KosmetologDetailScreen(cosmetolog: extra));
-      },
+      path: '/sources',
+      pageBuilder: (context, state) => _fade(state, const SourcesScreen()),
     ),
     GoRoute(
       path: '/account',

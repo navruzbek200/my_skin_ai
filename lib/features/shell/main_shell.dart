@@ -3,12 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:real_beauty_ai/core/theme/colors.dart';
+import 'package:real_beauty_ai/features/account/presentation/pages/account_page.dart';
 import 'package:real_beauty_ai/features/home/presentation/pages/bugun_page.dart';
 import 'package:real_beauty_ai/features/products/presentation/pages/products_page.dart';
 import 'package:real_beauty_ai/features/scanner/presentation/pages/scanner_page.dart';
 import 'package:real_beauty_ai/features/lessons/presentation/pages/lessons_page.dart';
 import 'package:go_router/go_router.dart';
-import 'package:real_beauty_ai/features/cosmetologists/presentation/pages/cosmetologist_page.dart';
 import 'package:real_beauty_ai/services/local_store.dart';
 
 class MainShell extends StatefulWidget {
@@ -60,7 +60,11 @@ class _MainShellState extends State<MainShell> {
     const ProductsScreen(),
     const ScannerScreen(),
     const LessonsScreen(),
-    const KonnikmaScreen(),
+    // Account is a tab, not a pushed route. It holds sign-out, the privacy
+    // policy, the citation list and — the reason it cannot be buried —
+    // account deletion, which guideline 5.1.1(v) requires be reachable from
+    // inside the app. Nothing navigated to /account before this.
+    const AccountScreen(embedded: true),
   ];
 
   // Uzbekistan time UTC+5
@@ -181,8 +185,8 @@ class _MainShellState extends State<MainShell> {
                 },
               ),
               _NavItem(
-                imagePath: 'assets/icons/customer.png',
-                label: 'Kosmetolog',
+                icon: Icons.person_outline_rounded,
+                label: 'Hisob',
                 active: _currentIndex == 4,
                 onTap: () {
                   HapticFeedback.selectionClick();
@@ -359,6 +363,7 @@ class _SkinAnalysisModalState extends State<_SkinAnalysisModal>
 class _NavItem extends StatelessWidget {
   final String? svgPath;
   final String? imagePath;
+  final IconData? icon;
   final String label;
   final bool active;
   final VoidCallback onTap;
@@ -366,6 +371,7 @@ class _NavItem extends StatelessWidget {
   const _NavItem({
     this.svgPath,
     this.imagePath,
+    this.icon,
     required this.label,
     required this.active,
     required this.onTap,
@@ -378,6 +384,10 @@ class _NavItem extends StatelessWidget {
     );
     if (svgPath != null) {
       return SvgPicture.asset(svgPath!, width: 22, height: 22, colorFilter: colorFilter);
+    }
+    if (icon != null) {
+      return Icon(icon, size: 23,
+          color: active ? AppColors.primary : AppColors.muted);
     }
     return ColorFiltered(
       colorFilter: colorFilter,

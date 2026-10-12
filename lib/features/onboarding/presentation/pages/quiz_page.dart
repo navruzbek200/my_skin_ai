@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:real_beauty_ai/core/router/route_args.dart';
 import 'package:real_beauty_ai/data/quiz_data.dart';
 import 'package:real_beauty_ai/features/skin_quiz/presentation/bloc/quiz_cubit.dart';
 import 'package:real_beauty_ai/models/quiz_question.dart';
@@ -133,11 +134,11 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
               fontWeight: FontWeight.w800, color: _textDark, fontSize: 17),
         ),
         content: Text(
-          'Savolnoma javoblaringiz faqat qurilmangizda mahalliy saqlanadi va '
-          'hech qachon internetga yuborilmaydi.\n\n'
-          'Kamera ishlatiladigan bosqichda tasvirlar faqat qurilma ichida '
-          'qayta ishlanadi — hech narsa saqlanmaydi yoki yuborilmaydi.\n\n'
-          'Tahlil natijasi quiz javoblaringiz asosida hisoblanadi.',
+          'Savolnoma javoblaringiz faqat qurilmangizda saqlanadi va '
+          'uchinchi tomon serverlariga yuborilmaydi.\n\n'
+          'Ilova uchinchi tomon sun\'iy intellekt (AI) xizmatlariga '
+          'ma\'lumot uzatmaydi. Teri tahlili to\'liq qurilmangiz ichida '
+          'hisoblanadi va kosmetik tavsiya xarakteriga ega.',
           style: GoogleFonts.nunito(
               fontSize: 13, color: const Color(0xFF4A4070), height: 1.6),
         ),
@@ -265,12 +266,15 @@ class _QuizBodyState extends State<_QuizBody> with TickerProviderStateMixin {
           _slideCtrl.forward();
         } else if (state is QuizCompleted) {
           // Replacing, not pushing. A pushed quiz stays on the stack under the
-          // scan screen, and closing that lands back on a finished quiz: there
-          // is no question left to draw, so the screen came up blank, and the
-          // next back press ran the exit path against a completed state. The
-          // quiz is done — it should not be somewhere "back" can return to.
-          context.pushReplacement('/scan-instructions',
-              extra: List<dynamic>.from(state.answers));
+          // analysis screen, and closing that lands back on a finished quiz:
+          // there is no question left to draw, so the screen came up blank,
+          // and the next back press ran the exit path against a completed
+          // state. The quiz is done — it should not be somewhere "back" can
+          // return to.
+          context.pushReplacement(
+            '/analysis',
+            extra: AnalysisArgs(quizAnswers: List<dynamic>.from(state.answers)),
+          );
         }
       },
       builder: (context, state) {
